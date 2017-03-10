@@ -2,7 +2,6 @@
 using Splitio.CommonLibraries;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Domain;
-using Splitio.Services.Parsing;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Cache.Classes;

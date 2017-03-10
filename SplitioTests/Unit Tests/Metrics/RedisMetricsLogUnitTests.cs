@@ -1,10 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Metrics.Classes;
-using System.Collections.Concurrent;
-using Splitio.Services.Metrics.Interfaces;
-using System.Linq;
 using Moq;
-using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Metrics

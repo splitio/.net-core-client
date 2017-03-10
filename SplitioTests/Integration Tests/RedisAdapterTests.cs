@@ -3,9 +3,7 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Splitio_Tests.Integration_Tests
 {

@@ -1,7 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Classes;
 using Splitio.Domain;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Splitio.Services.Client.Classes;
 using Moq;

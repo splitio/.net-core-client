@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Interfaces;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
 using System.Collections.Generic;
-using Moq;
 using Splitio.Domain;
 
 namespace Splitio_Tests.Integration_Tests

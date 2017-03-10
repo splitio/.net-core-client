@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Concurrent;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Cache.Classes;
