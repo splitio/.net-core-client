@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Splitio", "src\Splitio-net-core\Splitio.xproj", "{3DB60285-E48F-4DCC-AD15-0D11F79C3DD4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitioTests", "SplitioTests\SplitioTests.csproj", "{34C525AC-A48F-4D47-BC58-49F35E44769E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8C11D53D-6E81-45DF-9C62-CA7C81DB7158}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +26,16 @@ Global
 		{3DB60285-E48F-4DCC-AD15-0D11F79C3DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DB60285-E48F-4DCC-AD15-0D11F79C3DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DB60285-E48F-4DCC-AD15-0D11F79C3DD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34C525AC-A48F-4D47-BC58-49F35E44769E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C525AC-A48F-4D47-BC58-49F35E44769E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C525AC-A48F-4D47-BC58-49F35E44769E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C525AC-A48F-4D47-BC58-49F35E44769E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3DB60285-E48F-4DCC-AD15-0D11F79C3DD4} = {79B9E308-3F0F-441F-92B6-18C73B5CA3ED}
+		{34C525AC-A48F-4D47-BC58-49F35E44769E} = {8C11D53D-6E81-45DF-9C62-CA7C81DB7158}
 	EndGlobalSection
 EndGlobal

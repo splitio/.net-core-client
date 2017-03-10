@@ -1,4 +1,6 @@
-﻿using Splitio.Services.Client.Interfaces;
+﻿using log4net;
+using log4net.Repository.Hierarchy;
+using Splitio.Services.Client.Interfaces;
 using System;
 
 namespace Splitio.Services.Client.Classes
@@ -14,6 +16,15 @@ namespace Splitio.Services.Client.Classes
         {
             this.apiKey = apiKey;
             this.options = options;
+
+            try
+            {
+                var respository = LogManager.GetRepository("splitio");
+            }
+            catch
+            {
+                LogManager.CreateRepository("splitio", typeof(Hierarchy));
+            }
         }
 
         public ISplitClient Client()
@@ -66,10 +77,7 @@ namespace Splitio.Services.Client.Classes
                     throw new Exception("Unsupported mode.");
                 default:
                     throw new Exception("Mode should be set to build split client.");
-            }
-            
-
-            
+            }            
         }
 
         public ISplitManager Manager()

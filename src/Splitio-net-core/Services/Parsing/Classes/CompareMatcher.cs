@@ -1,16 +1,17 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
+using Splitio.Services.Parsing.Classes;
 using System;
 
 namespace Splitio.Services.Parsing
 {
-    public abstract class CompareMatcher:IMatcher
+    public abstract class CompareMatcher: BaseMatcher, IMatcher
     {
         protected DataTypeEnum? dataType;
         protected long value;
         protected long start;
         protected long end;
-        public bool Match(string key)
+        public override bool Match(string key)
         {
             switch (dataType)
             {
@@ -25,8 +26,8 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        public abstract bool Match(DateTime key);
+        public abstract override bool Match(DateTime key);
 
-        public abstract bool Match(long key);
+        public abstract override bool Match(long key);
     }
 }

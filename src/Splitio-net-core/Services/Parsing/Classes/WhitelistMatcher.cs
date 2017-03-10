@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Splitio.Services.Parsing.Classes;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
-    public class WhitelistMatcher: IMatcher
+    public class WhitelistMatcher: BaseMatcher, IMatcher
     {
         private List<string> list;
 
@@ -11,17 +12,17 @@ namespace Splitio.Services.Parsing
         {
             this.list = list ?? new List<string>();
         }
-        public bool Match(string key)
+        public override bool Match(string key)
         {
             return list.Contains(key);
         }
 
-        public bool Match(DateTime key)
+        public override bool Match(DateTime key)
         {
             return false;
         }
 
-        public bool Match(long key)
+        public override bool Match(long key)
         {
             return false;
         }

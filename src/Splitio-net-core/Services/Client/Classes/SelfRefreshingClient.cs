@@ -147,9 +147,7 @@ namespace Splitio.Services.Client.Classes
 
         private void InitializeLogger()
         {
-            var repository = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
-
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository(repository.Name);
+            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
             if (hierarchy.Root.Appenders.Count == 0)
             {
                 FileAppender fileAppender = new FileAppender();
@@ -162,7 +160,7 @@ namespace Splitio.Services.Client.Classes
                 fileAppender.Layout = pl;
                 fileAppender.ActivateOptions();
 
-                log4net.Config.BasicConfigurator.Configure(repository, fileAppender);
+                log4net.Config.BasicConfigurator.Configure(hierarchy, fileAppender);
             }
         }
 

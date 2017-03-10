@@ -1,9 +1,10 @@
 ﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Classes;
 using System;
 
 namespace Splitio.Services.Parsing
 {
-    public class UserDefinedSegmentMatcher: IMatcher
+    public class UserDefinedSegmentMatcher: BaseMatcher, IMatcher
     {
         private string segmentName;
         private ISegmentCache segmentsCache;
@@ -14,17 +15,17 @@ namespace Splitio.Services.Parsing
             this.segmentsCache = segmentsCache;
         }
 
-        public bool Match(string key)
+        public override bool Match(string key)
         {
             return segmentsCache.IsInSegment(segmentName, key);
         }
 
-        public bool Match(DateTime key)
+        public override bool Match(DateTime key)
         {
             return false;
         }
 
-        public bool Match(long key)
+        public override bool Match(long key)
         {
             return false;
         }

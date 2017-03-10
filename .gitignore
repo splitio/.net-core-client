@@ -1,2 +1,10 @@
 src/Splitio-net-core/bin/Debug/netstandard1.6/*
 src/Splitio-net-core/obj/*
+TestResults/*
+.vs/config/applicationhost.config
+.vs/restore.dg
+.vs/Split.io-net-core/v14/.suo
+packages/*
+SplitioTests/bin/*
+SplitioTests/obj/*
+src/Splitio-net-core/bin/*

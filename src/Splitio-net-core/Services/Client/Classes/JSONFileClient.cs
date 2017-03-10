@@ -37,8 +37,7 @@ namespace Splitio.Services.Client.Classes
 
         private void InitializeLogger()
         {
-            var repository = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository(repository.Name);
+            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
             log4net.Config.XmlConfigurator.Configure(hierarchy);
         }
 
