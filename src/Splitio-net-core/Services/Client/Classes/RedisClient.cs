@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
@@ -70,12 +71,12 @@ namespace Splitio.Services.Client.Classes
         }
         private void ReadConfig(ConfigurationOptions config)
         {
-            SdkVersion = ".NET-" + Version.SplitSdkVersion;
+            SdkVersion = ".NET-CORE-" + Version.SplitSdkVersion;
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
             SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
             var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
             hostAddressesTask.Wait();
-            SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Last().ToString();
+            SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
             RedisHost = config.CacheAdapterConfig.Host;
             RedisPort = config.CacheAdapterConfig.Port;
             RedisPassword = config.CacheAdapterConfig.Password;

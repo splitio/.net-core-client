@@ -19,6 +19,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -92,12 +93,12 @@ namespace Splitio.Services.Client.Classes
             HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
-            SdkVersion = ".NET-" + Version.SplitSdkVersion;
+            SdkVersion = ".NET-CORE-" + Version.SplitSdkVersion;
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
             SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
             var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
             hostAddressesTask.Wait();
-            SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Last().ToString();
+            SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString(); 
             RandomizeRefreshRates = config.RandomizeRefreshRates;
             BlockMilisecondsUntilReady = config.Ready ?? 0;
             ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
