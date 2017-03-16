@@ -1,0 +1,7 @@
+# this is a comment
+
+reporting_v2 on # sdk.getTreatment(*, reporting_v2) will return 'on'
+
+double_writes_to_cassandra off
+
+other_test_feature     on

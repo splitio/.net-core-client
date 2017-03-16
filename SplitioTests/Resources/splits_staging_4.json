@@ -1,0 +1,50 @@
+{
+  "splits": [
+    {
+      "trafficTypeName": "user",
+      "name": "Test_on_off_on",
+      "seed": 673896442,
+      "status": "ACTIVE",
+      "killed": false,
+      "defaultTreatment": "off",
+      "changeNumber": 1470855828956,
+      "conditions": [
+        {
+          "matcherGroup": {
+            "combiner": "AND",
+            "matchers": [
+              {
+                "keySelector": {
+                  "trafficType": "user",
+                  "attribute": null
+                },
+                "matcherType": "ALL_KEYS",
+                "negate": false,
+                "userDefinedSegmentMatcherData": null,
+                "whitelistMatcherData": null,
+                "unaryNumericMatcherData": null,
+                "betweenMatcherData": null
+              }
+            ]
+          },
+          "partitions": [
+            {
+              "treatment": "on",
+              "size": 20
+            },
+            {
+                "treatment": "off",
+                "size": 20
+            },
+            {
+                "treatment": "on",
+                "size": 60
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "since": -1,
+  "till": 1470855828956
+}
