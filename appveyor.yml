@@ -1,0 +1,22 @@
+nuget:
+  account_feed: true
+
+version: 1.0.0-rc{build}
+
+before_build:
+ - nuget restore
+ - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
+
+after_build:
+ - dotnet pack --no-build --configuration Release
+ #- nuget pack NetSDK\Splitio.nuspec -Version %appveyor_build_version%
+
+artifacts:
+ - path: '**\Splitio-net-core.*.nupkg'
+   name: splitio-net-core-nuget
+
+deploy:
+ - provider: Environment
+   name: NugetPublish
+   on:
+    branch: master
