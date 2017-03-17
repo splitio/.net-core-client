@@ -71,7 +71,7 @@ namespace Splitio.Services.Client.Classes
         }
         private void ReadConfig(ConfigurationOptions config)
         {
-            SdkVersion = ".NET-CORE-" + Version.SplitSdkVersion;
+            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
             SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
             var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);

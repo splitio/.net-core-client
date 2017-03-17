@@ -93,7 +93,7 @@ namespace Splitio.Services.Client.Classes
             HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
-            SdkVersion = ".NET-CORE-" + Version.SplitSdkVersion;
+            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
             SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
             var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
