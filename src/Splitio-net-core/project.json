@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-rc1",
+  "version": "1.0.0-rc2",
   "dependencies": {
     "log4net": "2.0.7",
     "NETStandard.Library": "1.6.1",
