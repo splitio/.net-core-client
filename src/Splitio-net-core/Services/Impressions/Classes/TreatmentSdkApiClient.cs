@@ -9,7 +9,7 @@ namespace Splitio.Services.Impressions.Classes
     {
         private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
         
-        private static readonly ILog Log = LogManager.GetLogger(typeof(TreatmentSdkApiClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(TreatmentSdkApiClient));
 
         public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 

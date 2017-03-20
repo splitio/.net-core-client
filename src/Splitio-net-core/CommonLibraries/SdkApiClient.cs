@@ -11,7 +11,7 @@ namespace Splitio.CommonLibraries
     public class SdkApiClient : ISdkApiClient
     {
         private HttpClient httpClient;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SdkApiClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio", typeof(SdkApiClient));
         protected IMetricsLog metricsLog;
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)

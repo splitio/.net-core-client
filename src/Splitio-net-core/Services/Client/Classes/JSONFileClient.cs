@@ -16,7 +16,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class JSONFileClient:SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(JSONFileClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(JSONFileClient));
 
         public JSONFileClient(string splitsFilePath, string segmentsFilePath, ISegmentCache segmentCacheInstance = null, ISplitCache splitCacheInstance = null, ITreatmentLog treatmentLogInstance = null, bool isLabelsEnabled = true)
         {

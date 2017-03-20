@@ -8,7 +8,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class RedisAdapter : IRedisAdapter
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(RedisAdapter));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(RedisAdapter));
 
         private ConnectionMultiplexer redis;
         private IDatabase database;

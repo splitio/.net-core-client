@@ -16,7 +16,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
         private const string SplitFetcherException = "splitChangeFetcher.exception";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitSdkApiClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SplitSdkApiClient));
 
         public SplitSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 

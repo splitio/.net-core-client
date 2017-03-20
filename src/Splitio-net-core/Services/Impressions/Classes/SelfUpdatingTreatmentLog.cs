@@ -21,7 +21,7 @@ namespace Splitio.Services.Impressions.Classes
         private IImpressionsCache impressionsCache;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(SelfUpdatingTreatmentLog));
+        protected static readonly ILog Logger = LogManager.GetLogger("splitio",typeof(SelfUpdatingTreatmentLog));
 
         public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient, int interval, IImpressionsCache impressionsCache, int maximumNumberOfKeysToCache = -1)
         {

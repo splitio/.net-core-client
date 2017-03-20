@@ -9,7 +9,7 @@ namespace Splitio.Services.Metrics.Classes
     {
         private const string MetricsUrlTemplate = "/api/metrics/{endpoint}";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(MetricsSdkApiClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(MetricsSdkApiClient));
 
         public MetricsSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 

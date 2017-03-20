@@ -27,7 +27,7 @@ namespace Splitio.Services.Metrics.Classes
         private int gaugeCallCount = 0;
 
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(InMemoryMetricsLog));
+        protected static readonly ILog Logger = LogManager.GetLogger("splitio",typeof(InMemoryMetricsLog));
 
         public InMemoryMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = 1000, int maxTimeBetweenCalls = 60)
         {

@@ -15,7 +15,7 @@ namespace Splitio.Services.SplitFetcher.Classes
     public class SelfRefreshingSplitFetcher 
     {
         protected ISplitCache splitCache;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SelfRefreshingSplitFetcher));
         private readonly ISplitChangeFetcher splitChangeFetcher;
         private readonly SplitParser splitParser;
         private int interval;

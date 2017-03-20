@@ -1,5 +1,6 @@
 ﻿using log4net;
 using log4net.Appender;
+using log4net.Core;
 using log4net.Layout;
 using log4net.Repository.Hierarchy;
 using Splitio.CommonLibraries;
@@ -67,7 +68,6 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config)
         {
-            InitializeLogger();
             ApiKey = apiKey;
             ReadConfig(config);
             BuildSdkReadinessGates();
@@ -146,24 +146,6 @@ namespace Splitio.Services.Client.Classes
             ((SelfUpdatingTreatmentLog)treatmentLog).Stop();
         }
 
-        private void InitializeLogger()
-        {
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
-            if (hierarchy.Root.Appenders.Count == 0)
-            {
-                FileAppender fileAppender = new FileAppender();
-                fileAppender.AppendToFile = true;
-                fileAppender.LockingModel = new FileAppender.MinimalLock();
-                fileAppender.File = @"Logs\split-sdk.log";
-                PatternLayout pl = new PatternLayout();
-                pl.ConversionPattern = "%date %level %logger - %message%newline";
-                pl.ActivateOptions();
-                fileAppender.Layout = pl;
-                fileAppender.ActivateOptions();
-
-                log4net.Config.BasicConfigurator.Configure(hierarchy, fileAppender);
-            }
-        }
 
         private void BuildSplitter()
         {

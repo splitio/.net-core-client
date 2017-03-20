@@ -6,7 +6,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentTaskWorker
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentTaskWorker));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SegmentTaskWorker));
 
         int numberOfParallelTasks;
         int counter;

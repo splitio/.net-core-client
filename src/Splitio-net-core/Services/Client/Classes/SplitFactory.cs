@@ -1,4 +1,6 @@
 ﻿using log4net;
+using log4net.Appender;
+using log4net.Layout;
 using log4net.Repository.Hierarchy;
 using Splitio.Services.Client.Interfaces;
 using System;
@@ -16,7 +18,11 @@ namespace Splitio.Services.Client.Classes
         {
             this.apiKey = apiKey;
             this.options = options;
+            InitializeLogger();
+        }
 
+        private void InitializeLogger()
+        {
             try
             {
                 var respository = LogManager.GetRepository("splitio");
@@ -24,6 +30,23 @@ namespace Splitio.Services.Client.Classes
             catch
             {
                 LogManager.CreateRepository("splitio", typeof(Hierarchy));
+            }
+
+            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
+            if (hierarchy.Root.Appenders.Count == 0)
+            {
+                RollingFileAppender fileAppender = new RollingFileAppender();
+                fileAppender.AppendToFile = true;
+                fileAppender.LockingModel = new FileAppender.MinimalLock();
+                fileAppender.File = @"Logs\split-sdk.log";
+                PatternLayout pl = new PatternLayout();
+                pl.ConversionPattern = "%date %level %logger - %message%newline";
+                pl.ActivateOptions();
+                fileAppender.Layout = pl;
+                fileAppender.ActivateOptions();
+                hierarchy.Root.AddAppender(fileAppender);
+
+                log4net.Config.BasicConfigurator.Configure(hierarchy);
             }
         }
 

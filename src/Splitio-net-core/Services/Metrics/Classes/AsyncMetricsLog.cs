@@ -10,7 +10,7 @@ namespace Splitio.Services.Metrics.Classes
     {
         IMetricsLog worker;
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(AsyncMetricsLog));
+        protected static readonly ILog Logger = LogManager.GetLogger("splitio",typeof(AsyncMetricsLog));
 
         public AsyncMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = -1, int maxTimeBetweenCalls = -1)
         {

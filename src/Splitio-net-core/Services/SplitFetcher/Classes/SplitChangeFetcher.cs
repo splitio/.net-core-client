@@ -8,7 +8,7 @@ namespace Splitio.Services.SplitFetcher.Classes
     public abstract class SplitChangeFetcher : ISplitChangeFetcher
     {
         private SplitChangesResult splitChanges;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitChangeFetcher));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SplitChangeFetcher));
 
         protected abstract SplitChangesResult FetchFromBackend(long since);
 

@@ -9,7 +9,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class InMemoryReadinessGatesCache : IReadinessGatesCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemoryReadinessGatesCache));
+        private static readonly ILog Log = LogManager.GetLogger("splitio", typeof(InMemoryReadinessGatesCache));
         private CountdownEvent splitsAreReady = new CountdownEvent(1);
         private Dictionary<string, CountdownEvent> segmentsAreReady = new Dictionary<string, CountdownEvent>();
 

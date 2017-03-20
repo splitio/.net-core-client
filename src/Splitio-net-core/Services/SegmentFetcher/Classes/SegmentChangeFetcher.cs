@@ -8,7 +8,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
     public abstract class SegmentChangeFetcher: ISegmentChangeFetcher
     {
         private SegmentChange segmentChange;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentChangeFetcher));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SegmentChangeFetcher));
 
         protected abstract SegmentChange FetchFromBackend(string name, long since);
 

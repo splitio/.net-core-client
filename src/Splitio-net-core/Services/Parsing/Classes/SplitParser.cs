@@ -9,7 +9,7 @@ namespace Splitio.Services.Parsing
 {
     public abstract class SplitParser
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitParser));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SplitParser));
         protected ISegmentCache segmentsCache;
 
         public ParsedSplit Parse(Split split)

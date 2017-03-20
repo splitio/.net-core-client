@@ -8,7 +8,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySegmentCache : ISegmentCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySegmentCache));
+        private static readonly ILog Log = LogManager.GetLogger("splitio", typeof(InMemorySegmentCache));
 
         private ConcurrentDictionary<string, Segment> segments;
 

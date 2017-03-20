@@ -15,7 +15,7 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient: ISplitClient
     {
-        protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitClient));
+        protected static readonly ILog Log = LogManager.GetLogger("splitio", typeof(SplitClient));
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string LabelKilled = "killed";
@@ -79,6 +79,7 @@ namespace Splitio.Services.Client.Classes
                     RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
 
                     Log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
+                    
                     return Control;
                 }
                 

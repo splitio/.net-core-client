@@ -40,7 +40,6 @@ namespace Splitio.Services.Client.Classes
 
         public RedisClient(ConfigurationOptions config)
         {
-            InitializeLogger();
             ReadConfig(config);
             BuildRedisCache();
             BuildTreatmentLog(); 
@@ -50,25 +49,6 @@ namespace Splitio.Services.Client.Classes
             BuildParser();
         }
 
-
-        private void InitializeLogger()
-        {
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
-            if (hierarchy.Root.Appenders.Count == 0)
-            {
-                FileAppender fileAppender = new FileAppender();
-                fileAppender.AppendToFile = true;
-                fileAppender.LockingModel = new FileAppender.MinimalLock();
-                fileAppender.File = @"Logs\split-sdk.log";
-                PatternLayout pl = new PatternLayout();
-                pl.ConversionPattern = "%date %level %logger - %message%newline";
-                pl.ActivateOptions();
-                fileAppender.Layout = pl;
-                fileAppender.ActivateOptions();
-
-                log4net.Config.BasicConfigurator.Configure(hierarchy, fileAppender);
-            }
-        }
         private void ReadConfig(ConfigurationOptions config)
         {
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;

@@ -13,14 +13,13 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(LocalhostClient));
 
         private FileSystemWatcher watcher;
         private string fullPath;
 
         public LocalhostClient(string filePath, Splitter splitter = null)
         {
-            InitializeLogger();
             fullPath = LookupFilePath(filePath);
             var directoryPath = Path.GetDirectoryName(fullPath);
 
@@ -112,12 +111,6 @@ namespace Splitio.Services.Client.Classes
             };
 
             return split;
-        }
-
-        private void InitializeLogger()
-        {
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
-            log4net.Config.XmlConfigurator.Configure(hierarchy);
         }
 
         private void BuildSplitter(Splitter splitter)

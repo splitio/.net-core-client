@@ -16,7 +16,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private const string SegmentFetcherStatus = "segmentChangeFetcher.status.{0}";
         private const string SegmentFetcherException = "segmentChangeFetcher.exception";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentSdkApiClient));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SegmentSdkApiClient));
 
         public SegmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 

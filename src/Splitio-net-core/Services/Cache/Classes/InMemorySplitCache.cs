@@ -9,7 +9,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : ISplitCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
+        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(InMemorySplitCache));
 
         private ConcurrentDictionary<string, ParsedSplit> splits;
         private long changeNumber;
