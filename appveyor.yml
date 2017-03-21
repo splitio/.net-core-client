@@ -18,4 +18,4 @@ deploy:
  - provider: Environment
    name: NugetNetCorePublish
    on:
-    branch: development
+    branch: master
