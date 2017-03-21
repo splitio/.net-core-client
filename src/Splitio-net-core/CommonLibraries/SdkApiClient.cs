@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using Splitio.Services.Metrics.Interfaces;
 using System;
 using System.Net;
@@ -11,7 +11,7 @@ namespace Splitio.CommonLibraries
     public class SdkApiClient : ISdkApiClient
     {
         private HttpClient httpClient;
-        private static readonly ILog Log = LogManager.GetLogger("splitio", typeof(SdkApiClient));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(SdkApiClient).ToString());
         protected IMetricsLog metricsLog;
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)
@@ -64,7 +64,7 @@ namespace Splitio.CommonLibraries
             }
             catch(Exception e)
             {
-                Log.Error(string.Format("Exception caught executing GET {0}", requestUri), e);
+                Log.Error(e, string.Format("Exception caught executing GET {0}", requestUri));
             }
             return result;
         }
@@ -82,7 +82,7 @@ namespace Splitio.CommonLibraries
             }
             catch (Exception e)
             {
-                Log.Error(string.Format("Exception caught executing POST {0}", requestUri), e);
+                Log.Error(e, string.Format("Exception caught executing POST {0}", requestUri));
             }
             return result;
         }

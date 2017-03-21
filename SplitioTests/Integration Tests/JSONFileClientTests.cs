@@ -6,27 +6,12 @@ using Moq;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Domain;
-using log4net;
-using log4net.Repository.Hierarchy;
 
 namespace Splitio_Tests.Integration_Tests
 {
     [TestClass]
     public class JSONFileClientTests
     {
-        [TestInitialize]
-        public void Initialize()
-        {
-            try
-            {
-                var respository = LogManager.GetRepository("splitio");
-            }
-            catch
-            {
-                LogManager.CreateRepository("splitio", typeof(Hierarchy));
-            }
-        }
-
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldReturnControl()

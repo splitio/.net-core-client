@@ -1,7 +1,6 @@
-﻿using log4net;
-using log4net.Appender;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
+﻿using NLog;
+using NLog.Config;
+using NLog.Targets;
 using Splitio.Services.Client.Interfaces;
 using System;
 
@@ -23,31 +22,19 @@ namespace Splitio.Services.Client.Classes
 
         private void InitializeLogger()
         {
-            try
-            {
-                var respository = LogManager.GetRepository("splitio");
-            }
-            catch
-            {
-                LogManager.CreateRepository("splitio", typeof(Hierarchy));
-            }
-
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
-            if (hierarchy.Root.Appenders.Count == 0)
-            {
-                RollingFileAppender fileAppender = new RollingFileAppender();
-                fileAppender.AppendToFile = true;
-                fileAppender.LockingModel = new FileAppender.MinimalLock();
-                fileAppender.File = @"Logs\split-sdk.log";
-                PatternLayout pl = new PatternLayout();
-                pl.ConversionPattern = "%date %level %logger - %message%newline";
-                pl.ActivateOptions();
-                fileAppender.Layout = pl;
-                fileAppender.ActivateOptions();
-                hierarchy.Root.AddAppender(fileAppender);
-
-                log4net.Config.BasicConfigurator.Configure(hierarchy);
-            }
+            var config = new LoggingConfiguration();
+            var fileTarget = new FileTarget();
+            config.AddTarget("file", fileTarget);
+            fileTarget.FileName = @".\Logs\split-sdk.log";
+            fileTarget.ArchiveFileName = "split-sdk.log";
+            fileTarget.LineEnding = LineEndingMode.CRLF;
+            fileTarget.Layout = "${longdate} ${level: uppercase = true} ${logger} - ${message}";
+            fileTarget.ConcurrentWrites = true;
+            fileTarget.CreateDirs = true;
+            fileTarget.ArchiveNumbering = ArchiveNumberingMode.Date;
+            var rule = new LoggingRule("*", LogLevel.Debug, fileTarget);
+            config.LoggingRules.Add(rule);
+            LogManager.Configuration = config;         
         }
 
         public ISplitClient Client()

@@ -6,6 +6,7 @@ using Splitio.Services.Metrics.Interfaces;
 using System.Linq;
 using Splitio.Services.Cache.Classes;
 
+
 namespace Splitio_Tests.Unit_Tests.Metrics
 {
     [TestClass]

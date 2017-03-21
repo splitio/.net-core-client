@@ -1,8 +1,4 @@
-﻿using log4net;
-using log4net.Appender;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
@@ -15,7 +11,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -132,7 +127,7 @@ namespace Splitio.Services.Client.Classes
                 //if there was an exception, impression label = "exception"
                 RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
 
-                Log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
+                Log.Error(e, string.Format("Exception caught getting treatment for feature: {0}", feature));
                 return Control;
             }
         }      

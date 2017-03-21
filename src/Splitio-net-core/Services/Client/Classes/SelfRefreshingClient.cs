@@ -1,9 +1,4 @@
-﻿using log4net;
-using log4net.Appender;
-using log4net.Core;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
@@ -21,7 +16,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes

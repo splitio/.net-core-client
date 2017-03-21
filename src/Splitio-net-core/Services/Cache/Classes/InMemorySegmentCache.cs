@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Concurrent;
@@ -8,7 +8,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySegmentCache : ISegmentCache
     {
-        private static readonly ILog Log = LogManager.GetLogger("splitio", typeof(InMemorySegmentCache));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(InMemorySegmentCache).ToString());
 
         private ConcurrentDictionary<string, Segment> segments;
 

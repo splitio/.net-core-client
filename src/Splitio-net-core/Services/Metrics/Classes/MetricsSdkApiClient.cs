@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using Splitio.CommonLibraries;
 using Splitio.Services.Metrics.Interfaces;
 using System.Net;
@@ -9,7 +9,7 @@ namespace Splitio.Services.Metrics.Classes
     {
         private const string MetricsUrlTemplate = "/api/metrics/{endpoint}";
 
-        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(MetricsSdkApiClient));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(MetricsSdkApiClient).ToString());
 
         public MetricsSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 

@@ -1,19 +1,17 @@
-﻿using log4net;
-using log4net.Repository.Hierarchy;
+﻿using NLog;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(LocalhostClient));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(LocalhostClient).ToString());
 
         private FileSystemWatcher watcher;
         private string fullPath;

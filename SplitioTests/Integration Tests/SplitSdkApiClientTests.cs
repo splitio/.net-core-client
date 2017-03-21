@@ -9,12 +9,6 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class SplitSdkApiClientTests
     {
-        [TestInitialize]
-        public void Initialization()
-        {
-            log4net.Config.XmlConfigurator.Configure();
-        }
-
         [TestMethod]
         [Ignore]
         public void ExecuteFetchSplitChangesSuccessful()

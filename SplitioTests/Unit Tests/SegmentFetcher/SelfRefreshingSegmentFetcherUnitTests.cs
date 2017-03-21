@@ -8,6 +8,7 @@ using Moq;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading;
 
+
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {
     [TestClass]

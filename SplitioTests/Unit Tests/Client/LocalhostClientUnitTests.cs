@@ -1,27 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
 using Splitio.Domain;
-using log4net;
-using log4net.Repository.Hierarchy;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class LocalhostClientUnitTests
     {
-        [TestInitialize]
-        public void Initialize()
-        {
-            try
-            {
-                var respository = LogManager.GetRepository("splitio");
-            }
-            catch
-            {
-                LogManager.CreateRepository("splitio", typeof(Hierarchy));
-            }
-        }
-
         [TestMethod]
         [DeploymentItem(@"Resources\test.splits")]
         public void GetTreatmentShouldReturnControlIfSplitNotFound()

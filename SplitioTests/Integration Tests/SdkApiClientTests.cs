@@ -8,12 +8,6 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class SdkApiClientTests
     {
-        [TestInitialize]
-        public void Initialization()
-        {
-            log4net.Config.XmlConfigurator.Configure();
-        }
-
         [TestMethod]
         [Ignore]
         public void ExecuteGetSuccessful()

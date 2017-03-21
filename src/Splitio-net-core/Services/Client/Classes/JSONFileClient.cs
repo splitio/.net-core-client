@@ -1,5 +1,6 @@
-﻿using log4net;
-using log4net.Repository.Hierarchy;
+﻿using NLog;
+using NLog.Config;
+using NLog.Targets;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
@@ -10,13 +11,12 @@ using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
     public class JSONFileClient:SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(JSONFileClient));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(JSONFileClient).ToString());
 
         public JSONFileClient(string splitsFilePath, string segmentsFilePath, ISegmentCache segmentCacheInstance = null, ISplitCache splitCacheInstance = null, ITreatmentLog treatmentLogInstance = null, bool isLabelsEnabled = true)
         {
@@ -37,8 +37,14 @@ namespace Splitio.Services.Client.Classes
 
         private void InitializeLogger()
         {
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository("splitio");
-            log4net.Config.XmlConfigurator.Configure(hierarchy);
+            var config = new LoggingConfiguration();
+            var fileTarget = new FileTarget();
+            config.AddTarget("file", fileTarget);
+            fileTarget.FileName = @"Logs\split-sdk.log";
+            fileTarget.Layout = "%date %level %logger - %message%newline";
+            fileTarget.ConcurrentWrites = true;
+            fileTarget.ArchiveNumbering = ArchiveNumberingMode.Date;
+            LogManager.Configuration = config;
         }
 
         public void RemoveSplitFromCache(string splitName)

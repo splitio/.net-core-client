@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using Splitio.CommonLibraries;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -16,7 +16,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private const string SegmentFetcherStatus = "segmentChangeFetcher.status.{0}";
         private const string SegmentFetcherException = "segmentChangeFetcher.exception";
 
-        private static readonly ILog Log = LogManager.GetLogger("splitio",typeof(SegmentSdkApiClient));
+        private static readonly Logger Log = LogManager.GetLogger(typeof(SegmentSdkApiClient).ToString());
 
         public SegmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
@@ -52,7 +52,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception caught executing FetchSegmentChanges", e);
+                Log.Error(e, "Exception caught executing FetchSegmentChanges");
                 
                 if (metricsLog != null)
                 {
