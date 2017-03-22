@@ -1,10 +1,10 @@
 {
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-rc5",
   "dependencies": {
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "9.0.1",
     "NLog": "5.0.0-beta06",
-    "StackExchange.Redis": "1.2.1"
+    "StackExchange.Redis": "1.2.0"
   },
 
   "frameworks": {

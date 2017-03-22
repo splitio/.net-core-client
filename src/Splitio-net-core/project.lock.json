@@ -388,7 +388,7 @@
           }
         }
       },
-      "StackExchange.Redis/1.2.1": {
+      "StackExchange.Redis/1.2.0": {
         "type": "package",
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -2398,13 +2398,11 @@
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
       ]
     },
-    "StackExchange.Redis/1.2.1": {
-      "sha512": "ZbvibTtEQ7HbrAbGxWEJ7NPUkxE2FmbpfMJXfecPnmmAyBzDA+Ut+m/bjw2vE5Ll5CNGZkB+bpLkW53lWcMjRQ==",
+    "StackExchange.Redis/1.2.0": {
+      "sha512": "RXi3cs12LsEVZoPW2RnHEkiKoRw8aCivJUi4JFbW6ym6OaANkoJq/BRrorb3XBHsCMfoyOm3PGMuAGibll6FbA==",
       "type": "package",
-      "path": "StackExchange.Redis/1.2.1",
+      "path": "StackExchange.Redis/1.2.0",
       "files": [
-        "StackExchange.Redis.1.2.1.nupkg.sha512",
-        "StackExchange.Redis.nuspec",
         "lib/net40/StackExchange.Redis.dll",
         "lib/net40/StackExchange.Redis.xml",
         "lib/net45/StackExchange.Redis.dll",
@@ -2412,7 +2410,9 @@
         "lib/net46/StackExchange.Redis.dll",
         "lib/net46/StackExchange.Redis.xml",
         "lib/netstandard1.5/StackExchange.Redis.dll",
-        "lib/netstandard1.5/StackExchange.Redis.xml"
+        "lib/netstandard1.5/StackExchange.Redis.xml",
+        "stackexchange.redis.1.2.0.nupkg.sha512",
+        "stackexchange.redis.nuspec"
       ]
     },
     "System.AppContext/4.3.0": {
@@ -6437,7 +6437,7 @@
       "NETStandard.Library >= 1.6.1",
       "NLog >= 5.0.0-beta06",
       "Newtonsoft.Json >= 9.0.1",
-      "StackExchange.Redis >= 1.2.1"
+      "StackExchange.Redis >= 1.2.0"
     ],
     ".NETStandard,Version=v1.6": []
   },
