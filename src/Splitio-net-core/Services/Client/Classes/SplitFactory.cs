@@ -28,7 +28,7 @@ namespace Splitio.Services.Client.Classes
             fileTarget.FileName = @".\Logs\split-sdk.log";
             fileTarget.ArchiveFileName = "split-sdk.log";
             fileTarget.LineEnding = LineEndingMode.CRLF;
-            fileTarget.Layout = "${longdate} ${level: uppercase = true} ${logger} - ${message}";
+            fileTarget.Layout = "${longdate} ${level: uppercase = true} ${logger} - ${message} - ${exception:format=tostring}";
             fileTarget.ConcurrentWrites = true;
             fileTarget.CreateDirs = true;
             fileTarget.ArchiveNumbering = ArchiveNumberingMode.Date;
