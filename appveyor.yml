@@ -13,6 +13,7 @@ build_script:
  - dotnet build
  
 after_build:
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj
  - dotnet pack .\src\Splitio-net-core --configuration Release
 
 artifacts:
@@ -23,4 +24,4 @@ deploy:
  - provider: Environment
    name: NugetNetCorePublish
    on:
-    branch: development
+    branch: master
