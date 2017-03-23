@@ -4,7 +4,7 @@ nuget:
 version: 1.0.0-rc{build}
 
 before_build:
- - dotnet restore
+ - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
 build: off
