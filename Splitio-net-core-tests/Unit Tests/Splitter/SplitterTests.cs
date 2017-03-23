@@ -13,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests
         public void VerifyHashAndBucketSampleData()
         {
             //Arrange
-            var contents = File.ReadAllText("sample-data.csv").Split('\n');
+            var contents = File.ReadAllText(@"Resources\sample-data.csv").Split('\n');
             var csv = from line in contents
                       select line.Split(',').ToArray();
 
@@ -43,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests
         public void VerifyHashAndBucketSampleDataNonAlphanumeric()
         {
             //Arrange
-            var contents = File.ReadAllText("sample-data-non-alpha-numeric.csv", System.Text.Encoding.BigEndianUnicode).Split('\n');
+            var contents = File.ReadAllText(@"Resources\sample-data-non-alpha-numeric.csv", System.Text.Encoding.BigEndianUnicode).Split('\n');
             var csv = from line in contents
                       select line.Split(',').ToArray();
 

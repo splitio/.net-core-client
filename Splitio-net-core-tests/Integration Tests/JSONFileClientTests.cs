@@ -17,7 +17,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
 
             //Act           
             var result = client.GetTreatment("test","fail", null);
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldNotAffectOtherSplits()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -47,7 +47,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnDeletedSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -69,7 +69,7 @@ namespace Splitio_Tests.Integration_Tests
             var treatmentLogMock = new Mock<ITreatmentLog>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatments()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
             List<string> features = new List<string>();
             features.Add("fail");
             features.Add("asd");
@@ -109,7 +109,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithBucketing()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
             List<string> features = new List<string>();
             features.Add("fail");
             features.Add("asd");
@@ -137,7 +137,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "segment_payed.json");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", @"Resources\segment_payed.json");
 
             //Act           
             var result = client.GetTreatment("abcdz", "test_jw2", null);
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithOnOffOnPartition()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_4.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "");
 
             //Act           
             var result = client.GetTreatment("01", "Test_on_off_on", null);
@@ -179,7 +179,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithSegmentNotInitialized()
         {
             //Arrange
-            var client = new JSONFileClient("splits_staging_3.json", "");
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "");
 
             //Act           
             //feature test_jw2 has UserDefinedSegmentMatcher 
@@ -198,7 +198,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "test_jw3", null);
@@ -213,7 +213,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "whitelisting_elements", null);
@@ -229,7 +229,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             client.RemoveSplitFromCache("asd");
@@ -247,7 +247,7 @@ namespace Splitio_Tests.Integration_Tests
             var treatmentLogMock = new Mock<ITreatmentLog>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -262,7 +262,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", null);
@@ -277,7 +277,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object, isLabelsEnabled: false);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object, isLabelsEnabled: false);
 
             //Act           
             var result = client.GetTreatment("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", null);
@@ -292,7 +292,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<ITreatmentLog>();
-            var client = new JSONFileClient("splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var key = new Key("db765170-e9f2-11e5-885c-c2f58c3a47a7", "ab765170-e9f2-11e5-885c-c2f58c3a47a7");

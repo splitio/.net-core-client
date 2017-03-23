@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void GetTreatmentShouldReturnControlIfSplitNotFound()
         {
             //Arrange
-            var splitClient = new LocalhostClient("test.splits");
+            var splitClient = new LocalhostClient(@"Resources\test.splits");
             
             //Act
             var result = splitClient.GetTreatment("test", "test");
@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [DeploymentItem(@"Resources\test.splits")]
         public void GetTreatmentShouldRunAsSingleKeyUsingNullBucketingKey()
         {
-            var splitClient = new LocalhostClient("test.splits");
+            var splitClient = new LocalhostClient(@"Resources\test.splits");
 
             //Act
             var key = new Key("test", null);

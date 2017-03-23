@@ -22,8 +22,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher("segment_payed.json", segmentCache), segmentCache);
-            var splitChangeFetcher = new JSONFileSplitChangeFetcher("splits_staging.json");
+            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher(@"Resources\segment_payed.json", segmentCache), segmentCache);
+            var splitChangeFetcher = new JSONFileSplitChangeFetcher(@"Resources\splits_staging.json");
             var splitChangesResult = splitChangeFetcher.Fetch(-1);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());         
             var gates = new InMemoryReadinessGatesCache();

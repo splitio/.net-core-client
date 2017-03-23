@@ -35,7 +35,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientWithLocalhostApiKeyShouldReturnLocalhostClient()
         {
             //Arrange
-            var options = new ConfigurationOptions() { LocalhostFilePath = "test.splits" };
+            var options = new ConfigurationOptions() { LocalhostFilePath = @"Resources\test.splits" };
             var factory = new SplitFactory("localhost", options);
 
             //Act         

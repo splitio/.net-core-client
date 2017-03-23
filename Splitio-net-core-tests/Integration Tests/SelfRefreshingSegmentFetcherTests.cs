@@ -19,7 +19,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
-            var segmentFetcher = new JSONFileSegmentFetcher("segment_payed.json", segmentCache);
+            var segmentFetcher = new JSONFileSegmentFetcher(@"Resources\segment_payed.json", segmentCache);
 
             //Act
             segmentFetcher.InitializeSegment("payed");

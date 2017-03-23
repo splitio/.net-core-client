@@ -14,7 +14,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfully()
         {
             //Arrange
-            var client = new LocalhostClient("test.splits");
+            var client = new LocalhostClient(@"Resources\test.splits");
 
             //Act
             var result1 = client.GetTreatment("", "double_writes_to_cassandra");
@@ -35,9 +35,9 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfullyWhenUpdatingSplitsFile()
         {
             //Arrange
-            var client = new LocalhostClient("test.splits");
-            File.AppendAllText("test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
-            Thread.Sleep(10);
+            var client = new LocalhostClient(@"Resources\test.splits");
+            File.AppendAllText(@"Resources\test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
+            Thread.Sleep(30);
 
             //Act
             var result1 = client.GetTreatment("", "double_writes_to_cassandra");
