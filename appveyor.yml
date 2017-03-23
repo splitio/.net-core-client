@@ -4,9 +4,14 @@ nuget:
 version: 1.0.0-rc{build}
 
 before_build:
- - nuget restore
+ - dotnet restore
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
+build: off
+
+build_script:
+ - dotnet build
+ 
 after_build:
  - dotnet pack .\src\Splitio-net-core --configuration Release
 
