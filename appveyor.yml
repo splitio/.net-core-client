@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 1.0.0-rc{build}
+version: 1.0.0-rc7
 
 before_build:
  - dotnet restore -s https://www.nuget.org/api/v2/
@@ -24,4 +24,4 @@ deploy:
  - provider: Environment
    name: NugetNetCorePublish
    on:
-    branch: master
+    branch: development

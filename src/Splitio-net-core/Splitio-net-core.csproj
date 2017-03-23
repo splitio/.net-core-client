@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>1.0.0-rc6</VersionPrefix>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <VersionPrefix>1.0.0-rc7</VersionPrefix>
+    <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>Splitio-net-core</AssemblyName>
     <PackageId>Splitio-net-core</PackageId>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
@@ -13,9 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="NLog" Version="5.0.0-beta06" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.0" />
+    <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
   </ItemGroup>
 
 </Project>
