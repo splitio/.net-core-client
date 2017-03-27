@@ -57,7 +57,7 @@ namespace Splitio.Services.Cache.Classes
             var splitValues = redisAdapter.Get(splitKeys);
             if (splitValues != null && splitValues.Count()>0)
             {
-                var splits = splitValues.Select(x => JsonConvert.DeserializeObject<Split>(x));
+                var splits = splitValues.Where(x=>!x.IsNull).Select(x => JsonConvert.DeserializeObject<Split>(x));
                 return splits.Cast<SplitBase>().ToList();
             }
             else
