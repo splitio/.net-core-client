@@ -48,7 +48,9 @@ namespace Splitio.Services.Cache.Classes
             {
                 config += ", syncTimeout = " + syncTimeout;
             }
-            
+
+            config += ", keepAlive = " + 1;
+
             return config;
         }
 
