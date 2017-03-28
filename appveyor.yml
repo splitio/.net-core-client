@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 1.0.0-rc10
+version: 1.0.0
 
 before_build:
  - dotnet restore -s https://www.nuget.org/api/v2/
@@ -13,7 +13,7 @@ build_script:
  - dotnet build
  
 after_build:
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
 
 artifacts:
@@ -24,4 +24,4 @@ deploy:
  - provider: Environment
    name: NugetNetCorePublish
    on:
-    branch: development
+    branch: master
