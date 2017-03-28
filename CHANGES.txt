@@ -1,5 +1,9 @@
 CHANGES
 
+1.0.1
+ 
+  - No changes for this update
+
 1.0.0
 
  - First release of Split.io SDK for Net Core

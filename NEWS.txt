@@ -1,5 +1,9 @@
 NEWS
 
+1.0.1
+ 
+ - No news for this version
+
 1.0.0
 
  - No news for this version.

@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 1.0.0
+version: 1.0.1
 
 before_build:
  - dotnet restore -s https://www.nuget.org/api/v2/
@@ -10,7 +10,7 @@ before_build:
 build: off
 
 build_script:
- - dotnet build
+ - dotnet build --configuration Release
  
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release
