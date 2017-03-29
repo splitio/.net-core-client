@@ -1,5 +1,9 @@
 NEWS
 
+1.0.2
+
+ - Custom NLog logger can be used in SDK.
+
 1.0.1
  
  - No news for this version

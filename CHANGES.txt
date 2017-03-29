@@ -1,5 +1,9 @@
 CHANGES
 
+1.0.2
+
+ - NLog logger can be configured by user. If not configured, the SDK will use default log file in 'Logs\split-sdk.log'
+
 1.0.1
  
   - No changes for this update
