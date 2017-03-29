@@ -277,6 +277,7 @@ The .Net Core SDK uses NLog for logging. You can configure it this way, before y
     
     var factory = new SplitFactory("API_KEY", configurations);
 ```
+For more details on how to configure different targets visit [NLog Configuration API document](https://github.com/nlog/NLog/wiki/Configuration-API).
 
 If you don't configure NLog yourself, the SDK creates a default file target and register logs in 'Logs\split-sdk.log' file.
  
