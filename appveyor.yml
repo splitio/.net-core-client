@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 1.0.2
+version: 1.1.0-rc{build}
 
 before_build:
  - dotnet restore -s https://www.nuget.org/api/v2/
