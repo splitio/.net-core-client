@@ -24,4 +24,4 @@ deploy:
  - provider: Environment
    name: NugetNetCorePublish
    on:
-    branch: master
+    branch: development
