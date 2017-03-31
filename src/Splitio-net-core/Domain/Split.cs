@@ -12,6 +12,7 @@ namespace Splitio.Domain
         public List<ConditionDefinition> conditions { get; set; }
         public long changeNumber { get; set; }
         public string trafficTypeName { get; set; }
+        public int? algo { get; set; }
         public int trafficAllocation { get; set; }
         public int? trafficAllocationSeed { get; set; }
     }

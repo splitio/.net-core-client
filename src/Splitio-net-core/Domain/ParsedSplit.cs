@@ -11,6 +11,7 @@ namespace Splitio.Domain
         public List<ConditionWithLogic> conditions { get; set; }
         public long changeNumber { get; set; }
         public string trafficTypeName { get; set; }
+        public AlgorithmEnum algo { get; set; }
         public int trafficAllocation { get; set; }
         public int trafficAllocationSeed { get; set; }
     }

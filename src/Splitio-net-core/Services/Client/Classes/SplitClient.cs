@@ -117,7 +117,7 @@ namespace Splitio.Services.Client.Classes
                         if (split.trafficAllocation < 100)
                         {
                             // bucket ranges from 1-100.
-                            int bucket = splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
+                            int bucket = split.algo == AlgorithmEnum.LegacyHash ? splitter.LegacyBucket(key.bucketingKey, split.trafficAllocationSeed) : splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
                             if (bucket >= split.trafficAllocation)
                             {
                                 // If not in traffic allocation, abort and return
@@ -132,7 +132,7 @@ namespace Splitio.Services.Client.Classes
                     var combiningMatcher = condition.matcher;
                     if (combiningMatcher.Match(key.matchingKey, attributes))
                     {
-                        var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions);
+                        var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
                         //If condition matched, impression label = condition.label 
                         RecordStats(key, split.name, split.changeNumber, condition.label, start, treatment, SdkGetTreatment, clock);

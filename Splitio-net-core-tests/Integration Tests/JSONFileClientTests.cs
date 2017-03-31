@@ -161,7 +161,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("01", "Test_on_off_on", null);
-            var result2 = client.GetTreatment("ab", "Test_on_off_on", null);
+            var result2 = client.GetTreatment("a0ax09z", "Test_on_off_on", null);
             var result3 = client.GetTreatment("00b0", "Test_on_off_on", null);
 
 

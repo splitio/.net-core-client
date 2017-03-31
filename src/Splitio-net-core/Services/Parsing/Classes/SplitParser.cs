@@ -30,6 +30,7 @@ namespace Splitio.Services.Parsing
                     conditions = new List<ConditionWithLogic>(),
                     changeNumber = split.changeNumber,
                     trafficTypeName = split.trafficTypeName,
+                    algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
                     trafficAllocation = split.trafficAllocation,
                     trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0
                 };
