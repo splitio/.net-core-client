@@ -1,5 +1,9 @@
 CHANGES
 
+1.1.0
+
+ - Support for Traffic Allocation
+
 1.0.2
 
  - NLog logger can be configured by user. If not configured, the SDK will use default log file in 'Logs\split-sdk.log'
