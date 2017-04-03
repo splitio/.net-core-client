@@ -9,12 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class SelfUpdatingTreatmentLog: ITreatmentLog
+    public class SelfUpdatingTreatmentLog : IImpressionListener
     {
         private ITreatmentSdkApiClient apiClient;
         private int interval;
@@ -43,7 +42,7 @@ namespace Splitio.Services.Impressions.Classes
 
         private void SendBulkImpressions()
         {
-            if(((InMemoryImpressionsCache)impressionsCache).HasReachedMaxSize())
+            if (((InMemoryImpressionsCache)impressionsCache).HasReachedMaxSize())
             {
                 Logger.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
             }
@@ -66,7 +65,7 @@ namespace Splitio.Services.Impressions.Classes
 
         private string ConvertToJson(List<KeyImpression> impressions)
         {
-            var impressionsPerFeature = 
+            var impressionsPerFeature =
                 impressions
                 .GroupBy(item => item.feature)
                 .Select(group => new { testName = group.Key, keyImpressions = group.Select(x => new { keyName = x.keyName, treatment = x.treatment, time = x.time, changeNumber = x.changeNumber, label = x.label, bucketingKey = x.bucketingKey }) });
@@ -74,11 +73,9 @@ namespace Splitio.Services.Impressions.Classes
         }
 
 
-        public void Log(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey = null)
+        public void Log(KeyImpression impression)
         {
-            KeyImpression impression = new KeyImpression() { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
-            var enqueueTask = new Task(() => impressionsCache.AddImpression(impression));
-            enqueueTask.Start();
+            impressionsCache.AddImpression(impression);
         }
     }
 }

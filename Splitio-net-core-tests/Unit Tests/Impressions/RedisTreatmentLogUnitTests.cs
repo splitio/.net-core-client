@@ -18,7 +18,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var treatmentLog = new RedisTreatmentLog(impressionsCache.Object);
 
             //Act
-            treatmentLog.Log("GetTreatment", "test", "on", 7000, 1, "test");
+            var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" };
+            treatmentLog.Log(impression);
 
             //Assert
             Thread.Sleep(1000);
@@ -34,11 +35,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             //Act
             Key key = new Key(bucketingKey : "a", matchingKey : "testkey");
-            treatmentLog.Log(key.matchingKey, "test", "on", 7000, 1, "test-label", key.bucketingKey);
+            var impression = new KeyImpression() { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey };
+            treatmentLog.Log(impression);
 
             //Assert
             Thread.Sleep(1000);
-            impressionsCache.Verify(mock => mock.AddImpression(It.IsAny<KeyImpression>()), Times.Once());
+            impressionsCache.Verify(mock => mock.AddImpression(It.Is<KeyImpression>(p => p.keyName == key.matchingKey && p.feature == "test" && p.treatment == "on" && p.time == 7000 && p.changeNumber == 1 && p.label == "test-label" && p.bucketingKey == key.bucketingKey)), Times.Once());
         }    
     }
 }
