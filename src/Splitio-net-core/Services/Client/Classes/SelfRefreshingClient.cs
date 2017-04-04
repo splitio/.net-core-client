@@ -115,7 +115,7 @@ namespace Splitio.Services.Client.Classes
 
         public void Start()
         {
-            ((SelfUpdatingTreatmentLog)impressionListener).Start();
+            ((SelfUpdatingTreatmentLog)treatmentLog).Start();
             ((SelfRefreshingSplitFetcher)splitFetcher).Start();
         }
 
@@ -138,7 +138,7 @@ namespace Splitio.Services.Client.Classes
         {
             ((SelfRefreshingSplitFetcher)splitFetcher).Stop();
             ((SelfRefreshingSegmentFetcher)selfRefreshingSegmentFetcher).Stop();
-            ((SelfUpdatingTreatmentLog)impressionListener).Stop();
+            ((SelfUpdatingTreatmentLog)treatmentLog).Stop();
         }
 
 
@@ -169,7 +169,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             impressionsCache = new InMemoryImpressionsCache(new BlockingQueue<KeyImpression>(TreatmentLogSize));
-            impressionListener = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
+            treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
             impressionListener = new AsynchronousImpressionListener();
             ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
             ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
