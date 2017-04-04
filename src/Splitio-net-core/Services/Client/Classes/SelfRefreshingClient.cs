@@ -59,6 +59,7 @@ namespace Splitio.Services.Client.Classes
         private ITreatmentSdkApiClient treatmentSdkApiClient;
         private IMetricsSdkApiClient metricsSdkApiClient;
         private SelfRefreshingSegmentFetcher selfRefreshingSegmentFetcher;
+        private IImpressionListener treatmentLog;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config)
         {
@@ -67,7 +68,7 @@ namespace Splitio.Services.Client.Classes
             BuildSdkReadinessGates();
             BuildSdkApiClients();
             BuildSplitFetcher();
-            BuildTreatmentLog();
+            BuildTreatmentLog(config);
             BuildSplitter();
             BuildManager();
             Start();
@@ -114,7 +115,7 @@ namespace Splitio.Services.Client.Classes
 
         public void Start()
         {
-            ((SelfUpdatingTreatmentLog)treatmentLog).Start();
+            ((SelfUpdatingTreatmentLog)impressionListener).Start();
             ((SelfRefreshingSplitFetcher)splitFetcher).Start();
         }
 
@@ -137,7 +138,7 @@ namespace Splitio.Services.Client.Classes
         {
             ((SelfRefreshingSplitFetcher)splitFetcher).Stop();
             ((SelfRefreshingSegmentFetcher)selfRefreshingSegmentFetcher).Stop();
-            ((SelfUpdatingTreatmentLog)treatmentLog).Stop();
+            ((SelfUpdatingTreatmentLog)impressionListener).Stop();
         }
 
 
@@ -165,10 +166,13 @@ namespace Splitio.Services.Client.Classes
             splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, splitCache);
         }
 
-        private void BuildTreatmentLog()
+        private void BuildTreatmentLog(ConfigurationOptions config)
         {
             impressionsCache = new InMemoryImpressionsCache(new BlockingQueue<KeyImpression>(TreatmentLogSize));
-            treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
+            impressionListener = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
+            impressionListener = new AsynchronousImpressionListener();
+            ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
+            ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
         }
 
 

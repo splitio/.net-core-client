@@ -30,7 +30,7 @@ namespace Splitio.Services.Client.Classes
             foreach (Split split in splitChangesResult.splits)
                 parsedSplits.TryAdd(split.name, splitParser.Parse(split));         
             splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-            treatmentLog = treatmentLogInstance;
+            impressionListener = treatmentLogInstance;
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
         }

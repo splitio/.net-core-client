@@ -27,7 +27,7 @@ namespace Splitio.Services.Client.Classes
         protected static bool LabelsEnabled;
 
         protected Splitter splitter;
-        protected IImpressionListener treatmentLog;
+        protected IImpressionListener impressionListener;
         protected IMetricsLog metricsLog;
         protected ISplitManager manager;
         protected IMetricsCache metricsCache;
@@ -58,10 +58,10 @@ namespace Splitio.Services.Client.Classes
                 metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
             }
 
-            if (treatmentLog != null)
+            if (impressionListener != null)
             {
                 KeyImpression impression = BuildImpression(key.matchingKey, feature, treatment, start, changeNumber, LabelsEnabled ? label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
-                treatmentLog.Log(impression);
+                impressionListener.Log(impression);
             }
         }
 
