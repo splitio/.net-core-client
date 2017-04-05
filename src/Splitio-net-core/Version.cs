@@ -2,7 +2,7 @@
 {
     public static class Version
     {
-        public static string SplitSdkVersion = "1.1.0-rc16";
+        public static string SplitSdkVersion = "1.1.1-rc1";
         public static string SplitSpecVersion = "1.0";
     }
 }
