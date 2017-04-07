@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>2.0.0-rc23</VersionPrefix>
+    <VersionPrefix>2.0.0-rc34</VersionPrefix>
     <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>Splitio-net-core</AssemblyName>
     <PackageId>Splitio-net-core</PackageId>
@@ -10,16 +10,13 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>2.0.0-rc23</Version>
+    <Version>2.0.0-rc34</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="NLog" Version="5.0.0-beta06" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="MurmurHash-net-core">
       <HintPath>..\..\lib\MurmurHash-net-core.dll</HintPath>
     </Reference>
