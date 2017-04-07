@@ -14,12 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="NLog" Version="5.0.0-beta06" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
-    <Reference Include="MurmurHash-net-core">
-      <HintPath>..\..\lib\MurmurHash-net-core.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
