@@ -1,12 +1,15 @@
 NEWS
 
+1.1.0
+ - Add support for Traffic Allocation.
+
 1.0.2
 
  - Custom NLog logger can be used in SDK.
 
 1.0.1
  
- - No news for this version
+ - No news for this version.
 
 1.0.0
 

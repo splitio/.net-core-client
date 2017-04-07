@@ -29,7 +29,9 @@ namespace Splitio.Services.Parsing
                     seed = split.seed,
                     conditions = new List<ConditionWithLogic>(),
                     changeNumber = split.changeNumber,
-                    trafficTypeName = split.trafficTypeName
+                    trafficTypeName = split.trafficTypeName,
+                    trafficAllocation = split.trafficAllocation,
+                    trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0
                 };
                 parsedSplit = ParseConditions(split, parsedSplit);
                 return parsedSplit;
@@ -45,6 +47,7 @@ namespace Splitio.Services.Parsing
         {
             parsedSplit.conditions.AddRange(split.conditions.Select(x => new ConditionWithLogic()
             {
+                conditionType = x.conditionType,
                 partitions = x.partitions,
                 matcher = ParseMatcherGroup(parsedSplit, x.matcherGroup),
                 label = x.label

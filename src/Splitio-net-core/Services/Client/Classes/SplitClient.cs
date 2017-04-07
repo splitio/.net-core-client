@@ -22,6 +22,7 @@ namespace Splitio.Services.Client.Classes
         protected const string LabelNoConditionMatched = "no rule matched";
         protected const string LabelSplitNotFound = "rules not found";
         protected const string LabelException = "exception";
+        protected const string LabelTrafficAllocationFailed = "not in split";
 
         protected static bool LabelsEnabled;
 
@@ -101,8 +102,27 @@ namespace Splitio.Services.Client.Classes
         {
             if (!split.killed)
             {
+                bool inRollout = false;
+                // use the first matching condition
                 foreach (ConditionWithLogic condition in split.conditions)
                 {
+                    if (!inRollout && condition.conditionType == ConditionType.ROLLOUT)
+                    {
+                        if (split.trafficAllocation < 100)
+                        {
+                            // bucket ranges from 1-100.
+                            int bucket = splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
+                            if (bucket >= split.trafficAllocation)
+                            {
+                                // If not in traffic allocation, abort and return
+                                // default treatment
+                                RecordStats(key, split.name, split.changeNumber, LabelTrafficAllocationFailed, start, split.defaultTreatment, SdkGetTreatment, clock);
+
+                                return split.defaultTreatment;
+                            }
+                        }
+                        inRollout = true;
+                    }
                     var combiningMatcher = condition.matcher;
                     if (combiningMatcher.Match(key.matchingKey, attributes))
                     {
@@ -110,7 +130,7 @@ namespace Splitio.Services.Client.Classes
 
                         //If condition matched, impression label = condition.label 
                         RecordStats(key, split.name, split.changeNumber, condition.label, start, treatment, SdkGetTreatment, clock);
-                        
+
                         return treatment;
                     }
                 }
