@@ -1,4 +1,6 @@
-﻿namespace Splitio.Services.Client.Classes
+﻿using Splitio.Services.Impressions.Interfaces;
+
+namespace Splitio.Services.Client.Classes
 {
     public class ConfigurationOptions
     {
@@ -21,6 +23,7 @@
         public string SdkMachineIP { get; set; }
         public int? NumberOfParalellSegmentTasks { get; set; }
         public bool? LabelsEnabled { get; set; }
+        public IImpressionListener ImpressionListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
     }
 }

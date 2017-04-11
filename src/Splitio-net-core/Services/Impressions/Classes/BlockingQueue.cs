@@ -19,6 +19,15 @@ namespace Splitio.Services.Impressions.Classes
             return queue.Count >= maxSize;
         }
 
+        public ConcurrentQueue<T> FetchAll()
+        {
+            lock (lockingObject)
+            {
+                var existingItems = new ConcurrentQueue<T>(queue);
+                return existingItems;
+            }
+        }
+
         public ConcurrentQueue<T> FetchAllAndClear()
         {
             lock (lockingObject)

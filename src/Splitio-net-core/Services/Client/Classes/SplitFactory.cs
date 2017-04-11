@@ -34,6 +34,7 @@ namespace Splitio.Services.Client.Classes
                 fileTarget.ConcurrentWrites = true;
                 fileTarget.CreateDirs = true;
                 fileTarget.ArchiveNumbering = ArchiveNumberingMode.Date;
+                fileTarget.ArchiveEvery = FileArchivePeriod.Day;
                 var rule = new LoggingRule("*", LogLevel.Debug, fileTarget);
                 config.LoggingRules.Add(rule);
                 LogManager.Configuration = config;

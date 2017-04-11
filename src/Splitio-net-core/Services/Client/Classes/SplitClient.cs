@@ -27,7 +27,7 @@ namespace Splitio.Services.Client.Classes
         protected static bool LabelsEnabled;
 
         protected Splitter splitter;
-        protected ITreatmentLog treatmentLog;
+        protected IImpressionListener impressionListener;
         protected IMetricsLog metricsLog;
         protected ISplitManager manager;
         protected IMetricsCache metricsCache;
@@ -58,13 +58,19 @@ namespace Splitio.Services.Client.Classes
                 metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
             }
 
-            if (treatmentLog != null)
+            if (impressionListener != null)
             {
-                treatmentLog.Log(key.matchingKey, feature, treatment, start, changeNumber, LabelsEnabled ? label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
+                KeyImpression impression = BuildImpression(key.matchingKey, feature, treatment, start, changeNumber, LabelsEnabled ? label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
+                impressionListener.Log(impression);
             }
         }
 
-        protected virtual string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes)
+        private KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
+        {
+            return new KeyImpression() { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
+        }
+
+    protected virtual string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes)
         {
             long start = CurrentTimeHelper.CurrentTimeMillis();
             var clock = new Stopwatch();
