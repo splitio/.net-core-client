@@ -94,7 +94,7 @@ namespace Splitio_Tests.Unit_Tests
             var split = result.splits.First();
             Assert.AreEqual("Test_1", split.name);
             Assert.AreEqual(false, split.killed);
-            Assert.AreEqual(StatusEnum.ACTIVE, split.status);
+            Assert.AreEqual("ACTIVE", split.status);
             Assert.AreEqual("user", split.trafficTypeName);
             Assert.AreEqual("off", split.defaultTreatment);
             Assert.IsNotNull(split.conditions);

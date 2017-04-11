@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests
             Split split = new Split();
             split.name = "test1";
             split.seed = 2323;
-            split.status = StatusEnum.ACTIVE;
+            split.status = "ACTIVE";
             split.killed = false;
             split.defaultTreatment = "off";
             split.changeNumber = 232323;
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests
             Split split = new Split();
             split.name = "test1";
             split.seed = 2323;
-            split.status = StatusEnum.ACTIVE;
+            split.status = "ACTIVE";
             split.killed = false;
             split.defaultTreatment = "off";
             split.changeNumber = 232323;
@@ -82,7 +82,7 @@ namespace Splitio_Tests.Unit_Tests
             Split split = new Split();
             split.name = "test1";
             split.seed = 2323;
-            split.status = StatusEnum.ACTIVE;
+            split.status = "ACTIVE";
             split.killed = false;
             split.defaultTreatment = "off";
             split.changeNumber = 232323;

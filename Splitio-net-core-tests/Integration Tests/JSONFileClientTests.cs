@@ -332,6 +332,21 @@ namespace Splitio_Tests.Integration_Tests
 
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_3.json")]
+        public void ExecuteGetTreatmentWhenUnknownMatcherIsIncluded()
+        {
+            //Arrange
+            var treatmentLogMock = new Mock<IImpressionListener>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+
+            //Act           
+            var result = client.GetTreatment("xs", "Unknown_Matcher", null);
+
+            //Assert
+            Assert.AreEqual("control", result);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
         public void ExecuteGetTreatmentAndNotLogLabelForTreatmentIfLabelsNotEnabled()
         {
             //Arrange

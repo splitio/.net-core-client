@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var splitName = "test_split";
-            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = StatusEnum.ACTIVE, trafficTypeName = "test" };
+            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = "ACTIVE", trafficTypeName = "test" };
             var splitJson = JsonConvert.SerializeObject(split);
             var redisAdapterMock = new Mock<IRedisAdapter>();          
             redisAdapterMock.Setup(x => x.Set(splitKeyPrefix + "test_split", splitJson)).Returns(true);
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
         {
             //Arrange
             var splitName = "test_split";
-            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = StatusEnum.ACTIVE, trafficTypeName = "test" };
+            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = "ACTIVE", trafficTypeName = "test" };
             var splitJson = JsonConvert.SerializeObject(split);
             var redisAdapterMock = new Mock<IRedisAdapter>();
             redisAdapterMock.Setup(x => x.Keys(splitKeyPrefix + "*")).Returns(new RedisKey[]{"test_split"});
@@ -176,8 +176,8 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var splitName = "test_split";
             var splitName2 = "test_split2";
-            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = StatusEnum.ACTIVE, trafficTypeName = "test" };
-            var split2 = new Split() { name = "test_split2", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = StatusEnum.ACTIVE, trafficTypeName = "test" };
+            var split = new Split() { name = "test_split", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = "ACTIVE", trafficTypeName = "test" };
+            var split2 = new Split() { name = "test_split2", changeNumber = 121291, killed = false, seed = 4324324, defaultTreatment = "on", conditions = new List<ConditionDefinition>(), status = "ACTIVE", trafficTypeName = "test" };
             var splitJson = JsonConvert.SerializeObject(split);
             var splitJson2 = JsonConvert.SerializeObject(split);
             var redisAdapterMock = new Mock<IRedisAdapter>();
