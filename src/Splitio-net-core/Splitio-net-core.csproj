@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>1.1.1-rc1</VersionPrefix>
+    <VersionPrefix>1.1.1-rc40</VersionPrefix>
     <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>Splitio-net-core</AssemblyName>
     <PackageId>Splitio-net-core</PackageId>
@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.1.1-rc1</Version>
+    <Version>1.1.1-rc40</Version>
   </PropertyGroup>
 
   <ItemGroup>
