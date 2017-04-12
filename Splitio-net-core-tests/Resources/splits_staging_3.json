@@ -738,7 +738,7 @@
             {
               "treatment": "unknown",
               "size": 0
-            },
+            }
           ]
         }
       ]
@@ -850,6 +850,44 @@
             }
           ],
           "label": "in segment all"
+        }
+      ]
+    },
+    {
+      "trafficTypeName": "user",
+      "name": "Unknown_Matcher",
+      "seed": 519134044,
+      "status": "ACTIVE",
+      "killed": false,
+      "defaultTreatment": "off",
+      "changeNumber": 1484084207827,
+      "conditions": [
+        {
+          "matcherGroup": {
+            "combiner": "AND",
+            "matchers": [
+              {
+                "keySelector": null,
+                "matcherType": "ARRAY_MATCHER",
+                "negate": false,
+                "userDefinedSegmentMatcherData": null,
+                "arrayMatcherData": {
+                  "array": [
+                    "asd"
+                  ]
+                },
+                "unaryNumericMatcherData": null,
+                "betweenMatcherData": null
+              }
+            ]
+          },
+          "partitions": [
+            {
+              "treatment": "on",
+              "size": 100
+            }
+          ],
+          "label": "explicitly included"
         }
       ]
     },

@@ -57,7 +57,9 @@ namespace Splitio.Services.SplitFetcher.Classes
             {
                 ParsedSplit parsedSplit;
                 //If not active --> Remove Split
-                if (split.status != StatusEnum.ACTIVE)
+                StatusEnum result;
+                var isValidStatus = Enum.TryParse(split.status, out result);
+                if (!isValidStatus || result != StatusEnum.ACTIVE)
                 {                    
                     splitCache.RemoveSplit(split.name);
                     removedSplits.Add(split);

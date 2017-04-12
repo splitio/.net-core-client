@@ -161,7 +161,7 @@ namespace Splitio_Tests.Integration_Tests
 
             //Act           
             var result = client.GetTreatment("01", "Test_on_off_on", null);
-            var result2 = client.GetTreatment("ab", "Test_on_off_on", null);
+            var result2 = client.GetTreatment("a0ax09z", "Test_on_off_on", null);
             var result3 = client.GetTreatment("00b0", "Test_on_off_on", null);
 
 
@@ -328,6 +328,21 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" && p.feature == "Segments_Restructuring_UI" && p.treatment == "on" && p.time > 0 && p.changeNumber == 1484084207827 && p.label == "explicitly included" && p.bucketingKey == null)));
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        public void ExecuteGetTreatmentWhenUnknownMatcherIsIncluded()
+        {
+            //Arrange
+            var treatmentLogMock = new Mock<IImpressionListener>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
+
+            //Act           
+            var result = client.GetTreatment("xs", "Unknown_Matcher", null);
+
+            //Assert
+            Assert.AreEqual("control", result);
         }
 
         [TestMethod]

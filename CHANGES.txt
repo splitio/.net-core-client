@@ -1,5 +1,9 @@
 CHANGES
 
+3.0.0
+
+- New hashing algorithm for splitter: Murmur hash. 
+
 1.1.1
 
  - Support for Impression Listener on configurations
