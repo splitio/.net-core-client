@@ -66,7 +66,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnExceptionShouldReturnControl()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
@@ -241,14 +241,14 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelKilled()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "test_jw3", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("test", "test_jw3", "off", It.IsAny<long>(), 1470947806420, "killed", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "test_jw3" && p.treatment == "off" && p.time > 0 && p.changeNumber == 1470947806420 && p.label == "killed" && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -256,14 +256,14 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelNoConditionMatched()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "whitelisting_elements", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("test", "whitelisting_elements", "off", It.IsAny<long>(), 1471368078203, "no rule matched", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "whitelisting_elements" && p.treatment == "off" && p.time > 0 && p.changeNumber == 1471368078203 && p.label == "no rule matched" && p.bucketingKey == null)));
 
         }
 
@@ -272,7 +272,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelSplitNotFound()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -280,7 +280,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "asd", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("test", "asd", "control", It.IsAny<long>(), null, "rules not found", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "asd" && p.treatment == "control" && p.time > 0 && p.changeNumber == null && p.label == "rules not found" && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -288,7 +288,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelException()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
@@ -297,7 +297,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "asd", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("test", "asd", "control", It.IsAny<long>(), null, "exception", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "asd" && p.treatment == "control" && p.time > 0 && p.changeNumber == null && p.label == "exception" && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -305,14 +305,14 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelTrafficAllocationFailed()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "Traffic_Allocation_UI2", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("test", "Traffic_Allocation_UI2", "off", It.IsAny<long>(), It.IsAny<long>(), "not in split", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "Traffic_Allocation_UI2" && p.treatment == "off" && p.time > 0 && p.changeNumber == 1490652849498 && p.label == "not in split" && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -320,14 +320,14 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelForTreatment()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", "on", It.IsAny<long>(), 1484084207827, "explicitly included", null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" && p.feature == "Segments_Restructuring_UI" && p.treatment == "on" && p.time > 0 && p.changeNumber == 1484084207827 && p.label == "explicitly included" && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -335,14 +335,14 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndNotLogLabelForTreatmentIfLabelsNotEnabled()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object, isLabelsEnabled: false);
 
             //Act           
             var result = client.GetTreatment("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", "on", It.IsAny<long>(), 1484084207827, null, null));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" && p.feature == "Segments_Restructuring_UI" && p.treatment == "on" && p.time > 0 && p.changeNumber == 1484084207827 && p.label == null && p.bucketingKey == null)));
         }
 
         [TestMethod]
@@ -350,7 +350,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelAndBucketingKeyForTreatment()
         {
             //Arrange
-            var treatmentLogMock = new Mock<ITreatmentLog>();
+            var treatmentLogMock = new Mock<IImpressionListener>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -358,7 +358,8 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment(key, "Segments_Restructuring_UI", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log("db765170-e9f2-11e5-885c-c2f58c3a47a7", "Segments_Restructuring_UI", "on", It.IsAny<long>(), 1484084207827, "explicitly included", "ab765170-e9f2-11e5-885c-c2f58c3a47a7"));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" && p.feature == "Segments_Restructuring_UI" && p.treatment == "on" && p.time > 0 && p.changeNumber == 1484084207827 && p.label == "explicitly included" && p.bucketingKey == "ab765170-e9f2-11e5-885c-c2f58c3a47a7")));
+
         }
     }
 }

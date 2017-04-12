@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Parsing;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests
@@ -48,6 +49,34 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var result = matcher.Match("test2");
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingLong()
+        {
+            //Arrange
+            var keys = new List<string>();
+            var matcher = new WhitelistMatcher(keys);
+
+            //Act
+            var result = matcher.Match(123);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingDate()
+        {
+            //Arrange
+            var keys = new List<string>();
+            var matcher = new WhitelistMatcher(keys);
+
+            //Act
+            var result = matcher.Match(DateTime.UtcNow);
 
             //Assert
             Assert.IsFalse(result);
