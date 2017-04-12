@@ -94,14 +94,143 @@ namespace Splitio_Tests.Unit_Tests
             var split = result.splits.First();
             Assert.AreEqual("Test_1", split.name);
             Assert.AreEqual(false, split.killed);
-            Assert.AreEqual(StatusEnum.ACTIVE, split.status);
+            Assert.AreEqual("ACTIVE", split.status);
             Assert.AreEqual("user", split.trafficTypeName);
             Assert.AreEqual("off", split.defaultTreatment);
             Assert.IsNotNull(split.conditions);
             Assert.AreEqual(-1, result.since);
             Assert.AreEqual(1470855828956, result.till);
+            Assert.AreEqual(null, split.algo);
+        }
 
+        [TestMethod]
+        public void FetchSplitChangesSuccessfullVerifyAlgorithmIsLegacy()
+        {
+            //Arrange
+            var apiClient = new Mock<ISplitSdkApiClient>();
+            apiClient
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Returns(@"{
+                          'splits': [
+                            {
+                              'trafficTypeName': 'user',
+                              'name': 'Test_1',
+                              'seed': 673896442,
+                              'status': 'ACTIVE',
+                              'killed': false,
+                              'algo': 1,
+                              'defaultTreatment': 'off',
+                              'changeNumber': 1470855828956,
+                              'conditions': [
+                                {
+                                  'matcherGroup': {
+                                    'combiner': 'AND',
+                                    'matchers': [
+                                      {
+                                        'keySelector': {
+                                          'trafficType': 'user',
+                                          'attribute': null
+                                        },
+                                        'matcherType': 'ALL_KEYS',
+                                        'negate': false,
+                                        'userDefinedSegmentMatcherData': null,
+                                        'whitelistMatcherData': null,
+                                        'unaryNumericMatcherData': null,
+                                        'betweenMatcherData': null
+                                      }
+                                    ]
+                                  },
+                                  'partitions': [
+                                    {
+                                      'treatment': 'on',
+                                      'size': 0
+                                    },
+                                    {
+                                      'treatment': 'off',
+                                      'size': 100
+                                    }
+                                  ]
+                                }
+                              ]
+                            }   
+                          ],
+                          'since': -1,
+                          'till': 1470855828956
+                        }");
+            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
 
+            //Act
+            var result = apiFetcher.Fetch(-1);
+
+            //Assert
+            Assert.IsNotNull(result);
+            var split = result.splits.First();
+            Assert.AreEqual(AlgorithmEnum.LegacyHash, (AlgorithmEnum)split.algo);
+        }
+
+        [TestMethod]
+        public void FetchSplitChangesSuccessfullVerifyAlgorithmIsMurmur()
+        {
+            //Arrange
+            var apiClient = new Mock<ISplitSdkApiClient>();
+            apiClient
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Returns(@"{
+                          'splits': [
+                            {
+                              'trafficTypeName': 'user',
+                              'name': 'Test_1',
+                              'seed': 673896442,
+                              'status': 'ACTIVE',
+                              'killed': false,
+                              'algo': 2,
+                              'defaultTreatment': 'off',
+                              'changeNumber': 1470855828956,
+                              'conditions': [
+                                {
+                                  'matcherGroup': {
+                                    'combiner': 'AND',
+                                    'matchers': [
+                                      {
+                                        'keySelector': {
+                                          'trafficType': 'user',
+                                          'attribute': null
+                                        },
+                                        'matcherType': 'ALL_KEYS',
+                                        'negate': false,
+                                        'userDefinedSegmentMatcherData': null,
+                                        'whitelistMatcherData': null,
+                                        'unaryNumericMatcherData': null,
+                                        'betweenMatcherData': null
+                                      }
+                                    ]
+                                  },
+                                  'partitions': [
+                                    {
+                                      'treatment': 'on',
+                                      'size': 0
+                                    },
+                                    {
+                                      'treatment': 'off',
+                                      'size': 100
+                                    }
+                                  ]
+                                }
+                              ]
+                            }   
+                          ],
+                          'since': -1,
+                          'till': 1470855828956
+                        }");
+            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+
+            //Act
+            var result = apiFetcher.Fetch(-1);
+
+            //Assert
+            Assert.IsNotNull(result);
+            var split = result.splits.First();
+            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
         }
 
         [TestMethod]

@@ -2,24 +2,58 @@
 using System.IO;
 using System.Linq;
 using Splitio.Services.EngineEvaluator;
+using System;
+using Splitio.Domain;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests
 {
     [TestClass]
     public class SplitterTests
     {
-        [DeploymentItem(@"Resources\sample-data.csv")]
+        [DeploymentItem(@"Resources\legacy-sample-data.csv")]
         [TestMethod]
         public void VerifyHashAndBucketSampleData()
         {
+            VerifyTestFile(@"Resources\legacy-sample-data.csv", new string[] { "\r\n" });
+        }
+
+        [DeploymentItem(@"Resources\legacy-sample-data-non-alpha-numeric.csv")]
+        [TestMethod]
+        public void VerifyHashAndBucketSampleDataNonAlphanumeric()
+        {
+            VerifyTestFile(@"Resources\legacy-sample-data-non-alpha-numeric.csv", new string[] { "\n" });
+        }
+
+
+        [DeploymentItem(@"Resources\murmur3-sample-data-v2.csv")]
+        [TestMethod]
+        public void VerifyMurmur3HashAndBucketSampleData()
+        {
+            VerifyTestFile(@"Resources\murmur3-sample-data-v2.csv", new string[] { "\r\n" }, false);
+        }
+
+
+        [DeploymentItem(@"Resources\murmur3-sample-data-non-alpha-numeric-v2.csv")]
+        [TestMethod]
+        public void VerifyMurmur3HashAndBucketSampleDataNonAlphanumeric()
+        {
+            VerifyTestFile(@"Resources\murmur3-sample-data-non-alpha-numeric-v2.csv", new string[] { "\n" }, false);
+        }
+
+
+        private void VerifyTestFile(string file, string[] sepparator, bool legacy = true)
+        {
             //Arrange
-            var contents = File.ReadAllText(@"Resources\sample-data.csv").Split('\n');
+            var fileContent = File.ReadAllText(file);
+            var contents = fileContent.Split(sepparator, StringSplitOptions.None);
             var csv = from line in contents
                       select line.Split(',').ToArray();
 
             var splitter = new Splitter();
             bool first = true;
 
+            var results = new List<string>();
             //Act
             foreach (string[] item in csv)
             {
@@ -29,43 +63,41 @@ namespace Splitio_Tests.Unit_Tests
                 }
                 else
                 {
-                    var hash = splitter.Hash(item[1], int.Parse(item[0]));
-                    var bucket = splitter.Bucket(item[1], int.Parse(item[0]));
-                    //Assert
-                    Assert.AreEqual(hash, int.Parse(item[2]));
-                    Assert.AreEqual(bucket, int.Parse(item[3]));
+                    if (item.Length == 4)
+                    {
+                        var hash = legacy ? splitter.LegacyHash(item[1], int.Parse(item[0])) : splitter.Hash(item[1], int.Parse(item[0]));
+                        var bucket = legacy ? splitter.LegacyBucket(item[1], int.Parse(item[0])) : splitter.Bucket(item[1], int.Parse(item[0]));
+
+                        //Assert
+                        Assert.AreEqual(hash, long.Parse(item[2]));
+                        Assert.AreEqual(bucket, int.Parse(item[3]));
+                    }
                 }
             }
         }
 
-        [DeploymentItem(@"Resources\sample-data-non-alpha-numeric.csv")]
+
+
         [TestMethod]
-        public void VerifyHashAndBucketSampleDataNonAlphanumeric()
+        public void VerifyCallMurmurOrLegacyDependingOnSplit()
         {
             //Arrange
-            var contents = File.ReadAllText(@"Resources\sample-data-non-alpha-numeric.csv", System.Text.Encoding.BigEndianUnicode).Split('\n');
-            var csv = from line in contents
-                      select line.Split(',').ToArray();
-
             var splitter = new Splitter();
-            bool first = true;
+            var partitions = new List<PartitionDefinition>();
+            partitions.Add(new PartitionDefinition() { size = 10, treatment = "on" });
+            partitions.Add(new PartitionDefinition() { size = 90, treatment = "off" });
 
             //Act
-            foreach (string[] item in csv)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    var hash = splitter.Hash(item[1], int.Parse(item[0]));
-                    var bucket = splitter.Bucket(item[1], int.Parse(item[0]));
-                    //Assert
-                    Assert.AreEqual(hash, int.Parse(item[2]));
-                    Assert.AreEqual(bucket, int.Parse(item[3]));
-                }
-            }
+            var result1 = splitter.GetTreatment("aUfEsdPN1twuEjff9Sl", 467569525, partitions, AlgorithmEnum.LegacyHash);
+            var result2 = splitter.GetTreatment("Sx1JzS1TDc", 467569525, partitions, AlgorithmEnum.LegacyHash);
+            var result3 = splitter.GetTreatment("Sx1JzS1TDc", 467569525, partitions, AlgorithmEnum.Murmur);
+            var result4 = splitter.GetTreatment("aUfEsdPN1twuEjff9Sl", 467569525, partitions, AlgorithmEnum.Murmur);
+
+            //Assert
+            Assert.AreEqual("off", result1);
+            Assert.AreEqual("on", result2);
+            Assert.AreEqual("off", result3);
+            Assert.AreEqual("off", result4);
         }
     }
 }

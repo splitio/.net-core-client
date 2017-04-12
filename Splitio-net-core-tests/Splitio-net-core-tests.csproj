@@ -20,6 +20,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\legacy-sample-data-non-alpha-numeric.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\legacy-sample-data.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\murmur3-sample-data-non-alpha-numeric-v2.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\murmur3-sample-data-non-alpha-numeric.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\murmur3-sample-data-v2.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\murmur3-sample-data.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\sample-data-non-alpha-numeric.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
