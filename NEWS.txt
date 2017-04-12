@@ -1,5 +1,9 @@
 NEWS
 
+3.0.0
+
+- Add support for Murmur hashing algorithm.
+
 1.1.1
 
  - Add support for custom Impression Listener.
