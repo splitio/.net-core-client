@@ -382,7 +382,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithBooleanAttribute()
         {
             //Arrange
-            var client = new JSONFileClient(@"C:\Making Sense\net-core-client\Splitio-net-core-tests\Resources\splits_staging_4.json", "", null, null);
+            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", null, null);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("boolean_attribute", true);
