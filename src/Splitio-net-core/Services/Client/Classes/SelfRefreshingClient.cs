@@ -90,10 +90,29 @@ namespace Splitio.Services.Client.Classes
             HttpReadTimeout = config.ReadTimeout ?? 15000;
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
-            SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
-            var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-            hostAddressesTask.Wait();
-            SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString(); 
+
+            try
+            {
+                SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
+            }
+            catch(Exception e)
+            {
+                SdkMachineName = "unknown";
+                Log.Warn(e, "Exception retrieving machine name.");
+            }
+
+            try
+            {
+                var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
+                hostAddressesTask.Wait();
+                SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+            }
+            catch(Exception e)
+            {
+                SdkMachineIP = "unknown";
+                Log.Warn(e, "Exception retrieving machine IP.");
+            }
+
             RandomizeRefreshRates = config.RandomizeRefreshRates;
             BlockMilisecondsUntilReady = config.Ready ?? 0;
             ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
