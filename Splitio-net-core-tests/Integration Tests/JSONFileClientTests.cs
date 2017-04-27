@@ -376,5 +376,23 @@ namespace Splitio_Tests.Integration_Tests
             treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" && p.feature == "Segments_Restructuring_UI" && p.treatment == "on" && p.time > 0 && p.changeNumber == 1484084207827 && p.label == "explicitly included" && p.bucketingKey == "ab765170-e9f2-11e5-885c-c2f58c3a47a7")));
 
         }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_4.json")]
+        public void ExecuteGetTreatmentWithBooleanAttribute()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", null, null);
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("boolean_attribute", true);
+
+            //Act           
+            var result = client.GetTreatment("fake_id_1", "sample_feature_bug", attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result);
+        }
     }
 }

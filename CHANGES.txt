@@ -1,5 +1,9 @@
 CHANGES
 
+3.0.1
+
+- Bug fixes.
+
 3.0.0
 
 - New hashing algorithm for splitter: Murmur hash. 
