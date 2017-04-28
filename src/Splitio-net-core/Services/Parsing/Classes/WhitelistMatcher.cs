@@ -26,5 +26,10 @@ namespace Splitio.Services.Parsing
         {
             return false;
         }
+
+        public override bool Match(List<string> key)
+        {
+            return false;
+        }
     }
 }

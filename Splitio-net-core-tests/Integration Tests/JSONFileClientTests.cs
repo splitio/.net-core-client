@@ -394,5 +394,77 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("off", result);
         }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        public void ExecuteGetTreatmentWithSetMatcherReturnsOff()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("permissions", new List<string>() { "create" });
+
+            //Act           
+            var result = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result); // !Contains any of "create","delete","update"
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        public void ExecuteGetTreatmentWithSetMatcherReturnsOn()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("permissions", new List<string>() { "execute" });
+
+            //Act           
+            var result = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result); // !Contains any of "create","delete","update"
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        public void ExecuteGetTreatmentWithStringMatcherReturnsOff()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("st", "permission");
+
+            //Act           
+            var result = client.GetTreatment("test1", "string_matchers", attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result); // Starts with "a" or "b" --> 100% off
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        public void ExecuteGetTreatmentWithStringMatcherReturnsOn()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("st", "allow");
+
+            //Act           
+            var result = client.GetTreatment("test1", "string_matchers", attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result); // Starts with "a" or "b" --> 100% off
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Parsing.Classes;
 using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
@@ -29,5 +30,10 @@ namespace Splitio.Services.Parsing
         public abstract override bool Match(DateTime key);
 
         public abstract override bool Match(long key);
+
+        public override bool Match(List<string> key)
+        {
+            return false;
+        }
     }
 }

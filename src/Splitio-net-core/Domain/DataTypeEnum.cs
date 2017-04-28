@@ -5,6 +5,7 @@ namespace Splitio.Domain
     {
         NUMBER,
         DATETIME,
-        STRING
+        STRING,
+        SET
     }
 }
