@@ -9,6 +9,13 @@ namespace Splitio.Domain
         EQUAL_TO,
         GREATER_THAN_OR_EQUAL_TO,
         LESS_THAN_OR_EQUAL_TO,
-        BETWEEN 
+        BETWEEN,
+        EQUAL_TO_SET,
+        CONTAINS_ANY_OF_SET,
+        CONTAINS_ALL_OF_SET,
+        PART_OF_SET,
+        STARTS_WITH,
+        ENDS_WITH,
+        CONTAINS_STRING
     }
 }

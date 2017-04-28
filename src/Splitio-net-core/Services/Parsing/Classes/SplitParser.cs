@@ -94,13 +94,34 @@ namespace Splitio.Services.Parsing
                 {
                     switch (result)
                     {
-                        case MatcherTypeEnum.ALL_KEYS: matcher = GetAllKeysMatcher(); break;
-                        case MatcherTypeEnum.BETWEEN: matcher = GetBetweenMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.EQUAL_TO: matcher = GetEqualToMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO: matcher = GetGreaterThanOrEqualToMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.IN_SEGMENT: matcher = GetInSegmentMatcher(matcherDefinition, parsedSplit); break;
-                        case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO: matcher = GetLessThanOrEqualToMatcher(matcherDefinition); break;
-                        case MatcherTypeEnum.WHITELIST: matcher = GetWhitelistMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.ALL_KEYS:
+                            matcher = GetAllKeysMatcher(); break;
+                        case MatcherTypeEnum.BETWEEN:
+                            matcher = GetBetweenMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.EQUAL_TO:
+                            matcher = GetEqualToMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.GREATER_THAN_OR_EQUAL_TO:
+                            matcher = GetGreaterThanOrEqualToMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.IN_SEGMENT:
+                            matcher = GetInSegmentMatcher(matcherDefinition, parsedSplit); break;
+                        case MatcherTypeEnum.LESS_THAN_OR_EQUAL_TO:
+                            matcher = GetLessThanOrEqualToMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.WHITELIST:
+                            matcher = GetWhitelistMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.EQUAL_TO_SET:
+                            matcher = GetEqualToSetMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.CONTAINS_ANY_OF_SET:
+                            matcher = GetContainsAnyOfSetMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.CONTAINS_ALL_OF_SET:
+                            matcher = GetContainsAllOfSetMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.PART_OF_SET:
+                            matcher = GetPartOfSetMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.STARTS_WITH:
+                            matcher = GetStartsWithMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.ENDS_WITH:
+                            matcher = GetEndsWithMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.CONTAINS_STRING:
+                            matcher = GetContainsStringMatcher(matcherDefinition); break;
                     }
                 }
             }
@@ -156,6 +177,48 @@ namespace Splitio.Services.Parsing
         {
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new WhitelistMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetEqualToSetMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new EqualToSetMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetContainsAnyOfSetMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new ContainsAnyOfSetMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetContainsStringMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new ContainsStringMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetEndsWithMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new EndsWithMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetStartsWithMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new StartsWithMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetPartOfSetMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new PartOfSetMatcher(matcherData.whitelist);
+        }
+
+        private IMatcher GetContainsAllOfSetMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.whitelistMatcherData;
+            return new ContainsAllOfSetMatcher(matcherData.whitelist);
         }
 
         protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);

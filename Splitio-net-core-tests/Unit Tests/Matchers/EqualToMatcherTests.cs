@@ -106,7 +106,7 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var result = matcher.Match("");
-            var result2 = matcher.Match(null);
+            var result2 = matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result);
