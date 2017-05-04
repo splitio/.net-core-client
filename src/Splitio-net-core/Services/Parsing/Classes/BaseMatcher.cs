@@ -13,6 +13,8 @@ namespace Splitio.Services.Parsing.Classes
 
         public abstract bool Match(long key);
 
+        public abstract bool Match(List<string> key);
+
         public bool Match(object value)
         {
             if (value is string)
@@ -30,6 +32,10 @@ namespace Splitio.Services.Parsing.Classes
             else if(value is int)
             {
                 return Match((int)value);
+            }
+            else if(value is List<string>)
+            {
+                return Match((List<string>)value);
             }
 
             return false;

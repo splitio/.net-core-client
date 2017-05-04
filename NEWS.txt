@@ -1,5 +1,9 @@
 NEWS
 
+3.1.0
+
+- Add support for new string and set matchers.
+
 3.0.1
 
 - No news for this version.

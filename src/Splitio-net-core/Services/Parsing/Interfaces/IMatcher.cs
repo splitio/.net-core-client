@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
@@ -11,5 +12,7 @@ namespace Splitio.Services.Parsing
         bool Match(DateTime key);
 
         bool Match(long key);
+
+        bool Match(List<string> key);
     }
 }

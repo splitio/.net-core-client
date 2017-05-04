@@ -26,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests
             var matcher = new AllKeysMatcher();
 
             //Act
-            var result2 = matcher.Match(null);
+            var result2 = matcher.Match((string)null);
 
             //Assert
             Assert.IsFalse(result2);
