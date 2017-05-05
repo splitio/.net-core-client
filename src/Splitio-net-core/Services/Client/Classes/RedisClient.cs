@@ -96,7 +96,10 @@ namespace Splitio.Services.Client.Classes
             var treatmentLog = new RedisTreatmentLog(impressionsCache);
             impressionListener = new AsynchronousImpressionListener();
             ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
-            ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
+            if (config.ImpressionListener != null)
+            {
+                ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
+            }
         }
 
         private void BuildMetricsLog()
