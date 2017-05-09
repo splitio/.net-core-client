@@ -1,15 +1,18 @@
-﻿using Metrics;
+﻿using hq.metrics.Core;
 using System;
 
 namespace Performance
 {
     class Program
     {
+        //private IMetric _resultsMeter;
+
         static void Main(string[] args)
         {
-            Metric.Config
+            
+            /*Metric.Config
             .WithHttpEndpoint("http://localhost:12345");
-            ;
+            ;*/
             
             
 

@@ -6,15 +6,23 @@ using System.Threading.Tasks;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Client.Classes;
 using System.Diagnostics;
-using Metrics;
+using hq.metrics;
+using hq.metrics.Core;
 
 namespace Performance
 {
     public class MetricsProcessor
     {
         ISplitClient client;
-        
-        private readonly ITimer timer = Metric.Timer("GET TREATMENT", Unit.Requests, SamplingType.Default, TimeUnit.Seconds, TimeUnit.Milliseconds);
+        IMetric timer;
+        TimerMetric timerr;
+
+        public MetricsProcessor()
+        {
+            Metrics metrics = new Metrics();
+            timer = metrics.Timer(typeof(MetricsProcessor),"GET TREATMENT",TimeUnit.Seconds, TimeUnit.Nanoseconds);
+            timerr = new TimerMetric(TimeUnit.Seconds, TimeUnit.Milliseconds);
+        }
 
         private ISplitClient GetInstance(string apikey)
         {
@@ -49,10 +57,10 @@ namespace Performance
                     atributes.Add("atrib2", "20");
                     while (true)
                     {
-                        using (timer.NewContext())
+                        timerr.Time(() =>
                         {
                             client.GetTreatment("abcdefghijklmnopqrxyz123456789ABCDEF", "benchmark_jw_1", atributes);
-                        }
+                        });
                     }
                 });
             }
@@ -60,10 +68,22 @@ namespace Performance
             {
                 if (sw.Elapsed > TimeSpan.FromMinutes(minutesRunning))
                 {
-
+                    Console.WriteLine("Values : ");
+                    foreach (var value in timerr.Values)
+                    {
+                        Console.Write(value.ToString() + " - " );
+                    }
+                    Console.WriteLine(" ");
+                    Console.WriteLine("Max : ");
+                    Console.WriteLine(timerr.Max);
+                    Console.WriteLine("Min : ");
+                    Console.WriteLine(timerr.Min);
+                    Console.Read();
                     return;
                 }
             }
+
+            
         }
     }
 }

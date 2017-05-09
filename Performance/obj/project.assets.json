@@ -2,6 +2,21 @@
   "version": 2,
   "targets": {
     ".NETCoreApp,Version=v1.0": {
+      "hq.metrics/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.0",
+          "System.Runtime.Serialization.Primitives": "4.1.1",
+          "System.Security.Cryptography.Algorithms": "4.2.0",
+          "System.Threading.Thread": "4.0.0"
+        },
+        "compile": {
+          "lib/netstandard1.6/hq.metrics.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.6/hq.metrics.dll": {}
+        }
+      },
       "Libuv/1.9.1": {
         "type": "package",
         "dependencies": {
@@ -144,25 +159,6 @@
         },
         "runtime": {
           "lib/netstandard1.3/Microsoft.CSharp.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Configuration/1.0.2": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "1.0.2",
-          "System.Collections": "4.0.11",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.IO": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Configuration.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Configuration.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration.Abstractions/1.1.1": {
@@ -2680,22 +2676,6 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Metrics/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v1.0",
-        "dependencies": {
-          "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.Configuration": "1.0.2",
-          "Microsoft.NETCore.App": "1.0.4",
-          "Newtonsoft.Json": "9.0.1",
-          "System.Diagnostics.Process": "4.1.0",
-          "System.Diagnostics.TraceSource": "4.0.0",
-          "System.Dynamic.Runtime": "4.0.11",
-          "System.Net.Http": "4.1.1",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
-          "System.Threading.Thread": "4.0.0"
-        }
-      },
       "Splitio-net-core/3.1.1": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
@@ -2710,6 +2690,16 @@
     }
   },
   "libraries": {
+    "hq.metrics/1.0.0": {
+      "sha512": "ijIxt3iDztXs4D9SoKzez8zxRJZRxWaVOaaIXMo4OJCB5KVmeuknl31zk+AjkL90AORLzBNeVfamashXbiut9Q==",
+      "type": "package",
+      "path": "hq.metrics/1.0.0",
+      "files": [
+        "hq.metrics.1.0.0.nupkg.sha512",
+        "hq.metrics.nuspec",
+        "lib/netstandard1.6/hq.metrics.dll"
+      ]
+    },
     "Libuv/1.9.1": {
       "sha512": "uqX2Frwf9PW8MaY7PRNY6HM5BpW1D8oj1EdqzrmbEFD5nH63Yat3aEjN/tws6Tw6Fk7LwmLBvtUh32tTeTaHiA==",
       "type": "package",
@@ -2847,17 +2837,6 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
-      ]
-    },
-    "Microsoft.Extensions.Configuration/1.0.2": {
-      "sha512": "fq9dvlP90wXV6F63iNKu9wvwvjPuFLDAe3W2YRj1akrw6pW633KtV54r2H3pvepY0FRynYXD1pnxSDx0Kvi+EQ==",
-      "type": "package",
-      "path": "microsoft.extensions.configuration/1.0.2",
-      "files": [
-        "lib/netstandard1.1/Microsoft.Extensions.Configuration.dll",
-        "lib/netstandard1.1/Microsoft.Extensions.Configuration.xml",
-        "microsoft.extensions.configuration.1.0.2.nupkg.sha512",
-        "microsoft.extensions.configuration.nuspec"
       ]
     },
     "Microsoft.Extensions.Configuration.Abstractions/1.1.1": {
@@ -8122,11 +8101,6 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "Metrics/1.0.0": {
-      "type": "project",
-      "path": "../../../Metrics.NET-CoreClrPrototype/Src/Metrics/Metrics.csproj",
-      "msbuildProject": "../../../Metrics.NET-CoreClrPrototype/Src/Metrics/Metrics.csproj"
-    },
     "Splitio-net-core/3.1.1": {
       "type": "project",
       "path": "../src/Splitio-net-core/Splitio-net-core.csproj",
@@ -8135,10 +8109,10 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v1.0": [
-      "Metrics >= 1.0.0",
       "Microsoft.Extensions.Configuration.Abstractions >= 1.1.1",
       "Microsoft.NETCore.App >= 1.0.4",
-      "Splitio-net-core >= 3.1.1"
+      "Splitio-net-core >= 3.1.1",
+      "hq.metrics >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -8158,9 +8132,6 @@
       "frameworks": {
         "netcoreapp1.0": {
           "projectReferences": {
-            "C:\\Metrics.NET-CoreClrPrototype\\Src\\Metrics\\Metrics.csproj": {
-              "projectPath": "C:\\Metrics.NET-CoreClrPrototype\\Src\\Metrics\\Metrics.csproj"
-            },
             "C:\\Making Sense\\net-core-client\\src\\Splitio-net-core\\Splitio-net-core.csproj": {
               "projectPath": "C:\\Making Sense\\net-core-client\\src\\Splitio-net-core\\Splitio-net-core.csproj"
             }
@@ -8179,6 +8150,10 @@
             "target": "Package",
             "version": "1.0.4",
             "autoReferenced": true
+          },
+          "hq.metrics": {
+            "target": "Package",
+            "version": "1.0.0"
           }
         }
       }
