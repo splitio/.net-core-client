@@ -1,0 +1,13 @@
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Performance.deps.json
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Performance.runtimeconfig.json
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Performance.runtimeconfig.dev.json
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Performance.dll
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Performance.pdb
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Metrics.dll
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Splitio-net-core.dll
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Metrics.pdb
+C:\Making Sense\net-core-client\Performance\bin\Debug\netcoreapp1.0\Splitio-net-core.pdb
+C:\Making Sense\net-core-client\Performance\obj\Debug\netcoreapp1.0\Performance.csprojResolveAssemblyReference.cache
+C:\Making Sense\net-core-client\Performance\obj\Debug\netcoreapp1.0\Performance.AssemblyInfo.cs
+C:\Making Sense\net-core-client\Performance\obj\Debug\netcoreapp1.0\Performance.dll
+C:\Making Sense\net-core-client\Performance\obj\Debug\netcoreapp1.0\Performance.pdb

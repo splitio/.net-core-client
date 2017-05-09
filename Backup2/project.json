@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "Microsoft.CSharp": "4.0.1",
+    "Microsoft.Extensions.Configuration": "1.0.0",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0"
+    },
+    "Newtonsoft.Json": "9.0.1",
+    "System.Diagnostics.Process": "4.1.0",
+    "System.Diagnostics.TraceSource": "4.0.0",
+    "System.Dynamic.Runtime": "4.0.11",
+    "System.Net.Http": "4.1.0",
+    "System.Runtime.Serialization.Primitives": "4.1.1",
+    "System.Threading.Thread": "4.0.0"
+  },
+  "buildOptions": {
+    "embed": {
+      "includeFiles": [ "Visualization/index.full.html.gz", "Visualization/metrics_32.png" ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "buildOptions": {
+        "define": [ "LIBLOG_PORTABLE" ]
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}

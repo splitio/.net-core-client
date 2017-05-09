@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Performance": {
+      "commandName": "Project",
+      "commandLineArgs": "4 2"
+    }
+  }
+}
