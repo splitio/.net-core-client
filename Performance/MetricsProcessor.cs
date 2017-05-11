@@ -6,23 +6,19 @@ using System.Threading.Tasks;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Client.Classes;
 using System.Diagnostics;
-using hq.metrics;
-using hq.metrics.Core;
+
 
 namespace Performance
 {
     public class MetricsProcessor
     {
         ISplitClient client;
-        IMetric timer;
-        TimerMetric timerr;
 
-        public MetricsProcessor()
+
+       /* public MetricsProcessor()
         {
-            Metrics metrics = new Metrics();
-            timer = metrics.Timer(typeof(MetricsProcessor),"GET TREATMENT",TimeUnit.Seconds, TimeUnit.Nanoseconds);
-            timerr = new TimerMetric(TimeUnit.Seconds, TimeUnit.Milliseconds);
-        }
+
+        }*/
 
         private ISplitClient GetInstance(string apikey)
         {
@@ -49,7 +45,7 @@ namespace Performance
             sw.Start();
 
             for (int i = 0; i < numberOfThreads; i++)
-            {
+            {             
                 Task.Factory.StartNew(() =>
                 {
                     var atributes = new Dictionary<string, object>();
@@ -57,10 +53,7 @@ namespace Performance
                     atributes.Add("atrib2", "20");
                     while (true)
                     {
-                        timerr.Time(() =>
-                        {
                             client.GetTreatment("abcdefghijklmnopqrxyz123456789ABCDEF", "benchmark_jw_1", atributes);
-                        });
                     }
                 });
             }
@@ -68,17 +61,8 @@ namespace Performance
             {
                 if (sw.Elapsed > TimeSpan.FromMinutes(minutesRunning))
                 {
-                    Console.WriteLine("Values : ");
-                    foreach (var value in timerr.Values)
-                    {
-                        Console.Write(value.ToString() + " - " );
-                    }
-                    Console.WriteLine(" ");
-                    Console.WriteLine("Max : ");
-                    Console.WriteLine(timerr.Max);
-                    Console.WriteLine("Min : ");
-                    Console.WriteLine(timerr.Min);
-                    Console.Read();
+                    Console.WriteLine("Finished.");
+                    //Console.Read();
                     return;
                 }
             }

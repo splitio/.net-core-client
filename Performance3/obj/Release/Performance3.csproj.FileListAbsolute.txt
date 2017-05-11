@@ -1,0 +1,13 @@
+C:\Making Sense\net-core-client\Performance3\bin\Release\Performance3.exe.config
+C:\Making Sense\net-core-client\Performance3\bin\Release\Performance3.exe
+C:\Making Sense\net-core-client\Performance3\bin\Release\Performance3.pdb
+C:\Making Sense\net-core-client\Performance3\obj\Release\Performance3.csprojResolveAssemblyReference.cache
+C:\Making Sense\net-core-client\Performance3\obj\Release\Performance3.exe
+C:\Making Sense\net-core-client\Performance3\obj\Release\Performance3.pdb
+C:\Making Sense\net-core-client\Performance3\bin\Release\Metrics.dll
+C:\Making Sense\net-core-client\Performance3\bin\Release\Splitio-net-core.dll
+C:\Making Sense\net-core-client\Performance3\bin\Release\Splitio-net-core.pdb
+C:\Making Sense\net-core-client\Performance3\bin\Release\Metrics.pdb
+C:\Making Sense\net-core-client\Performance3\bin\Release\Metrics.xml
+C:\Making Sense\net-core-client\Performance3\bin\Release\MurmurHash-net-core.dll
+C:\Making Sense\net-core-client\Performance3\bin\Release\MurmurHash-net-core.pdb

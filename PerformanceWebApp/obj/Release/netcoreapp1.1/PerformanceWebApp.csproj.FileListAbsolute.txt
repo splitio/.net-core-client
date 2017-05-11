@@ -1,0 +1,11 @@
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\PerformanceWebApp.deps.json
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\PerformanceWebApp.runtimeconfig.json
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\PerformanceWebApp.runtimeconfig.dev.json
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\PerformanceWebApp.dll
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\PerformanceWebApp.pdb
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\Splitio-net-core.dll
+C:\Making Sense\net-core-client\PerformanceWebApp\bin\Release\netcoreapp1.1\Splitio-net-core.pdb
+C:\Making Sense\net-core-client\PerformanceWebApp\obj\Release\netcoreapp1.1\PerformanceWebApp.csprojResolveAssemblyReference.cache
+C:\Making Sense\net-core-client\PerformanceWebApp\obj\Release\netcoreapp1.1\PerformanceWebApp.AssemblyInfo.cs
+C:\Making Sense\net-core-client\PerformanceWebApp\obj\Release\netcoreapp1.1\PerformanceWebApp.dll
+C:\Making Sense\net-core-client\PerformanceWebApp\obj\Release\netcoreapp1.1\PerformanceWebApp.pdb

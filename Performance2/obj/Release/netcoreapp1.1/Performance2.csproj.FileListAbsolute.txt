@@ -1,0 +1,8 @@
+C:\Making Sense\net-core-client\Performance2\bin\Release\netcoreapp1.1\Performance2.deps.json
+C:\Making Sense\net-core-client\Performance2\bin\Release\netcoreapp1.1\Performance2.runtimeconfig.json
+C:\Making Sense\net-core-client\Performance2\bin\Release\netcoreapp1.1\Performance2.runtimeconfig.dev.json
+C:\Making Sense\net-core-client\Performance2\bin\Release\netcoreapp1.1\Performance2.dll
+C:\Making Sense\net-core-client\Performance2\bin\Release\netcoreapp1.1\Performance2.pdb
+C:\Making Sense\net-core-client\Performance2\obj\Release\netcoreapp1.1\Performance2.AssemblyInfo.cs
+C:\Making Sense\net-core-client\Performance2\obj\Release\netcoreapp1.1\Performance2.dll
+C:\Making Sense\net-core-client\Performance2\obj\Release\netcoreapp1.1\Performance2.pdb
