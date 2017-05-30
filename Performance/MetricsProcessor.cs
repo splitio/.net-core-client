@@ -39,7 +39,8 @@ namespace Performance
 
         public void ProcessRequest(int numberOfThreads, int minutesRunning)
         {
-            client = GetInstance("mhfvtl3ilt6aeds8i1amn8qjssbdarlr76ju");
+            client = GetInstance("89d5uvpc1ktg9gdj1nrhk0coh6k5vsqj1uu4");
+            Console.WriteLine("Key: " + "89d5uvpc1ktg9gdj1nrhk0coh6k5vsqj1uu4");
             Console.WriteLine("Running with: " + numberOfThreads + " threads " + minutesRunning + " minutes ");
             Stopwatch sw = new Stopwatch();
             sw.Start();
