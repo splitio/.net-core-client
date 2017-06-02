@@ -14,7 +14,7 @@ namespace Splitio.Services.Cache.Classes
         private IDatabase database;
         private IServer server;
 
-        public RedisAdapter(string host, string port, string password, int databaseNumber = 0, 
+        public RedisAdapter(string host, string port, string password = "", int databaseNumber = 0, 
             int connectTimeout = 0, int connectRetry = 0, int syncTimeout = 0)
         {
             try
