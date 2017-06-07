@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
@@ -10,7 +10,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class AsynchronousImpressionListener : IImpressionListener
     {
-        protected static readonly Logger Logger = LogManager.GetLogger("AsynchronousImpressionListener");
+        protected static readonly ILog Logger = LogManager.GetLogger("AsynchronousImpressionListener");
         private List<IImpressionListener> workers = new List<IImpressionListener>();
 
         public void AddListener(IImpressionListener worker)
@@ -43,7 +43,7 @@ namespace Splitio.Services.Impressions.Classes
                         }
                         catch (Exception e)
                         {
-                            Logger.Error(e, "Exception performing Log with worker. ");
+                            Logger.Error("Exception performing Log with worker. ", e);
                         }
                     }
                 });
@@ -51,7 +51,7 @@ namespace Splitio.Services.Impressions.Classes
             }
             catch (Exception e)
             {
-                Logger.Error(e, "Exception creating Log task. ");
+                Logger.Error("Exception creating Log task. ", e);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
@@ -11,7 +11,7 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(LocalhostClient).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
 
         private FileSystemWatcher watcher;
         private string fullPath;

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
-using NLog;
+using Common.Logging;
 using Splitio.Services.Cache.Interfaces;
 
 namespace Splitio.Services.Client.Classes
 {
     public class InMemoryReadinessGatesCache : IReadinessGatesCache
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(InMemoryReadinessGatesCache).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemoryReadinessGatesCache));
         private CountdownEvent splitsAreReady = new CountdownEvent(1);
         private Dictionary<string, CountdownEvent> segmentsAreReady = new Dictionary<string, CountdownEvent>();
 

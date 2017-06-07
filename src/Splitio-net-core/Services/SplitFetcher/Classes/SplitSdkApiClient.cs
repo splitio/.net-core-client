@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.CommonLibraries;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -16,7 +16,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
         private const string SplitFetcherException = "splitChangeFetcher.exception";
 
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SplitSdkApiClient).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitSdkApiClient));
 
         public SplitSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
@@ -52,7 +52,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
             catch (Exception e)
             {
-                Log.Error(e, "Exception caught executing FetchSplitChanges");
+                Log.Error("Exception caught executing FetchSplitChanges", e);
 
                 if (metricsLog != null)
                 {
