@@ -1,5 +1,10 @@
 CHANGES
 
+3.1.2
+
+- Changed logging approach by supporting Common.Logging integration. Client can configure its already existing logging system 
+by using Common.Logging adapter, to be used in Splitio SDK.
+
 3.1.1
 
 - Bug fixes.

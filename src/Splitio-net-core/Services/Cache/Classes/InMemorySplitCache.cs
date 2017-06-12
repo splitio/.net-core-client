@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Concurrent;
@@ -9,7 +9,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : ISplitCache
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(InMemorySplitCache).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
 
         private ConcurrentDictionary<string, ParsedSplit> splits;
         private long changeNumber;

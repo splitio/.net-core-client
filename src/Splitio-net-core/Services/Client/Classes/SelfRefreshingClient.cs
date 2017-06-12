@@ -98,7 +98,7 @@ namespace Splitio.Services.Client.Classes
             catch(Exception e)
             {
                 SdkMachineName = "unknown";
-                Log.Warn(e, "Exception retrieving machine name.");
+                Log.Warn("Exception retrieving machine name.", e);
             }
 
             try
@@ -110,7 +110,7 @@ namespace Splitio.Services.Client.Classes
             catch(Exception e)
             {
                 SdkMachineIP = "unknown";
-                Log.Warn(e, "Exception retrieving machine IP.");
+                Log.Warn("Exception retrieving machine IP.", e);
             }
 
             RandomizeRefreshRates = config.RandomizeRefreshRates;

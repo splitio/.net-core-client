@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,7 +6,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SegmentTaskWorker
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SegmentTaskWorker).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentTaskWorker));
 
         int numberOfParallelTasks;
         int counter;

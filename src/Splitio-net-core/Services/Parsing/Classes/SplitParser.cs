@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using System;
@@ -9,7 +9,7 @@ namespace Splitio.Services.Parsing
 {
     public abstract class SplitParser
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SplitParser).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitParser));
         protected ISegmentCache segmentsCache;
 
         public ParsedSplit Parse(Split split)
@@ -41,7 +41,7 @@ namespace Splitio.Services.Parsing
             }
             catch (Exception e)
             {
-                Log.Error(e, "Exception caught parsing split");
+                Log.Error("Exception caught parsing split", e);
                 return null;
             }
         }
@@ -127,7 +127,7 @@ namespace Splitio.Services.Parsing
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error parsing matcher", e);
+                Log.Error("Error parsing matcher", e);
             }
 
             if (matcher == null)

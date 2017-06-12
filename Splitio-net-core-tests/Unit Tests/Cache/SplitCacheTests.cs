@@ -2,9 +2,6 @@
 using Splitio.Services.Cache.Classes;
 using System.Collections.Concurrent;
 using Splitio.Domain;
-using NLog.Config;
-using NLog.Targets;
-using NLog;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
