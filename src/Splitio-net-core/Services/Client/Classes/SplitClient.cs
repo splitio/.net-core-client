@@ -7,6 +7,7 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -35,20 +36,36 @@ namespace Splitio.Services.Client.Classes
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
 
+        private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
+
         public ISplitManager GetSplitManager()
         {
             return manager;
         }
 
-        public string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
+        public string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
             Key keys = new Key(key, null);
-            return GetTreatmentForFeature(keys, feature, attributes);
+            return GetTreatment(keys, feature, attributes, logMetricsAndImpressions, multiple);
         }
 
-        public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
+        public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            return GetTreatmentForFeature(key, feature, attributes);
+            string featureHash = string.Concat(key.matchingKey, "#", feature, "#", attributes != null ? attributes.GetHashCode() : 0);
+
+            if (multiple && treatmentCache.ContainsKey(featureHash))
+            {
+                return treatmentCache[featureHash];
+            }
+
+            var result = GetTreatmentForFeature(key, feature, attributes, logMetricsAndImpressions);
+
+            if (multiple)
+            {
+                treatmentCache.TryAdd(featureHash, result);
+            }
+
+            return result;
         }
 
         protected void RecordStats(Key key, string feature, long? changeNumber, string label, long start, string treatment, string operation, Stopwatch clock)
@@ -70,7 +87,7 @@ namespace Splitio.Services.Client.Classes
             return new KeyImpression() { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
         }
 
-    protected virtual string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes)
+        protected virtual string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes, bool logMetricsAndImpressions = true)
         {
             long start = CurrentTimeHelper.CurrentTimeMillis();
             var clock = new Stopwatch();
@@ -82,29 +99,35 @@ namespace Splitio.Services.Client.Classes
 
                 if (split == null)
                 {
-                    //if split definition was not found, impression label = "rules not found"
-                    RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
+                    if (logMetricsAndImpressions)
+                    {
+                        //if split definition was not found, impression label = "rules not found"
+                        RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
+                    }
 
                     Log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
                     
                     return Control;
                 }
-                
-                var treatment = GetTreatment(key, split, attributes, start, clock);
-                
+
+                var treatment = GetTreatment(key, split, attributes, start, clock, this, logMetricsAndImpressions);
+
                 return treatment;
             }
             catch (Exception e)
             {
-                //if there was an exception, impression label = "exception"
-                RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
+                if (logMetricsAndImpressions)
+                {
+                    //if there was an exception, impression label = "exception"
+                    RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
+                }
 
                 Log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
                 return Control;
             }
         }
 
-        protected string GetTreatment(Key key, ParsedSplit split, Dictionary<string, object> attributes, long start, Stopwatch clock)
+        protected string GetTreatment(Key key, ParsedSplit split, Dictionary<string, object> attributes, long start, Stopwatch clock, ISplitClient splitClient, bool logMetricsAndImpressions)
         {
             if (!split.killed)
             {
@@ -120,9 +143,12 @@ namespace Splitio.Services.Client.Classes
                             int bucket = split.algo == AlgorithmEnum.LegacyHash ? splitter.LegacyBucket(key.bucketingKey, split.trafficAllocationSeed) : splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
                             if (bucket >= split.trafficAllocation)
                             {
-                                // If not in traffic allocation, abort and return
-                                // default treatment
-                                RecordStats(key, split.name, split.changeNumber, LabelTrafficAllocationFailed, start, split.defaultTreatment, SdkGetTreatment, clock);
+                                if (logMetricsAndImpressions)
+                                {
+                                    // If not in traffic allocation, abort and return
+                                    // default treatment
+                                    RecordStats(key, split.name, split.changeNumber, LabelTrafficAllocationFailed, start, split.defaultTreatment, SdkGetTreatment, clock);
+                                }
 
                                 return split.defaultTreatment;
                             }
@@ -130,25 +156,34 @@ namespace Splitio.Services.Client.Classes
                         inRollout = true;
                     }
                     var combiningMatcher = condition.matcher;
-                    if (combiningMatcher.Match(key.matchingKey, attributes))
+                    if (combiningMatcher.Match(key.matchingKey, attributes, splitClient))
                     {
                         var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-                        //If condition matched, impression label = condition.label 
-                        RecordStats(key, split.name, split.changeNumber, condition.label, start, treatment, SdkGetTreatment, clock);
+                        if (logMetricsAndImpressions)
+                        {
+                            //If condition matched, impression label = condition.label 
+                            RecordStats(key, split.name, split.changeNumber, condition.label, start, treatment, SdkGetTreatment, clock);
+                        }
 
                         return treatment;
                     }
                 }
-                //If no condition matched, impression label = "no rule matched"
-                RecordStats(key, split.name, split.changeNumber, LabelNoConditionMatched, start, split.defaultTreatment, SdkGetTreatment, clock);
 
+                if (logMetricsAndImpressions)
+                {
+                    //If no condition matched, impression label = "no rule matched"
+                    RecordStats(key, split.name, split.changeNumber, LabelNoConditionMatched, start, split.defaultTreatment, SdkGetTreatment, clock);
+                }
                 return split.defaultTreatment;
             }
             else
             {
-                //If split was killed, impression label = "killed"
-                RecordStats(key, split.name, split.changeNumber, LabelKilled, start, split.defaultTreatment, SdkGetTreatment, clock);
+                if (logMetricsAndImpressions)
+                {
+                    //If split was killed, impression label = "killed"
+                    RecordStats(key, split.name, split.changeNumber, LabelKilled, start, split.defaultTreatment, SdkGetTreatment, clock);
+                }
 
                 return split.defaultTreatment;
             }
@@ -157,16 +192,31 @@ namespace Splitio.Services.Client.Classes
         public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
             Key keys = new Key(key, null);
-            Dictionary<string, string> treatmentsForFeatures;
-            treatmentsForFeatures = features.ToDictionary(x => x, x => GetTreatment(keys, x, attributes));
-            return treatmentsForFeatures;
+            return GetTreatments(keys, features, attributes);
         }
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            Dictionary<string, string> treatmentsForFeatures;
-            treatmentsForFeatures = features.ToDictionary(x => x, x => GetTreatment(key, x, attributes));
+            Dictionary<string, string> treatmentsForFeatures = new Dictionary<string, string>();
+
+            foreach (string feature in features)
+            {
+                treatmentsForFeatures.Add(feature, GetTreatment(key, feature, attributes, true, true));
+            }
+
+            ClearItemsAddedToTreatmentCache(key.matchingKey);
             return treatmentsForFeatures;
+        }
+
+        private void ClearItemsAddedToTreatmentCache(string key)
+        {
+            var temporaryTreatmentCache = new ConcurrentDictionary<string, string>(treatmentCache);
+            foreach (var item in temporaryTreatmentCache.Keys.Where(x => x.StartsWith(key)))
+            {
+                string result;
+                temporaryTreatmentCache.TryRemove(item, out result);
+            }
+            treatmentCache = temporaryTreatmentCache;
         }
     }
 }

@@ -39,11 +39,11 @@ namespace Splitio_Tests.Unit_Tests
 
             var delegates = new List<AttributeMatcher>();
             var mock1 = new Mock<AttributeMatcher>();
-            mock1.Setup(x=>x.Match("test",attributes)).Returns(true);
+            mock1.Setup(x=>x.Match("test",attributes, null)).Returns(true);
             var mock2 = new Mock<AttributeMatcher>();
-            mock2.Setup(x=>x.Match("test",attributes)).Returns(true);
+            mock2.Setup(x=>x.Match("test",attributes, null)).Returns(true);
             var mock3 = new Mock<AttributeMatcher>();
-            mock3.Setup(x=>x.Match("test",attributes)).Returns(true);
+            mock3.Setup(x=>x.Match("test",attributes, null)).Returns(true);
 
             delegates.Add(mock1.Object);
             delegates.Add(mock2.Object);
@@ -72,11 +72,11 @@ namespace Splitio_Tests.Unit_Tests
 
             var delegates = new List<AttributeMatcher>();
             var mock1 = new Mock<AttributeMatcher>();
-            mock1.Setup(x => x.Match("test", attributes)).Returns(true);
+            mock1.Setup(x => x.Match("test", attributes, null)).Returns(true);
             var mock2 = new Mock<AttributeMatcher>();
-            mock2.Setup(x => x.Match("test", attributes)).Returns(false);
+            mock2.Setup(x => x.Match("test", attributes, null)).Returns(false);
             var mock3 = new Mock<AttributeMatcher>();
-            mock3.Setup(x => x.Match("test", attributes)).Returns(true);
+            mock3.Setup(x => x.Match("test", attributes, null)).Returns(true);
 
             delegates.Add(mock1.Object);
             delegates.Add(mock2.Object);

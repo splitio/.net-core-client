@@ -1,25 +1,30 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Client.Interfaces;
-using Splitio.Services.Parsing.Classes;
+﻿using Splitio.Services.Client.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace Splitio.Services.Parsing
+namespace Splitio.Services.Parsing.Classes
 {
-    public class UserDefinedSegmentMatcher: BaseMatcher, IMatcher
+    public class DependencyMatcher : BaseMatcher, IMatcher
     {
-        private string segmentName;
-        private ISegmentCache segmentsCache;
+        string split { get; set; }
+        List<string> treatments { get; set; }
 
-        public UserDefinedSegmentMatcher(string segmentName, ISegmentCache segmentsCache)
+        public DependencyMatcher(string split, List<string> treatments)
         {
-            this.segmentName = segmentName;
-            this.segmentsCache = segmentsCache;
+            this.split = split;
+            this.treatments = treatments;
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
-            return segmentsCache.IsInSegment(segmentName, key);
+            if (splitClient == null)
+            {
+                return false;
+            }
+
+            string treatment = splitClient.GetTreatment(key, split, attributes, false, true);
+
+            return treatments.Contains(treatment);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
@@ -30,6 +35,7 @@ namespace Splitio.Services.Parsing
         public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
+
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)

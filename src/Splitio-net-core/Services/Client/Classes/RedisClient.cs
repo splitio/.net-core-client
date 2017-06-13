@@ -122,7 +122,7 @@ namespace Splitio.Services.Client.Classes
             splitParser = new RedisSplitParser(segmentCache);
         }
 
-        protected override string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes)
+        protected override string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true)
         {
             long start = CurrentTimeHelper.CurrentTimeMillis();
             var clock = new Stopwatch();
@@ -134,8 +134,11 @@ namespace Splitio.Services.Client.Classes
 
                 if (split == null)
                 {
-                    //if split definition was not found, impression label = "rules not found"
-                    RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
+                    if (logMetricsAndImpressions)
+                    {
+                        //if split definition was not found, impression label = "rules not found"
+                        RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
+                    }
 
                     Log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
                     return Control;
@@ -143,7 +146,7 @@ namespace Splitio.Services.Client.Classes
 
                 ParsedSplit parsedSplit = splitParser.Parse((Split)split);
 
-                var treatment = GetTreatment(key, parsedSplit, attributes, start, clock);
+                var treatment = GetTreatment(key, parsedSplit, attributes, start, clock, this, logMetricsAndImpressions);
 
                 return treatment;
             }

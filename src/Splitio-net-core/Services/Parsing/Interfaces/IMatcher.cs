@@ -1,18 +1,19 @@
-﻿using System;
+﻿using Splitio.Services.Client.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
     public interface IMatcher
     {
-        bool Match(object value);
+        bool Match(object value, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
-        bool Match(string key);
+        bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
-        bool Match(DateTime key);
+        bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
-        bool Match(long key);
+        bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
-        bool Match(List<string> key);
+        bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
     }
 }
