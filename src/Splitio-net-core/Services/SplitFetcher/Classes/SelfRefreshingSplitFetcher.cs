@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
@@ -15,7 +15,7 @@ namespace Splitio.Services.SplitFetcher.Classes
     public class SelfRefreshingSplitFetcher 
     {
         protected ISplitCache splitCache;
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher));
         private readonly ISplitChangeFetcher splitChangeFetcher;
         private readonly SplitParser splitParser;
         private int interval;
@@ -117,7 +117,7 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Exception caught refreshing splits");
+                    Log.Error("Exception caught refreshing splits", e);
                     Stop();
                 }
                 finally

@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Newtonsoft.Json;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
@@ -27,7 +27,7 @@ namespace Splitio.Services.Metrics.Classes
         private int gaugeCallCount = 0;
 
 
-        protected static readonly Logger Logger = LogManager.GetLogger(typeof(InMemoryMetricsLog).ToString());
+        protected static readonly ILog Logger = LogManager.GetLogger(typeof(InMemoryMetricsLog));
 
         public InMemoryMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = 1000, int maxTimeBetweenCalls = 60)
         {
@@ -121,7 +121,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch(Exception e)
             {
-                Logger.Error(e, "Exception ocurred serializing count metrics");
+                Logger.Error("Exception ocurred serializing count metrics", e);
 
                 return string.Empty;
             }
@@ -152,7 +152,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch (Exception e)
             {
-                Logger.Error(e, "Exception ocurred serializing time metrics");
+                Logger.Error("Exception ocurred serializing time metrics", e);
 
                 return string.Empty;
             }
@@ -186,7 +186,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch (Exception e)
             {
-                Logger.Error(e, "Exception ocurred serializing gauge metrics");
+                Logger.Error("Exception ocurred serializing gauge metrics", e);
 
                 return string.Empty;
             }

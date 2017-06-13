@@ -256,7 +256,34 @@ The SDK polls Split servers for feature split and segment changes at regular per
 
 ###  Logging in the SDK 
 
-The .Net Core SDK uses NLog for logging. You can configure it this way, before you create a SplitFactory instance:
+The .NET SDK uses Common.Logging for logging. You can write your own adapter by implementing ILoggerFactoryAdapter interface. More details [here](http://netcommon.sourceforge.net/docs/2.1.0/reference/html/ch01.html)
+Splitio SDK doesn't log by default, you need to configure an adapter.
+
+This is an example on how to write an NLog adapter:
+
+```cs
+	public class NLogAdapter : ILog
+	{
+	  //Implement ILog interface
+	}
+```
+
+```cs
+    public class CommonLoggingNLogAdapter : ILoggerFactoryAdapter
+    {
+        public ILog GetLogger(Type type)
+        {
+            return new NLogAdapter(type);
+        }
+
+        public ILog GetLogger(string key)
+        {
+            return new NLogAdapter(key);
+        }
+    }
+```
+
+This is an example on how to configure NLog and its adapter:
 
 ```cs
 	var config = new LoggingConfiguration();
@@ -272,12 +299,10 @@ The .Net Core SDK uses NLog for logging. You can configure it this way, before y
 	var rule = new LoggingRule("*", LogLevel.Debug, fileTarget);
 	config.LoggingRules.Add(rule);
 	LogManager.Configuration = config;     
-    
-    ...
-    
-    var factory = new SplitFactory("API_KEY", configurations);
-```
-For more details on how to configure different targets visit [NLog Configuration API document](https://github.com/nlog/NLog/wiki/Configuration-API).
 
-If you don't configure NLog yourself, the SDK creates a default file target and register logs in 'Logs\split-sdk.log' file.
- 
+    Common.Logging.LogManager.Adapter = new CommonLoggingNLogAdapter();
+	
+	...
+	
+    var factory = new SplitFactory("API_KEY", configurations);
+```	

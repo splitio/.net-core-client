@@ -1,6 +1,4 @@
-﻿using NLog;
-using NLog.Config;
-using NLog.Targets;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
@@ -16,11 +14,10 @@ namespace Splitio.Services.Client.Classes
 {
     public class JSONFileClient:SplitClient
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(JSONFileClient).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(JSONFileClient));
 
         public JSONFileClient(string splitsFilePath, string segmentsFilePath, ISegmentCache segmentCacheInstance = null, ISplitCache splitCacheInstance = null, IImpressionListener treatmentLogInstance = null, bool isLabelsEnabled = true)
         {
-            InitializeLogger();
             segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);
             var splitParser = new InMemorySplitParser(segmentFetcher, segmentCache);
@@ -33,23 +30,6 @@ namespace Splitio.Services.Client.Classes
             impressionListener = treatmentLogInstance;
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
-        }
-
-        private void InitializeLogger()
-        {
-            var config = new LoggingConfiguration();
-            var fileTarget = new FileTarget();
-            config.AddTarget("file", fileTarget);
-            fileTarget.FileName = @".\Logs\split-sdk.log";
-            fileTarget.ArchiveFileName = "split-sdk.log";
-            fileTarget.LineEnding = LineEndingMode.CRLF;
-            fileTarget.Layout = "${longdate} ${level: uppercase = true} ${logger} - ${message} - ${exception:format=tostring}";
-            fileTarget.ConcurrentWrites = true;
-            fileTarget.CreateDirs = true;
-            fileTarget.ArchiveNumbering = ArchiveNumberingMode.Date;
-            var rule = new LoggingRule("*", LogLevel.Debug, fileTarget);
-            config.LoggingRules.Add(rule);
-            LogManager.Configuration = config;
         }
 
         public void RemoveSplitFromCache(string splitName)

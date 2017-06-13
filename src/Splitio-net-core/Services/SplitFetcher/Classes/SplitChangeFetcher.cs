@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
@@ -8,7 +8,7 @@ namespace Splitio.Services.SplitFetcher.Classes
     public abstract class SplitChangeFetcher : ISplitChangeFetcher
     {
         private SplitChangesResult splitChanges;
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SplitChangeFetcher).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitChangeFetcher));
 
         protected abstract SplitChangesResult FetchFromBackend(long since);
 
@@ -20,7 +20,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
             catch(Exception e)
             {
-                Log.Error(e, string.Format("Exception caught executing Fetch since={0}", since));
+                Log.Error(string.Format("Exception caught executing Fetch since={0}", since), e);
                 splitChanges = null; 
             }                   
             return splitChanges;

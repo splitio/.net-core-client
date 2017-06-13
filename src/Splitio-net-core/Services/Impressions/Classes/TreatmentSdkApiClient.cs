@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.CommonLibraries;
 using Splitio.Services.Impressions.Interfaces;
 using System.Net;
@@ -9,7 +9,7 @@ namespace Splitio.Services.Impressions.Classes
     {
         private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
         
-        private static readonly Logger Log = LogManager.GetLogger(typeof(TreatmentSdkApiClient).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(TreatmentSdkApiClient));
 
         public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 

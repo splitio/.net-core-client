@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using System;
@@ -8,7 +8,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment
     {
-        private static readonly Logger Log = LogManager.GetLogger(typeof(SelfRefreshingSegment).ToString());
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSegment));
 
         public string name;
         private IReadinessGatesCache gates;
@@ -63,7 +63,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Exception caught refreshing segment");
+                    Log.Error("Exception caught refreshing segment", e);
                 }
                 finally
                 {

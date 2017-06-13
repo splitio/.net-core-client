@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Common.Logging;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
 using System;
@@ -10,7 +10,7 @@ namespace Splitio.Services.Metrics.Classes
     {
         IMetricsLog worker;
 
-        protected static readonly Logger Logger = LogManager.GetLogger(typeof(AsyncMetricsLog).ToString());
+        protected static readonly ILog Logger = LogManager.GetLogger(typeof(AsyncMetricsLog));
 
         public AsyncMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = -1, int maxTimeBetweenCalls = -1)
         {
@@ -26,7 +26,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch(Exception e)
             {
-                Logger.Error(e, "Exception running count metrics task");
+                Logger.Error("Exception running count metrics task", e);
             }
         }
 
@@ -39,7 +39,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch(Exception e)
             {
-                Logger.Error(e, "Exception running time metrics task");
+                Logger.Error("Exception running time metrics task", e);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Splitio.Services.Metrics.Classes
             }
             catch(Exception e)
             {
-                Logger.Error(e, "Exception running gauge metrics task");
+                Logger.Error("Exception running gauge metrics task", e);
             }
         }
     }

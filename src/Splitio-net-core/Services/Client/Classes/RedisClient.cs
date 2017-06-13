@@ -56,7 +56,7 @@ namespace Splitio.Services.Client.Classes
             catch (Exception e)
             {
                 SdkMachineName = "unknown";
-                Log.Warn(e, "Exception retrieving machine name.");
+                Log.Warn("Exception retrieving machine name.", e);
             }
 
             try
@@ -68,7 +68,7 @@ namespace Splitio.Services.Client.Classes
             catch (Exception e)
             {
                 SdkMachineIP = "unknown";
-                Log.Warn(e, "Exception retrieving machine IP.");
+                Log.Warn("Exception retrieving machine IP.", e);
             }
 
             RedisHost = config.CacheAdapterConfig.Host;
@@ -152,7 +152,7 @@ namespace Splitio.Services.Client.Classes
                 //if there was an exception, impression label = "exception"
                 RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
 
-                Log.Error(e, string.Format("Exception caught getting treatment for feature: {0}", feature));
+                Log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
                 return Control;
             }
         }      
