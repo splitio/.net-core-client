@@ -16,5 +16,7 @@ namespace Splitio.Services.Cache.Interfaces
         SplitBase GetSplit(string splitName);
 
         List<SplitBase> GetAllSplits();
+
+        void Clear();
     }
 }

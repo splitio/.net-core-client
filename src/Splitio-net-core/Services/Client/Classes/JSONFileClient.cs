@@ -30,6 +30,7 @@ namespace Splitio.Services.Client.Classes
             impressionListener = treatmentLogInstance;
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
+            manager = new SplitManager(splitCache);
         }
 
         public void RemoveSplitFromCache(string splitName)
@@ -40,6 +41,12 @@ namespace Splitio.Services.Client.Classes
         public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
         {
             segmentCache.RemoveFromSegment(segmentName, keys);
+        }
+
+        public override void Destroy()
+        {
+            splitCache.Clear();
+            segmentCache.Clear();
         }
     }
 }

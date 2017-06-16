@@ -56,5 +56,10 @@ namespace Splitio.Services.Cache.Classes
         {
             return splits.Values.ToList<SplitBase>(); 
         }
+
+        public void Clear()
+        {
+            splits.Clear();
+        }
     }
 }

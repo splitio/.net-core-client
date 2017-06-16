@@ -46,6 +46,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         public void Stop()
         {
             cancelTokenSource.Cancel();
+            splitCache.Clear();
         }
 
         private void UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
