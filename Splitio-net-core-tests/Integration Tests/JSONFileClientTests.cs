@@ -588,5 +588,33 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual(resultDestroy3.Count, 0);
             Assert.IsTrue(resultDestroy4 == null);
         }
+
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        [TestMethod]
+        public void DestroySucessfully()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("permissions", new List<string>() { "execute" });
+
+            //Act           
+            var result = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+            client.Destroy();
+            var resultDestroy1 = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+            var manager = client.GetSplitManager();
+            var resultDestroy2 = manager.Splits();
+            var resultDestroy3 = manager.SplitNames();
+            var resultDestroy4 = manager.Split("UT_NOT_SET_MATCHER");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result); // !Contains any of "create","delete","update"
+            Assert.IsTrue(resultDestroy1 == "control");
+            Assert.AreEqual(resultDestroy2.Count, 0);
+            Assert.AreEqual(resultDestroy3.Count, 0);
+            Assert.IsTrue(resultDestroy4 == null);
+        }
     }
 }
