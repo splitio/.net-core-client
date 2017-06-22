@@ -124,6 +124,8 @@ namespace Splitio.Services.Parsing
                         case MatcherTypeEnum.CONTAINS_STRING:
                             matcher = GetContainsStringMatcher(matcherDefinition); break;
                         case MatcherTypeEnum.IN_SPLIT_TREATMENT: matcher = GetDependencyMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.EQUAL_TO_BOOLEAN: matcher = GetEqualToBooleanMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.MATCHES_STRING: matcher = GetMatchesStringMatcher(matcherDefinition); break;
                     }
                 }
             }
@@ -149,6 +151,18 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
+        }
+
+        private IMatcher GetMatchesStringMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.stringMatcherData;
+            return new MatchesStringMatcher(matcherData);
+        }
+
+        private IMatcher GetEqualToBooleanMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.booleanMatcherData;
+            return new EqualToBooleanMatcher(matcherData.Value);
         }
 
 

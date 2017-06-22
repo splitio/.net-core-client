@@ -18,5 +18,7 @@ namespace Splitio.Services.Parsing
         bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
         bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
+
+        bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
     }
 }
