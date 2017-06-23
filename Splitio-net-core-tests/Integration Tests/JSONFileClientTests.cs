@@ -6,6 +6,8 @@ using Moq;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Domain;
+using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Cache.Classes;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -537,6 +539,26 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsNotNull(result);
             Assert.AreEqual("on", result["test_whitelist"]);
             Assert.AreEqual("on", result["test_dependency"]);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentWithDependencyMatcherImpressionOnChild()
+        {
+            //Arrange
+            var queue = new BlockingQueue<KeyImpression>(10);
+            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", null, null, new SelfUpdatingTreatmentLog(null, 1000, impressionsCache));
+
+            //Act           
+            var result = client.GetTreatment("test", "test_dependency_segment", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("V1", result);
+            var item = queue.Dequeue();
+            Assert.AreEqual(item.feature, "test_dependency_segment");
+            Assert.IsNull(queue.Dequeue());
         }
     }
 }
