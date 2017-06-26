@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests
             var treatments = new List<string>() { "on" };
             var matcher = new DependencyMatcher("test1", treatments);
             var splitClientMock = new Mock<ISplitClient>();
-            splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, true)).Returns("on");
+            splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
             //Act
             var result = matcher.Match("test", null, splitClientMock.Object);
 
