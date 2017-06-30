@@ -20,7 +20,6 @@ namespace Splitio_Tests.Unit_Tests
             var splitClientMock = new Mock<ISplitClient>();
             var key = new Key("test", "test");
             splitClientMock.Setup(x => x.GetTreatment(key, "test1", null, false, false)).Returns("on");
-            
             //Act
             var result = matcher.Match(key, null, splitClientMock.Object);
 
@@ -37,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests
             var splitClientMock = new Mock<ISplitClient>();
             splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
             //Act
-            var result = matcher.Match("test", null, splitClientMock.Object);
+            var result = matcher.Match(new Key("test", "test"), null, splitClientMock.Object);
 
             //Assert
             Assert.IsFalse(result);
@@ -52,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests
             ISplitClient splitClient = null;
 
             //Act
-            var result = matcher.Match("test2", null, splitClient);
+            var result = matcher.Match(new Key("test2", "test2"), null, splitClient);
 
             //Assert
             Assert.IsFalse(result);
@@ -68,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests
             splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
 
             //Act
-            var result = matcher.Match("test2", null, splitClientMock.Object);
+            var result = matcher.Match(new Key("test2", "test2"), null, splitClientMock.Object);
 
             //Assert
             Assert.IsFalse(result);
@@ -118,6 +117,38 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var result = matcher.Match(DateTime.UtcNow, null, splitClientMock.Object);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingString()
+        {
+            //Arrange
+            var treatments = new List<string>() { "on" };
+            var matcher = new DependencyMatcher("test1", treatments);
+            var splitClientMock = new Mock<ISplitClient>();
+            splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
+
+            //Act
+            var result = matcher.Match("test", null, splitClientMock.Object);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingBoolean()
+        {
+            //Arrange
+            var treatments = new List<string>() { "on" };
+            var matcher = new DependencyMatcher("test1", treatments);
+            var splitClientMock = new Mock<ISplitClient>();
+            splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
+
+            //Act
+            var result = matcher.Match(true, null, splitClientMock.Object);
 
             //Assert
             Assert.IsFalse(result);
