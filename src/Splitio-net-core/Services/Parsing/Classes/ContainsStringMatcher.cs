@@ -3,6 +3,7 @@ using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Splitio.Domain;
 
 namespace Splitio.Services.Parsing
 {
@@ -26,6 +27,11 @@ namespace Splitio.Services.Parsing
             }
 
             return itemsToCompare.Any(i => key.Contains(i));
+        }
+
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return Match(key.matchingKey, attributes, splitClient);
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)

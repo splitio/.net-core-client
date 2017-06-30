@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Client.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Client.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace Splitio.Services.Parsing.Classes
         public abstract bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
         public abstract bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
+
+        public abstract bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
         public bool Match(object value, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
@@ -37,6 +40,10 @@ namespace Splitio.Services.Parsing.Classes
             else if(value is List<string>)
             {
                 return Match((List<string>)value, attributes, splitClient);
+            }
+            else if(value is Key)
+            {
+                return Match((Key)value, attributes, splitClient);
             }
 
             return false;

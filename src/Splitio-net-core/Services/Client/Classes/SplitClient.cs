@@ -156,7 +156,7 @@ namespace Splitio.Services.Client.Classes
                         inRollout = true;
                     }
                     var combiningMatcher = condition.matcher;
-                    if (combiningMatcher.Match(key.matchingKey, attributes, splitClient))
+                    if (combiningMatcher.Match(key, attributes, splitClient))
                     {
                         var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 

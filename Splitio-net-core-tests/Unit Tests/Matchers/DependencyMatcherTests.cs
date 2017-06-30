@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Domain;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using System;
@@ -17,9 +18,11 @@ namespace Splitio_Tests.Unit_Tests
             var treatments = new List<string>() { "on" };
             var matcher = new DependencyMatcher("test1", treatments);
             var splitClientMock = new Mock<ISplitClient>();
-            splitClientMock.Setup(x => x.GetTreatment("test", "test1", null, false, false)).Returns("on");
+            var key = new Key("test", "test");
+            splitClientMock.Setup(x => x.GetTreatment(key, "test1", null, false, false)).Returns("on");
+            
             //Act
-            var result = matcher.Match("test", null, splitClientMock.Object);
+            var result = matcher.Match(key, null, splitClientMock.Object);
 
             //Assert
             Assert.IsTrue(result);

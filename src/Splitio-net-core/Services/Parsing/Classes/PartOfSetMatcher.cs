@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Client.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,11 @@ namespace Splitio.Services.Parsing
             }
 
             return key.All(k => itemsToCompare.Contains(k));
+        }
+
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return false;
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)

@@ -10,7 +10,7 @@ namespace Splitio.Domain
         public IMatcher matcher { get; set; }
         public bool negate { get; set; }
 
-        public virtual bool Match(string key, Dictionary<string, object> attributes, ISplitClient splitClient = null)
+        public virtual bool Match(Key key, Dictionary<string, object> attributes, ISplitClient splitClient = null)
         {
             if (attribute == null)
             {
