@@ -17,7 +17,7 @@ namespace Splitio.Services.Parsing.Classes
 
         public abstract bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 
-        public abstract bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);}
+        public abstract bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
         
         public abstract bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null);
 

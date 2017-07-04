@@ -177,19 +177,6 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseOnBooleanParameter()
-        {
-            //Arrange
-            var matcher = new BetweenMatcher(DataTypeEnum.DATETIME, 1470960000000, 1480960000000);
-
-            //Act
-            var result = matcher.Match(true);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
         public void MatchShouldReturnFalseIfNullOrEmptyWithStringKey()
         {
             //Arrange

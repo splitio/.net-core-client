@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Splitio.Domain;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
@@ -18,6 +19,11 @@ namespace Splitio.Services.Parsing.Classes
         }
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, Client.Interfaces.ISplitClient splitClient = null)
+        {
+            return false;
+        }
+
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, Client.Interfaces.ISplitClient splitClient = null)
         {
             return false;
         }

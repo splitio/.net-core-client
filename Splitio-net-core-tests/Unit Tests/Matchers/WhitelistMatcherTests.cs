@@ -142,19 +142,5 @@ namespace Splitio_Tests.Unit_Tests
             //Assert
             Assert.IsFalse(result);
         }
-
-        [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingBoolean()
-        {
-            //Arrange
-            var keys = new List<string>();
-            var matcher = new WhitelistMatcher(keys);
-
-            //Act
-            var result = matcher.Match(true);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
     }
 }

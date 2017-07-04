@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,19 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var result = matcher.Match(DateTime.UtcNow);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingKey()
+        {
+            //Arrange
+            var matcher = new EqualToBooleanMatcher(true);
+
+            //Act
+            var result = matcher.Match(new Key("test", "test"));
 
             //Assert
             Assert.IsFalse(result);
