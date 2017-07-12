@@ -12,8 +12,8 @@
 <<<<<<< HEAD
     <Version>3.2.0</Version>
 =======
-    <Version>3.3.0-rc184</Version>
->>>>>>> Update version for prerelease
+    <Version>3.3.0-rc187</Version>
+>>>>>>> New update for prerelease
   </PropertyGroup>
 
   <ItemGroup>
