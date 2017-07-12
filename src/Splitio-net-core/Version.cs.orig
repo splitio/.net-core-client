@@ -5,8 +5,8 @@
 <<<<<<< HEAD
         public static string SplitSdkVersion = "3.2.0";
 =======
-        public static string SplitSdkVersion = "3.3.0-rc123";
->>>>>>> Update version
+        public static string SplitSdkVersion = "3.3.0-rc184";
+>>>>>>> Update version for prerelease
         public static string SplitSpecVersion = "1.0";
     }
 }
