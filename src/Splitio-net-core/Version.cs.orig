@@ -5,7 +5,7 @@
 <<<<<<< HEAD
         public static string SplitSdkVersion = "3.2.0";
 =======
-        public static string SplitSdkVersion = "3.3.0-rc187";
+        public static string SplitSdkVersion = "3.3.0-rc190";
 >>>>>>> New update for prerelease
         public static string SplitSpecVersion = "1.0";
     }
