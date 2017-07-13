@@ -23,9 +23,21 @@ namespace Splitio.Services.Parsing.Classes
 
         public bool Match(object value, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
-            if (value is string)
+            if (value is bool)
             {
-                return Match((string)value, attributes, splitClient);
+                return Match((bool)value, attributes, splitClient);
+            }
+            else if (value is string)
+            {
+                bool boolValue;
+                if (bool.TryParse((string)value, out boolValue))
+                {
+                    return Match(boolValue, attributes, splitClient);
+                }
+                else
+                {
+                    return Match((string)value, attributes, splitClient);
+                }
             }
             else if (value is DateTime)
             {
@@ -47,10 +59,7 @@ namespace Splitio.Services.Parsing.Classes
             {
                 return Match((Key)value, attributes, splitClient);
             }
-            else if(value is bool)
-            {
-                return Match((bool)value, attributes, splitClient);
-            }
+             
 
             return false;
         }
