@@ -1,5 +1,9 @@
 CHANGES
 
+3.2.0
+
+- Support for Dependency Matcher.
+
 3.1.2
 
 - Changed logging approach by supporting Common.Logging integration. Client can configure its already existing logging system 
