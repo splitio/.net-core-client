@@ -1,5 +1,9 @@
 NEWS
 
+3.3.0
+
+- Add support for new boolean and regex matchers.
+
 3.2.0
 
 - Add support for new Dependency Matcher.
