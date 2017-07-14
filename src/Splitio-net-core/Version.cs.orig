@@ -5,8 +5,8 @@
 <<<<<<< HEAD
         public static string SplitSdkVersion = "3.2.0";
 =======
-        public static string SplitSdkVersion = "3.3.0-rc194";
->>>>>>> Update version for pre-release
+        public static string SplitSdkVersion = "3.3.0-rc196";
+>>>>>>> Implement improvement on EqualToBooleanMatcher
         public static string SplitSpecVersion = "1.0";
     }
 }

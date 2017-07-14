@@ -83,7 +83,20 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public void MatchShouldReturnFalseIfMatchingString()
+        public void MatchShouldReturnFalseIfMatchingStringNotBoolean()
+        {
+            //Arrange
+            var matcher = new EqualToBooleanMatcher(true);
+
+            //Act
+            var result = matcher.Match("testring");
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnTrueIfMatchingStringBoolean()
         {
             //Arrange
             var matcher = new EqualToBooleanMatcher(true);
@@ -92,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests
             var result = matcher.Match("true");
 
             //Assert
-            Assert.IsFalse(result);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]

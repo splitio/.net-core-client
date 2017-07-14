@@ -20,7 +20,15 @@ namespace Splitio.Services.Parsing.Classes
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, Client.Interfaces.ISplitClient splitClient = null)
         {
-            return false;
+            bool boolValue;
+            if (bool.TryParse(key, out boolValue))
+            {
+                return Match(boolValue, attributes, splitClient);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public override bool Match(Key key, Dictionary<string, object> attributes = null, Client.Interfaces.ISplitClient splitClient = null)

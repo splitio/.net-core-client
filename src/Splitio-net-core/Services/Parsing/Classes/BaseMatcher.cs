@@ -29,15 +29,7 @@ namespace Splitio.Services.Parsing.Classes
             }
             else if (value is string)
             {
-                bool boolValue;
-                if (bool.TryParse((string)value, out boolValue))
-                {
-                    return Match(boolValue, attributes, splitClient);
-                }
-                else
-                {
-                    return Match((string)value, attributes, splitClient);
-                }
+                return Match((string)value, attributes, splitClient);
             }
             else if (value is DateTime)
             {
@@ -47,15 +39,15 @@ namespace Splitio.Services.Parsing.Classes
             {
                 return Match((long)value, attributes, splitClient);
             }
-            else if(value is int)
+            else if (value is int)
             {
                 return Match((int)value, attributes, splitClient);
             }
-            else if(value is List<string>)
+            else if (value is List<string>)
             {
                 return Match((List<string>)value, attributes, splitClient);
             }
-            else if(value is Key)
+            else if (value is Key)
             {
                 return Match((Key)value, attributes, splitClient);
             }

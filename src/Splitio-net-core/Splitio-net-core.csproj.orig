@@ -12,8 +12,8 @@
 <<<<<<< HEAD
     <Version>3.2.0</Version>
 =======
-    <Version>3.3.0-rc194</Version>
->>>>>>> Update version for pre-release
+    <Version>3.3.0-rc196</Version>
+>>>>>>> Implement improvement on EqualToBooleanMatcher
   </PropertyGroup>
 
   <ItemGroup>
