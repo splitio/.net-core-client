@@ -1,5 +1,9 @@
 NEWS
 
+3.2.1
+
+- Add support for Client Destroy.
+
 3.2.0
 
 - Add support for new Dependency Matcher.
