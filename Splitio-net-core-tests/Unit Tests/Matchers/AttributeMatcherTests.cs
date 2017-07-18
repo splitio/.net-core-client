@@ -87,7 +87,7 @@ namespace Splitio_Tests.Unit_Tests
             attributes.Add("card_type", "ABC");
 
             //Act
-            var result = matcher.Match(null, attributes);
+            var result = matcher.Match(new Key(null, null), attributes);
 
             //Assert
             Assert.IsFalse(result);
@@ -109,7 +109,7 @@ namespace Splitio_Tests.Unit_Tests
             attributes.Add("card_type", "ABC");
 
             //Act
-            var result = matcher.Match("1", attributes);
+            var result = matcher.Match(new Key("1", "1"), attributes);
 
             //Assert
             Assert.IsFalse(result);
@@ -131,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests
             attributes.Add("card_type", "ABC");
 
             //Act
-            var result = matcher.Match("12012", attributes);
+            var result = matcher.Match(new Key ("12012", "12012"), attributes);
 
             //Assert
             Assert.IsTrue(result);

@@ -11,3 +11,5 @@ src/Splitio-net-core/bin/*
 .vs/Split.io-net-core/v15/.suo
 Splitio-net-core-tests/bin/*
 Splitio-net-core-tests/obj/*
+Splitio.TestSupport/bin
+Splitio.TestSupport/obj

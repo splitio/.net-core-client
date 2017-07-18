@@ -1,6 +1,7 @@
 ﻿using Common.Logging;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,6 +123,7 @@ namespace Splitio.Services.Parsing
                             matcher = GetEndsWithMatcher(matcherDefinition); break;
                         case MatcherTypeEnum.CONTAINS_STRING:
                             matcher = GetContainsStringMatcher(matcherDefinition); break;
+                        case MatcherTypeEnum.IN_SPLIT_TREATMENT: matcher = GetDependencyMatcher(matcherDefinition); break;
                     }
                 }
             }
@@ -147,6 +149,13 @@ namespace Splitio.Services.Parsing
             }
 
             return attributeMatcher;
+        }
+
+
+        private IMatcher GetDependencyMatcher(MatcherDefinition matcherDefinition)
+        {
+            var matcherData = matcherDefinition.dependencyMatcherData;
+            return new DependencyMatcher(matcherData.split, matcherData.treatments);
         }
 
         private IMatcher GetBetweenMatcher(MatcherDefinition matcherDefinition)
