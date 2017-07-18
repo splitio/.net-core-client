@@ -1,11 +1,8 @@
 CHANGES
 
-3.3.0
-
-- Support for Boolean and Regex matchers.
-
 3.2.0
 
+- Support for Boolean and Regex matchers.
 - Support for Dependency Matcher.
 - Support for Client Destroy using In Memory mode.
 
