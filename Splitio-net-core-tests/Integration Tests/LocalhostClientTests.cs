@@ -55,5 +55,37 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result5 == "off"); //default treatment
             Assert.IsTrue(result6 == "off"); //default treatment
         }
+
+        [DeploymentItem(@"Resources\test.splits")]
+        [TestMethod]
+        public void ClientDestroySuccessfully()
+        {
+            //Arrange
+            var client = new LocalhostClient(@"Resources\test.splits");
+
+
+            //Act
+            var result1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
+
+
+            client.Destroy();
+
+            var resultDestroy1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var manager = client.GetSplitManager();
+            var resultDestroy2 = manager.Splits();
+            var resultDestroy3 = manager.SplitNames();
+            var resultDestroy4 = manager.Split("double_writes_to_cassandra");
+
+
+            //Asert
+            Assert.IsTrue(result1 == "off");
+            Assert.IsTrue(result2 == "off");
+            Assert.IsTrue(resultDestroy1 == "control");
+            Assert.AreEqual(resultDestroy2.Count, 0);
+            Assert.AreEqual(resultDestroy3.Count, 0);
+            Assert.IsTrue(resultDestroy4 == null);
+
+        }
     }
 }

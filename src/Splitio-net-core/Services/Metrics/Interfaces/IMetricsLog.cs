@@ -7,5 +7,7 @@
         void Time(string operation, long miliseconds);
 
         void Gauge(string gauge, long value);
+
+        void Clear();
     }
 }

@@ -42,5 +42,10 @@ namespace Splitio.Services.Parsing
         {
             return false;
         }
+
+        public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return false;
+        }
     }
 }

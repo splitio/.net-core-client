@@ -158,6 +158,11 @@ namespace Splitio.Services.Client.Classes
                 Log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
                 return Control;
             }
-        }      
+        }
+
+        public override void Destroy()
+        {
+            return;
+        }
     }
 }

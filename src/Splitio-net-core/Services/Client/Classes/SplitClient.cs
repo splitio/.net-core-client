@@ -218,5 +218,7 @@ namespace Splitio.Services.Client.Classes
             }
             treatmentCache = temporaryTreatmentCache;
         }
+
+        public abstract void Destroy();
     }
 }
