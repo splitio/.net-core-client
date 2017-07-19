@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Parsing;
+using Splitio.Services.Parsing.Classes;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests
@@ -135,6 +136,67 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnTrueIfValueBooleanOrStringBooleanMatching()
+        {
+            //Arrange
+            var possibleValues = new List<object>();
+            possibleValues.Add(true);
+            possibleValues.Add("true");
+            possibleValues.Add("TRUE");
+            possibleValues.Add("True");
+            possibleValues.Add("TrUe");
+            possibleValues.Add("truE");
+
+            var matcher = new AttributeMatcher()
+            {
+                attribute = "test1",
+                matcher = new EqualToBooleanMatcher(true),
+                negate = false
+            };
+
+            foreach (var value in possibleValues)
+            {
+                var attributes = new Dictionary<string, object>();
+                attributes.Add("test1", value);
+
+                //Act
+                var result = matcher.Match(new Key("12012", "12012"), attributes);
+
+                //Assert
+                Assert.IsTrue(result);
+            }
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfValueBooleanOrStringBooleanNotMatching()
+        {
+            //Arrange
+            var possibleValues = new List<object>();
+            possibleValues.Add(false);
+            possibleValues.Add("False");
+            possibleValues.Add("test");
+
+            var matcher = new AttributeMatcher()
+            {
+                attribute = "test1",
+                matcher = new EqualToBooleanMatcher(true),
+                negate = false
+            };
+
+            foreach (var value in possibleValues)
+            {
+                var attributes = new Dictionary<string, object>();
+                attributes.Add("test1", value);
+
+                //Act
+                var result = matcher.Match(new Key("12012", "12012"), attributes);
+
+                //Assert
+                Assert.IsFalse(result);
+            }
         }
     }
 }

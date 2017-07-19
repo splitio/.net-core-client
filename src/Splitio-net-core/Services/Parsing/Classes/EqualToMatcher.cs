@@ -25,5 +25,10 @@ namespace Splitio.Services.Parsing
 
             return date.Date == key.Date; // Compare just date part
         }
+
+        public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return false;
+        }
     }
 }
