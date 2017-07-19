@@ -6,6 +6,8 @@ using Moq;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Domain;
+using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Cache.Classes;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -465,6 +467,126 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("off", result); // Starts with "a" or "b" --> 100% off
+        }
+
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentWithDependencyMatcherReturnsOn()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "");
+
+            //Act           
+            var result = client.GetTreatment("fake_user_id_1", "test_dependency", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentWithDependencyMatcherReturnsOff()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "");
+
+            //Act           
+            var result = client.GetTreatment("fake_user_id_6", "test_dependency", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("off", result);
+        }
+
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentsWithDependencyMatcherReturnsOn()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "");
+
+            //Act           
+            var features = new List<string>();
+            features.Add("test_whitelist");
+            features.Add("test_dependency");
+            var result = client.GetTreatments("fake_user_id_1", features, null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result["test_whitelist"]);
+            Assert.AreEqual("on", result["test_dependency"]);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentsWithDependencyMatcherWithAttributesReturnsOn()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "");
+
+            //Act           
+            var features = new List<string>();
+            features.Add("test_whitelist");
+            features.Add("test_dependency");
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("st", "allow");
+            var result = client.GetTreatments("fake_user_id_1", features, attributes);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result["test_whitelist"]);
+            Assert.AreEqual("on", result["test_dependency"]);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_6.json")]
+        public void ExecuteGetTreatmentWithDependencyMatcherImpressionOnChild()
+        {
+            //Arrange
+            var queue = new BlockingQueue<KeyImpression>(10);
+            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", null, null, new SelfUpdatingTreatmentLog(null, 1000, impressionsCache));
+
+            //Act           
+            var result = client.GetTreatment("test", "test_dependency_segment", null);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("V1", result);
+            var item = queue.Dequeue();
+            Assert.AreEqual(item.feature, "test_dependency_segment");
+            Assert.IsNull(queue.Dequeue());
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_5.json")]
+        [TestMethod]
+        public void DestroySucessfully()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "");
+
+            var attributes = new Dictionary<string, object>();
+            attributes.Add("permissions", new List<string>() { "execute" });
+
+            //Act           
+            var result = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+            client.Destroy();
+            var resultDestroy1 = client.GetTreatment("test1", "UT_NOT_SET_MATCHER", attributes);
+            var manager = client.GetSplitManager();
+            var resultDestroy2 = manager.Splits();
+            var resultDestroy3 = manager.SplitNames();
+            var resultDestroy4 = manager.Split("UT_NOT_SET_MATCHER");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("on", result); // !Contains any of "create","delete","update"
+            Assert.IsTrue(resultDestroy1 == "control");
+            Assert.AreEqual(resultDestroy2.Count, 0);
+            Assert.AreEqual(resultDestroy3.Count, 0);
+            Assert.IsTrue(resultDestroy4 == null);
         }
     }
 }

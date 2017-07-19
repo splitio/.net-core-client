@@ -37,6 +37,7 @@ namespace Splitio.Services.Impressions.Classes
         public void Stop()
         {
             cancellationTokenSource.Cancel();
+            SendBulkImpressions();
         }
 
 

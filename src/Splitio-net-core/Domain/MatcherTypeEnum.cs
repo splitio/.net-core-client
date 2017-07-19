@@ -16,6 +16,9 @@ namespace Splitio.Domain
         PART_OF_SET,
         STARTS_WITH,
         ENDS_WITH,
-        CONTAINS_STRING
+        CONTAINS_STRING,
+        IN_SPLIT_TREATMENT,
+        EQUAL_TO_BOOLEAN,
+        MATCHES_STRING
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Services.Parsing;
 using System;
 using System.Collections.Generic;
@@ -154,6 +155,22 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingKey()
+        {
+            //Arrange
+            var toCompare = new List<string>();
+            toCompare.Add("test1");
+            toCompare.Add("test2");
+            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+
+            //Act
+            var result = matcher.Match(new Key("test", "test"));
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public void MatchShouldReturnFalseIfMatchingString()
         {
             //Arrange
@@ -164,6 +181,22 @@ namespace Splitio_Tests.Unit_Tests
 
             //Act
             var result = matcher.Match("test");
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void MatchShouldReturnFalseIfMatchingBoolean()
+        {
+            //Arrange
+            var toCompare = new List<string>();
+            toCompare.Add("test1");
+            toCompare.Add("test2");
+            var matcher = new ContainsAnyOfSetMatcher(toCompare);
+
+            //Act
+            var result = matcher.Match(true);
 
             //Assert
             Assert.IsFalse(result);

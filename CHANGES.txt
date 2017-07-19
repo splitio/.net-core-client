@@ -1,5 +1,11 @@
 CHANGES
 
+3.2.0
+
+- Support for Boolean and Regex matchers.
+- Support for Dependency Matcher.
+- Support for Client Destroy using In Memory mode.
+
 3.1.2
 
 - Changed logging approach by supporting Common.Logging integration. Client can configure its already existing logging system 

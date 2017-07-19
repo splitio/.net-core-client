@@ -32,6 +32,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public void Stop()
         {
             cancelTokenSource.Cancel();
+            SegmentTaskQueue.segmentsQueue.Dispose();
+            segments.Clear();
+            segmentCache.Clear();
         }
 
         private void StartWorker()

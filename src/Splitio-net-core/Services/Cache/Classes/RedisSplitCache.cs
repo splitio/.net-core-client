@@ -86,5 +86,10 @@ namespace Splitio.Services.Cache.Classes
         {
             redisAdapter.Flush();
         }
+
+        public void Clear()
+        {
+            return;
+        }
     }
 }

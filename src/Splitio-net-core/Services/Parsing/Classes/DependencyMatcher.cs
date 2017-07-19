@@ -1,27 +1,31 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Client.Interfaces;
-using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
 
-namespace Splitio.Services.Parsing
+namespace Splitio.Services.Parsing.Classes
 {
-    public class WhitelistMatcher: BaseMatcher, IMatcher
+    public class DependencyMatcher : BaseMatcher, IMatcher
     {
-        private List<string> list;
+        string split { get; set; }
+        List<string> treatments { get; set; }
 
-        public WhitelistMatcher(List<string> list)
+        public DependencyMatcher(string split, List<string> treatments)
         {
-            this.list = list ?? new List<string>();
-        }
-        public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
-        {
-            return list.Contains(key);
+            this.split = split;
+            this.treatments = treatments;
         }
 
         public override bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
-            return Match(key.matchingKey, attributes, splitClient);
+            if (splitClient == null)
+            {
+                return false;
+            }
+
+            string treatment = splitClient.GetTreatment(key, split, attributes, false, false);
+
+            return treatments.Contains(treatment);
         }
 
         public override bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
@@ -32,9 +36,15 @@ namespace Splitio.Services.Parsing
         public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
+
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return false;
+        }
+
+        public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
         }

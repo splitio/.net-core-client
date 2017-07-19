@@ -254,6 +254,35 @@ calling splitManager.Split(String featureName) will return the following structu
 
 The SDK polls Split servers for feature split and segment changes at regular periods. The configuration parameters FeaturesRefreshRate and SegmentsRefreshRate control these periods. Say the value set for FeaturesRefreshRate is 60 seconds. Then, instead of polling at exactly p seconds interval, each SDK instance polls at a randomly chosen time period in the range (0.5 * p, p). This randomization is done to avoid letting SDKs deployed across multiple machines to poll at the same time which can lead to bad performance.
 
+###  Impression Listener
+
+In order to capture every single impression in your app SDK provides an option called Impression Listener. It works pretty straightforward: you define a class that implements IImpressionListener interface, which must have instance method called Log, which must receive an argument of type KeyImpression. 
+
+This is an example on how to write your custom impression listener:
+
+```cs
+	public class CustomImpressionListener: IImpressionListener
+	{
+	   ...
+	   
+	   public void Log(KeyImpression impression)
+	   {
+		 //Implement your custom code
+	   }
+	}
+```
+
+And then, you can configure the SDK to use it in ConfigurationOptions object:
+
+```cs
+	...
+	configurations.ImpressionListener = new CustomImpressionListener();
+	...
+
+	var factory = new SplitFactory("API_KEY", configurations);
+	var sdk = factory.Client();
+```
+
 ###  Logging in the SDK 
 
 The .NET SDK uses Common.Logging for logging. You can write your own adapter by implementing ILoggerFactoryAdapter interface. More details [here](http://netcommon.sourceforge.net/docs/2.1.0/reference/html/ch01.html)

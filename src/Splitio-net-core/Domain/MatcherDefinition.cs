@@ -10,5 +10,8 @@ namespace Splitio.Domain
         public WhitelistData whitelistMatcherData { get; set; }
         public UnaryNumericData unaryNumericMatcherData { get; set; }
         public BetweenData betweenMatcherData { get; set; }
+        public DependencyData dependencyMatcherData { get; set; }
+        public bool? booleanMatcherData { get; set; }
+        public string stringMatcherData { get; set; }
     }
 }

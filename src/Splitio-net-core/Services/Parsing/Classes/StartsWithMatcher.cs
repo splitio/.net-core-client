@@ -1,4 +1,6 @@
-﻿using Splitio.Services.Parsing.Classes;
+﻿using Splitio.Domain;
+using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Parsing.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace Splitio.Services.Parsing
             }
         }
 
-        public override bool Match(string key)
+        public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             if (String.IsNullOrEmpty(key))
             {
@@ -27,17 +29,27 @@ namespace Splitio.Services.Parsing
             return itemsToCompare.Any(i => key.StartsWith(i));
         }
 
-        public override bool Match(List<string> key)
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return Match(key.matchingKey, attributes, splitClient);
+        }
+
+        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
         }
 
-        public override bool Match(DateTime key)
+        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
         }
 
-        public override bool Match(long key)
+        public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        {
+            return false;
+        }
+
+        public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
             return false;
         }
