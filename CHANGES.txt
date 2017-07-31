@@ -1,5 +1,10 @@
 CHANGES
 
+3.2.1
+
+
+- Updated Split Manager to return treatments from ROLLOUT condition.
+
 3.2.0
 
 - Support for Boolean and Regex matchers.

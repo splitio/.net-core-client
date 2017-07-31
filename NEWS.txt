@@ -1,5 +1,10 @@
 NEWS
 
+3.2.1
+
+
+- Updates on Split Manager.
+
 3.2.0
 
 - Add support for new boolean and regex matchers.
