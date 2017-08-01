@@ -27,14 +27,15 @@ namespace Splitio_Tests.Unit_Tests.Client
             var conditionWithLogic2 = new ConditionWithLogic()
             {
                 conditionType = ConditionType.ROLLOUT,
-                partitions  = new List<PartitionDefinition>()
+                partitions = new List<PartitionDefinition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new PartitionDefinition(){size = 90, treatment = "on"},
+                    new PartitionDefinition(){size = 10, treatment = "off"}
                 }
             };
             conditionsWithLogic.Add(conditionWithLogic2);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic});
+            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
             splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
             splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
             splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
@@ -42,21 +43,23 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
             var manager = new SplitManager(splitCache);
-            
+
             //Act
             var result = manager.Splits();
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(6, result.Count);
-            var firstResult = result.Find(x=>x.name == "test1");
+            var firstResult = result.Find(x => x.name == "test1");
             Assert.AreEqual(firstResult.name, "test1");
             Assert.AreEqual(firstResult.changeNumber, 10000);
             Assert.AreEqual(firstResult.killed, false);
             Assert.AreEqual(firstResult.trafficType, "user");
-            Assert.AreEqual(firstResult.treatments.Count, 1);
+            Assert.AreEqual(firstResult.treatments.Count, 2);
             var firstTreatment = firstResult.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
+            var secondTreatment = firstResult.treatments[1];
+            Assert.AreEqual(secondTreatment, "off");
         }
 
         [TestMethod]
@@ -97,7 +100,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(firstResult.treatments.Count, 0);
         }
 
-
         [TestMethod]
         public void SplitReturnSuccessfully()
         {
@@ -108,7 +110,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 conditionType = ConditionType.ROLLOUT,
                 partitions = new List<PartitionDefinition>()
                 {
-                    new PartitionDefinition(){size = 100, treatment = "on"}
+                    new PartitionDefinition(){size = 90, treatment = "on"},
+                    new PartitionDefinition(){size = 10, treatment = "off"}
                 }
             };
             conditionsWithLogic.Add(conditionWithLogic);
@@ -131,9 +134,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(result.changeNumber, 10000);
             Assert.AreEqual(result.killed, false);
             Assert.AreEqual(result.trafficType, "user");
-            Assert.AreEqual(result.treatments.Count, 1);
+            Assert.AreEqual(result.treatments.Count, 2);
             var firstTreatment = result.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
+            var secondTreatment = result.treatments[1];
+            Assert.AreEqual(secondTreatment, "off");
         }
 
         [TestMethod]
@@ -218,7 +223,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(result.name, "test1");
             Assert.AreEqual(result.treatments.Count, 0);
         }
-
 
         [TestMethod]
         public void SplitReturnsNullWhenInexistent()
