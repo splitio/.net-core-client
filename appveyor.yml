@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 3.2.1-rc{build}
+version: 3.2.1
 
 configuration: Release
 
