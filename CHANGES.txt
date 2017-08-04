@@ -1,5 +1,10 @@
 CHANGES
 
+3.3.0
+
+- Changed Splitio package to support just Standalone mode, and added Splitio.Redis package 
+for Consumer mode.
+
 3.2.1
 
 

@@ -1,6 +1,6 @@
 ﻿using StackExchange.Redis;
 
-namespace Splitio.Services.Cache.Interfaces
+namespace Splitio.Redis.Services.Cache.Interfaces
 {
     public interface IRedisAdapter
     {

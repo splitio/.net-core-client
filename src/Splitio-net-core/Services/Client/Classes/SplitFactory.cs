@@ -1,5 +1,8 @@
-﻿using Splitio.Services.Client.Interfaces;
+﻿using Microsoft.CSharp.RuntimeBinder;
+using Splitio.Services.Client.Interfaces;
 using System;
+using System.Globalization;
+using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -51,11 +54,21 @@ namespace Splitio.Services.Client.Classes
                 case Mode.Consumer:
                     if (options.CacheAdapterConfig != null && options.CacheAdapterConfig.Type == AdapterType.Redis)
                     {
-                        if (string.IsNullOrEmpty(options.CacheAdapterConfig.Host) || string.IsNullOrEmpty(options.CacheAdapterConfig.Port))
+                        try
                         {
-                            throw new Exception("Redis Host and Port should be set to initialize Split SDK in Redis Mode.");
+                            if (String.IsNullOrEmpty(options.CacheAdapterConfig.Host) || String.IsNullOrEmpty(options.CacheAdapterConfig.Port))
+                            {
+                                throw new Exception("Redis Host and Port should be set to initialize Split SDK in Redis Mode.");
+                            }
+                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio-net-core.Redis"));
+                            var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
+                            client = (ISplitClient)Activator.CreateInstance(redisType, new Object[] { options });
+
                         }
-                        client = new RedisClient(options);
+                        catch (Exception e)
+                        {
+                            throw new Exception("Splitio.Redis package should be added as reference, to build split client in Redis Consumer mode.", e);
+                        }
                     }
                     else
                     {

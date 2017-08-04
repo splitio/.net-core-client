@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Splitio-net-core.Redis\Splitio-net-core.Redis.csproj" />
     <ProjectReference Include="..\src\Splitio-net-core\Splitio-net-core.csproj" />
   </ItemGroup>
 

@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
 using System.Collections.Generic;
+using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {

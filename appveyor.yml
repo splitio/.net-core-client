@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 3.2.1
+version: 3.3.0-rc{build}
 
 configuration: Release
 
@@ -17,6 +17,8 @@ build_script:
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
+ - dotnet pack .\Splitio-net-core.Redis --configuration Release
+
 
 artifacts:
  - path: '**\Splitio-net-core.*.nupkg'

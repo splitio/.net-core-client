@@ -1,10 +1,11 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace Splitio.Services.Cache.Classes
+namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisMetricsCache : RedisCacheBase, IMetricsCache
     {

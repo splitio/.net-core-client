@@ -1,10 +1,10 @@
 ﻿using Common.Logging;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Linq;
 
-namespace Splitio.Services.Cache.Classes
+namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisAdapter : IRedisAdapter
     {

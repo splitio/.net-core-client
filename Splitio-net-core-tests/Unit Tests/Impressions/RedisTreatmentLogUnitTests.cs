@@ -4,6 +4,7 @@ using Splitio.Domain;
 using System.Threading;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Impressions.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
