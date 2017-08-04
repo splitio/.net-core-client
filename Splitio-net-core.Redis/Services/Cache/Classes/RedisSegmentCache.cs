@@ -1,9 +1,10 @@
-﻿using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Cache.Interfaces;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Splitio.Services.Cache.Classes
+namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisSegmentCache : RedisCacheBase, ISegmentCache
     {

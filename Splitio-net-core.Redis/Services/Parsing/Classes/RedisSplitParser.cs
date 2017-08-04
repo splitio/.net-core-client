@@ -1,7 +1,8 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Parsing;
 
-namespace Splitio.Services.Parsing.Classes
+namespace Splitio.Redis.Services.Parsing.Classes
 {
     public class RedisSplitParser : SplitParser
     {

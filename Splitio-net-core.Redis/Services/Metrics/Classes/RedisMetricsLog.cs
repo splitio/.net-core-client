@@ -1,7 +1,7 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
 
-namespace Splitio.Services.Metrics.Classes
+namespace Splitio.Redis.Services.Metrics.Classes
 {
     public class RedisMetricsLog : IMetricsLog
     {

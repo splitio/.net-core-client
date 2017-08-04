@@ -2,7 +2,7 @@
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 
-namespace Splitio.Services.Impressions.Classes
+namespace Splitio.Redis.Services.Impressions.Classes
 {
     public class RedisTreatmentLog : IImpressionListener
     {

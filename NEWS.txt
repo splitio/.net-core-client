@@ -1,5 +1,9 @@
 NEWS
 
+3.3.0
+
+- Put Redis on a separated package: Splitio.Redis
+
 3.2.1
 
 

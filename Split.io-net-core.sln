@@ -8,6 +8,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core", "src\Spl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core-tests", "Splitio-net-core-tests\Splitio-net-core-tests.csproj", "{87059146-5A35-41E5-89F3-F5FDC68059E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio-net-core.Redis", "Splitio-net-core.Redis\Splitio-net-core.Redis.csproj", "{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +24,16 @@ Global
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1764AE35-67FB-455D-B9DB-6914FC9A0783} = {79B9E308-3F0F-441F-92B6-18C73B5CA3ED}
+		{C12DE747-F565-4327-A3BA-6E6B5D5C9BBA} = {79B9E308-3F0F-441F-92B6-18C73B5CA3ED}
 	EndGlobalSection
 EndGlobal

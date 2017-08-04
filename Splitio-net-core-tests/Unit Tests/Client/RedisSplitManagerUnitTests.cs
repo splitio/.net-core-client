@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Splitio.Services.Client.Classes;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Client.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {

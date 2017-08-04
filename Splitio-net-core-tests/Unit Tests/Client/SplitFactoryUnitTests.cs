@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
+using Splitio.Redis.Services.Client.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {

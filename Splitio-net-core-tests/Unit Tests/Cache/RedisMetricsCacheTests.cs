@@ -5,6 +5,8 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using System.Linq;
 using StackExchange.Redis;
+using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
