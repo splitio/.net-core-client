@@ -16,9 +16,12 @@ build_script:
  
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release
+ - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
 
+
+test: off
 
 artifacts:
  - path: '**\Splitio-net-core.*.nupkg'
