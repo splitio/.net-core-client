@@ -47,7 +47,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public void StartScheduler()
         {
             //Delay first execution until expected time has passed
-            Thread.Sleep(interval * 1000);
+            Task.Delay(interval * 1000).Wait();
             Task schedulerTask = PeriodicTaskFactory.Start(
                     () => AddSegmentsToQueue(),
                     intervalInMilliseconds: interval * 1000,

@@ -4,7 +4,7 @@ using Splitio.Services.Client.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Splitio.Services.Client.Classes
+namespace Splitio.Redis.Services.Client.Classes
 {
     public class RedisSplitManager : ISplitManager
     {

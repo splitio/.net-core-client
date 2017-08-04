@@ -1,5 +1,10 @@
 NEWS
 
+3.3.0
+
+- Put Redis on a separated package: Splitio.Redis. 
+- Add testing framework : Splitio.TestSupport 
+
 3.2.1
 
 
