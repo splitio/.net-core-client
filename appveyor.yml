@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 3.3.0-rc{build}
+version: 3.3.0
 
 configuration: Release
 
@@ -19,7 +19,7 @@ after_build:
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
-
+ - dotnet pack .\Splitio-net-core.TestSupport --configuration Release
 
 test: off
 
