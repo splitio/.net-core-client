@@ -18,6 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var conditionsWithLogic = new List<ConditionDefinition>();
             var conditionWithLogic = new ConditionDefinition()
             {
+                conditionType = "Rollout",
                 partitions  = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
@@ -60,6 +61,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var conditionsWithLogic = new List<ConditionDefinition>();
             var conditionWithLogic = new ConditionDefinition()
             {
+                conditionType = "rollout",
                 partitions = new List<PartitionDefinition>()
                 {
                     new PartitionDefinition(){size = 100, treatment = "on"}
@@ -86,6 +88,85 @@ namespace Splitio_Tests.Unit_Tests.Client
             var firstTreatment = result.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
         }
+
+        [TestMethod]
+        public void SplitReturnRolloutConditionTreatmentsSuccessfully()
+        {
+            //Arrange
+            var conditionsWithLogic = new List<ConditionDefinition>();
+            var conditionWithLogic = new ConditionDefinition()
+            {
+                conditionType = "whitelist",
+                partitions = new List<PartitionDefinition>()
+                {
+                    new PartitionDefinition() { size = 100, treatment = "on"},
+                }
+            };
+            conditionsWithLogic.Add(conditionWithLogic);
+
+            var conditionWithLogic2 = new ConditionDefinition()
+            {
+                conditionType = "rollout",
+                partitions = new List<PartitionDefinition>()
+                {
+                    new PartitionDefinition() { size = 90, treatment = "on"},
+                    new PartitionDefinition() { size = 10, treatment = "off"},
+                }
+            };
+            conditionsWithLogic.Add(conditionWithLogic2);
+
+
+            var splitCache = new Mock<ISplitCache>();
+            var split = new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic };
+
+            splitCache.Setup(x => x.GetSplit("test1")).Returns(split);
+
+            var manager = new RedisSplitManager(splitCache.Object);
+
+            //Act
+            var result = manager.Split("test1");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.name, "test1");
+            Assert.AreEqual(result.treatments.Count, 2);
+            var firstTreatment = result.treatments[0];
+            Assert.AreEqual(firstTreatment, "on");
+            var secondTreatment = result.treatments[1];
+            Assert.AreEqual(secondTreatment, "off");
+        }
+
+        [TestMethod]
+        public void SplitReturnEmptyTreatmentsWhenNoRolloutCondition()
+        {
+            //Arrange
+            var conditionsWithLogic = new List<ConditionDefinition>();
+            var conditionWithLogic = new ConditionDefinition()
+            {
+                conditionType = "whitelist",
+                partitions = new List<PartitionDefinition>()
+                {
+                    new PartitionDefinition() { size = 100, treatment = "on"},
+                }
+            };
+            conditionsWithLogic.Add(conditionWithLogic);
+
+            var splitCache = new Mock<ISplitCache>();
+            var split = new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic };
+
+            splitCache.Setup(x => x.GetSplit("test1")).Returns(split);
+
+            var manager = new RedisSplitManager(splitCache.Object);
+
+            //Act
+            var result = manager.Split("test1");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.name, "test1");
+            Assert.AreEqual(result.treatments.Count, 0);
+        }
+
 
         [TestMethod]
         public void SplitReturnsNullWhenInexistent()
