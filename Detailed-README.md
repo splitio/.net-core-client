@@ -1,10 +1,9 @@
 # .net-core-client
 
 ## CI status
+![CI Status:master](https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=master&svg=true&passingText=master%20-%20ok&pendingText=master%20-%20running&failingText=master%20-%20failing)
 
-<img src=https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=master&svg=true&passingText=master%20-%20ok&pendingText=master%20-%20running&failingText=master%20-%20failing>
-
-<img src=https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=development&svg=true&passingText=development%20-%20ok&pendingText=development%20-%20running&failingText=development%20-%20failing>
+![CI Status:develop](img src=https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=development&svg=true&passingText=development%20-%20ok&pendingText=development%20-%20running&failingText=development%20-%20failing)
 
 
 ## Installing Split SDK using Nuget
