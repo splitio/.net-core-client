@@ -20,8 +20,8 @@ namespace Splitio.Services.Client.Classes
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string LabelKilled = "killed";
-        protected const string LabelNoConditionMatched = "no rule matched";
-        protected const string LabelSplitNotFound = "rules not found";
+        protected const string LabelNoConditionMatched = "default rule";
+        protected const string LabelSplitNotFound = "definition not found";
         protected const string LabelException = "exception";
         protected const string LabelTrafficAllocationFailed = "not in split";
 
@@ -101,7 +101,7 @@ namespace Splitio.Services.Client.Classes
                 {
                     if (logMetricsAndImpressions)
                     {
-                        //if split definition was not found, impression label = "rules not found"
+                        //if split definition was not found, impression label = "definition not found"
                         RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
                     }
 
@@ -172,7 +172,7 @@ namespace Splitio.Services.Client.Classes
 
                 if (logMetricsAndImpressions)
                 {
-                    //If no condition matched, impression label = "no rule matched"
+                    //If no condition matched, impression label = "default rule"
                     RecordStats(key, split.name, split.changeNumber, LabelNoConditionMatched, start, split.defaultTreatment, SdkGetTreatment, clock);
                 }
                 return split.defaultTreatment;
