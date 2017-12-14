@@ -138,7 +138,7 @@ namespace Splitio.Redis.Services.Client.Classes
                 {
                     if (logMetricsAndImpressions)
                     {
-                        //if split definition was not found, impression label = "rules not found"
+                        //if split definition was not found, impression label = "definition not found"
                         RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
                     }
 
