@@ -265,7 +265,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "whitelisting_elements", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "whitelisting_elements" && p.treatment == "off" && p.time > 0 && p.changeNumber == 1471368078203 && p.label == "no rule matched" && p.bucketingKey == null)));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "whitelisting_elements" && p.treatment == "off" && p.time > 0 && p.changeNumber == 1471368078203 && p.label == "default rule" && p.bucketingKey == null)));
 
         }
 
@@ -282,7 +282,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "asd", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "asd" && p.treatment == "control" && p.time > 0 && p.changeNumber == null && p.label == "rules not found" && p.bucketingKey == null)));
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "asd" && p.treatment == "control" && p.time > 0 && p.changeNumber == null && p.label == "definition not found" && p.bucketingKey == null)));
         }
 
         [TestMethod]
