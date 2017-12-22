@@ -149,6 +149,8 @@ namespace Splitio.Services.Client.Classes
                             selfRefreshingSegmentFetcher.StartScheduler();
                             break;
                         }
+
+                        Task.Delay(500).Wait();
                     }
                 });
         }
