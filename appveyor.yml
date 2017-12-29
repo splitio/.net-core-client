@@ -3,6 +3,11 @@ nuget:
 
 version: 3.3.2-rc{build}
 
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  package_version: '{version}'
+
 configuration: Release
 
 before_build:
