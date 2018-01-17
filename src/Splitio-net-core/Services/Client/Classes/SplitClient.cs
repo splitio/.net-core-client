@@ -32,7 +32,7 @@ namespace Splitio.Services.Client.Classes
         protected IMetricsLog metricsLog;
         protected ISplitManager manager;
         protected IMetricsCache metricsCache;
-        protected IImpressionsCache impressionsCache;
+        protected ISimpleCache<KeyImpression> impressionsCache;
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
 

@@ -547,7 +547,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
             var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", null, null, new SelfUpdatingTreatmentLog(null, 1000, impressionsCache));
 
             //Act           

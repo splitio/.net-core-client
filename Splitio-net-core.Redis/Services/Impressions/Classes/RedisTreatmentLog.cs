@@ -6,16 +6,16 @@ namespace Splitio.Redis.Services.Impressions.Classes
 {
     public class RedisTreatmentLog : IImpressionListener
     {
-        private IImpressionsCache impressionsCache;
+        private ISimpleCache<KeyImpression> impressionsCache;
 
-        public RedisTreatmentLog(IImpressionsCache impressionsCache)
+        public RedisTreatmentLog(ISimpleCache<KeyImpression> impressionsCache)
         {
             this.impressionsCache = impressionsCache;
         }
 
         public void Log(KeyImpression impression)
         {
-            impressionsCache.AddImpression(impression);
+            impressionsCache.AddItem(impression);
         }
     }
 }

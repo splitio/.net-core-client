@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Cache.Classes;
 using Moq;
-using StackExchange.Redis;
+using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using StackExchange.Redis;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -23,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var cache = new RedisImpressionsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
 
             //Act
-            cache.AddImpression(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 });
+            cache.AddItem(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 });
 
             //Assert
             redisAdapterMock.Verify(mock => mock.SAdd(key, It.IsAny<RedisValue>()));

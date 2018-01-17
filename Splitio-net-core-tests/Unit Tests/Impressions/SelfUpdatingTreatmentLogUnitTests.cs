@@ -16,7 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
             var treatmentLog = new SelfUpdatingTreatmentLog(null, 1, impressionsCache, 10);
 
             //Act
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         {
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
             var treatmentLog = new SelfUpdatingTreatmentLog(null, 1, impressionsCache, 10);
 
             //Act
@@ -69,7 +69,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             //Arrange
             var apiClientMock = new Mock<ITreatmentSdkApiClient>();
             var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemoryImpressionsCache(queue);
+            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
             var treatmentLog = new SelfUpdatingTreatmentLog(apiClientMock.Object, 1, impressionsCache, 10);
 
             //Act
