@@ -1,13 +1,15 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Client.Classes;
-using System.Collections.Generic;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Domain;
-using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared;
+using Splitio.Services.Shared.Interfaces;
+using System;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -68,7 +70,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnExceptionShouldReturnControl()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
@@ -243,7 +245,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelKilled()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -258,7 +260,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelNoConditionMatched()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -274,7 +276,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelSplitNotFound()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -290,7 +292,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelException()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, splitCacheMock.Object, treatmentLogMock.Object);
@@ -307,7 +309,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelTrafficAllocationFailed()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -322,7 +324,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelForTreatment()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -337,7 +339,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWhenUnknownMatcherIsIncluded()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           
@@ -352,7 +354,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndNotLogLabelForTreatmentIfLabelsNotEnabled()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object, isLabelsEnabled: false);
 
             //Act           
@@ -367,7 +369,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndLogLabelAndBucketingKeyForTreatment()
         {
             //Arrange
-            var treatmentLogMock = new Mock<IImpressionListener>();
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", null, null, treatmentLogMock.Object);
 
             //Act           

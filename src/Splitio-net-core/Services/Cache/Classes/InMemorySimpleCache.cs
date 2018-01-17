@@ -1,5 +1,5 @@
 ﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Shared;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -5,6 +5,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ using System.Threading;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class SelfUpdatingTreatmentLog : IImpressionListener
+    public class SelfUpdatingTreatmentLog : IListener<KeyImpression>
     {
         private ITreatmentSdkApiClient apiClient;
         private int interval;

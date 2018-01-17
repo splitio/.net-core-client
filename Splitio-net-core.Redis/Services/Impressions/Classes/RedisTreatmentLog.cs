@@ -1,10 +1,10 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Redis.Services.Impressions.Classes
 {
-    public class RedisTreatmentLog : IImpressionListener
+    public class RedisTreatmentLog : IListener<KeyImpression>
     {
         private ISimpleCache<KeyImpression> impressionsCache;
 
@@ -13,9 +13,9 @@ namespace Splitio.Redis.Services.Impressions.Classes
             this.impressionsCache = impressionsCache;
         }
 
-        public void Log(KeyImpression impression)
+        public void Log(KeyImpression item)
         {
-            impressionsCache.AddItem(impression);
+            impressionsCache.AddItem(item);
         }
     }
 }

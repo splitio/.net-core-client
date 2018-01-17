@@ -1,4 +1,5 @@
-﻿using Splitio.CommonLibraries;
+﻿using Common.Logging;
+using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
@@ -6,7 +7,7 @@ using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -96,11 +97,11 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var treatmentLog = new RedisTreatmentLog(impressionsCache);
-            impressionListener = new AsynchronousImpressionListener();
-            ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
+            impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
             if (config.ImpressionListener != null)
             {
-                ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
+                ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
             }
         }
 

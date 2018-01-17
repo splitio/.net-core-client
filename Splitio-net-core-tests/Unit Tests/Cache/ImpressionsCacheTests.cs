@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Classes;
 using Splitio.Domain;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Cache.Classes;
+using Splitio.Services.Shared;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
