@@ -6,7 +6,7 @@ using Splitio.Services.Shared;
 namespace Splitio_Tests.Unit_Tests.Cache
 {
     [TestClass]
-    public class ImpressionsCacheTests
+    public class InMemorySimpleCacheTests
     {
         [TestMethod]
         public void AddImpressionSuccessfully()
