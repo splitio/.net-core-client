@@ -1,9 +1,8 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Shared;
+﻿using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Splitio.Services.Cache.Classes
+namespace Splitio.Services.Shared.Classes
 {
     public class InMemorySimpleCache<T> : ISimpleCache<T>
     {

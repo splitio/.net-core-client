@@ -7,7 +7,7 @@ using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Shared;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

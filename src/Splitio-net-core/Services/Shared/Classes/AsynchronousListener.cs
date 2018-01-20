@@ -1,25 +1,28 @@
 ﻿using Common.Logging;
-using Splitio.Domain;
-using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Splitio.Services.Events.Classes
+namespace Splitio.Services.Shared.Classes
 {
-    public class AsynchronousEventListener : IEventListener
+    public class AsynchronousListener<T> : IAsynchronousListener<T>
     {
-        protected static readonly ILog Logger = LogManager.GetLogger("AsynchronousEventListener");
-        private List<IEventListener> workers = new List<IEventListener>();
+        protected readonly ILog _logger;
+        private List<IListener<T>> workers = new List<IListener<T>>();
 
-        public void AddListener(IEventListener worker)
+        public AsynchronousListener(ILog logger)
+        {
+            _logger = logger;
+        }
+
+        public void AddListener(IListener<T> worker)
         {
             workers.Add(worker);
         }
 
-        public void Log(Event item)
+        public void Log(T item)
         {
             try
             {
@@ -27,7 +30,7 @@ namespace Splitio.Services.Events.Classes
                 //all worker's tasks in the main thread
                 var listenerTask = new Task(() =>
                 {
-                    foreach (IEventListener worker in workers)
+                    foreach (IListener<T> worker in workers)
                     {
                         try
                         {
@@ -38,13 +41,13 @@ namespace Splitio.Services.Events.Classes
                                                     var stopwatch = Stopwatch.StartNew();
                                                     worker.Log(item);
                                                     stopwatch.Stop();
-                                                    Logger.Info(worker.GetType() + " took " + stopwatch.ElapsedMilliseconds + " milliseconds");
+                                                    _logger.Info(worker.GetType() + " took " + stopwatch.ElapsedMilliseconds + " milliseconds");
                                                 });
                             logTask.Start();
                         }
                         catch (Exception e)
                         {
-                            Logger.Error("Exception performing Log with worker. ", e);
+                            _logger.Error("Exception performing Log with worker. ", e);
                         }
                     }
                 });
@@ -52,7 +55,7 @@ namespace Splitio.Services.Events.Classes
             }
             catch (Exception e)
             {
-                Logger.Error("Exception creating Log task. ", e);
+                _logger.Error("Exception creating Log task. ", e);
             }
         }
     }

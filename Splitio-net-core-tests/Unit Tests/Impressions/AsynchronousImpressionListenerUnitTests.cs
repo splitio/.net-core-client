@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Common.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Impressions.Classes;
-using Splitio.Domain;
 using Moq;
-using Splitio.Services.Impressions.Interfaces;
-using System.Threading;
-using Splitio.Services.Shared;
+using Splitio.Domain;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Common.Logging;
+using System;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {

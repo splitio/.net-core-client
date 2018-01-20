@@ -2,10 +2,8 @@
 using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
-using Splitio.Services.Shared;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Threading;

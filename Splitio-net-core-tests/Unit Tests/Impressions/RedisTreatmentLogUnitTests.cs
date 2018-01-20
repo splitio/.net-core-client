@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Impressions.Classes;
-using Splitio.Domain;
-using System.Threading;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Domain;
 using Splitio.Redis.Services.Impressions.Classes;
+using Splitio.Services.Shared.Interfaces;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
 {

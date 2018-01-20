@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 

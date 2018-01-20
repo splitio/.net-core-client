@@ -210,7 +210,7 @@ namespace Splitio.Services.Client.Classes
             return treatmentsForFeatures;
         }
 
-        public bool Track(string key, string trafficType, string eventType, double? value)
+        public bool Track(string key, string trafficType, string eventType, double value)
         {
             try
             { 
@@ -234,7 +234,23 @@ namespace Splitio.Services.Client.Classes
 
         public bool Track(string key, string trafficType, string eventType)
         {
-            return Track(key, trafficType, eventType, null);
+            try
+            {
+                eventListener.Log(new Event
+                {
+                    key = key,
+                    trafficTypeName = trafficType,
+                    eventTypeId = eventType,
+                    timestamp = CurrentTimeHelper.CurrentTimeMillis()
+                });
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception caught trying to track an event", e);
+                return false;
+            }
         }
 
         private void ClearItemsAddedToTreatmentCache(string key)

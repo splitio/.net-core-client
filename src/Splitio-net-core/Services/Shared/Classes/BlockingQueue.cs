@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Splitio.Services.Shared
+namespace Splitio.Services.Shared.Classes
 {
     public class BlockingQueue<T>
     {

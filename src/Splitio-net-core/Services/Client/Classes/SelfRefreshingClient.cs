@@ -12,7 +12,7 @@ using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
-using Splitio.Services.Shared;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
