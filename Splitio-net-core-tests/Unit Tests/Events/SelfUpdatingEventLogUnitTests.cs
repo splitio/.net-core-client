@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             //Arrange
             var queue = new BlockingQueue<Event>(10);
             var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(null, 1, eventsCache, 10);
+            var eventLog = new SelfUpdatingEventLog(null, 1, 1, eventsCache, 10);
 
             //Act
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
@@ -43,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             //Arrange
             var queue = new BlockingQueue<Event>(10);
             var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(null, 1, eventsCache, 10);
+            var eventLog = new SelfUpdatingEventLog(null, 1, 1, eventsCache, 10);
 
             //Act
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 };
@@ -70,7 +70,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             var apiClientMock = new Mock<IEventSdkApiClient>();
             var queue = new BlockingQueue<Event>(10);
             var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, eventsCache, 10);
+            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, 1, eventsCache, 10);
 
             //Act
             eventLog.Start();
@@ -89,7 +89,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             var apiClientMock = new Mock<IEventSdkApiClient>();
             var queue = new BlockingQueue<Event>(10);
             var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, eventsCache, 10);
+            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, 1, eventsCache, 10);
 
             //Act
             eventLog.Start();

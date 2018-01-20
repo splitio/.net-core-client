@@ -43,6 +43,8 @@ namespace Splitio.Services.Client.Classes
         private static int ConcurrencyLevel;
         private static int TreatmentLogRefreshRate;
         private static int TreatmentLogSize;
+        private static int EventsFirstPushWindow;
+        private static int EventLogRefreshRate;
         private static int EventLogSize;
         private static string EventsBaseUrl;
         private static int MaxCountCalls;
@@ -127,7 +129,9 @@ namespace Splitio.Services.Client.Classes
             ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
             TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30;
             TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000;
-            EventLogSize = config.MaxEventLogSize ?? 500;
+            EventLogRefreshRate = config.EventsPushRate ?? 60;
+            EventLogSize = config.EventsQueueSize ?? 500;
+            EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10;
             MaxCountCalls = config.MaxMetricsCountCallsBeforeFlush ?? 1000;
             MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
@@ -215,7 +219,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildEventLog(ConfigurationOptions config)
         {
             eventsCache = new InMemorySimpleCache<Event>(new BlockingQueue<Event>(EventLogSize));
-            eventLog = new SelfUpdatingEventLog(eventSdkApiClient, TreatmentLogRefreshRate, eventsCache);
+            eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
             eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
             ((IAsynchronousListener<Event>)eventListener).AddListener(eventLog);
             if (config.EventListener != null)
