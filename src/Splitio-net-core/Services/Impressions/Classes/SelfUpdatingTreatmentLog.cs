@@ -17,14 +17,14 @@ namespace Splitio.Services.Impressions.Classes
     {
         private ITreatmentSdkApiClient apiClient;
         private int interval;
-        private ISimpleCache<KeyImpression> impressionsCache;
+        private ISimpleProducerCache<KeyImpression> impressionsCache;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(SelfUpdatingTreatmentLog));
 
         public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient, int interval, ISimpleCache<KeyImpression> impressionsCache, int maximumNumberOfKeysToCache = -1)
         {
-            this.impressionsCache = impressionsCache ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));
+            this.impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression> ) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));
             this.apiClient = apiClient;
             this.interval = interval;
         }

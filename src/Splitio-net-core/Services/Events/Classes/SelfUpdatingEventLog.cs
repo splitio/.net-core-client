@@ -16,14 +16,14 @@ namespace Splitio.Services.Events.Classes
         private IEventSdkApiClient apiClient;
         private int interval;
         private int firstPushWindow;
-        private ISimpleCache<Event> eventsCache;
+        private ISimpleProducerCache<Event> eventsCache;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(SelfUpdatingEventLog));
 
         public SelfUpdatingEventLog(IEventSdkApiClient apiClient, int firstPushWindow, int interval, ISimpleCache<Event> eventsCache, int maximumNumberOfKeysToCache = -1)
         {
-            this.eventsCache = eventsCache ?? new InMemorySimpleCache<Event>(new BlockingQueue<Event>(maximumNumberOfKeysToCache));
+            this.eventsCache = (eventsCache as ISimpleProducerCache<Event>) ?? new InMemorySimpleCache<Event>(new BlockingQueue<Event>(maximumNumberOfKeysToCache));
             this.apiClient = apiClient;
             this.interval = interval;
             this.firstPushWindow = firstPushWindow;

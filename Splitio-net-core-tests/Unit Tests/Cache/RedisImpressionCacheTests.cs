@@ -26,27 +26,5 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Assert
             redisAdapterMock.Verify(mock => mock.SAdd(key, It.IsAny<RedisValue>()));
         }
-
-        [TestMethod]
-        public void FetchAllAndClearSuccessfully()
-        {        
-            //Arrange
-            var redisAdapterMock = new Mock<IRedisAdapter>();
-            var redisValue = (RedisValue)"{\"keyName\":\"date\",\"treatment\":null,\"time\":10000000,\"changeNumber\":100,\"label\":\"testdate\",\"bucketingKey\":null}";
-            redisAdapterMock.Setup(x => x.Keys(impressionKeyPrefix + "*")).Returns(new RedisKey[] { impressionKeyPrefix + "test" });
-            redisAdapterMock.Setup(x => x.SMembers(impressionKeyPrefix + "test")).Returns(new RedisValue[]{redisValue});
-            redisAdapterMock.Setup(x => x.Del(impressionKeyPrefix + "test")).Returns(true);
-            var cache = new RedisImpressionsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
-
-            //Act
-            var result = cache.FetchAllAndClear();
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
-            redisAdapterMock.Verify(mock => mock.Keys(impressionKeyPrefix + "*"));
-            redisAdapterMock.Verify(mock => mock.SMembers(impressionKeyPrefix + "test"));
-            redisAdapterMock.Verify(mock => mock.Del(impressionKeyPrefix + "test"));
-        }
     }
 }

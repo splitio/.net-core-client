@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Splitio.Services.Shared.Classes
 {
-    public class InMemorySimpleCache<T> : ISimpleCache<T>
+    public class InMemorySimpleCache<T> : ISimpleProducerCache<T>
     {
         private BlockingQueue<T> queue;
 
