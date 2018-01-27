@@ -23,7 +23,7 @@ namespace Splitio.Services.Parsing
         {
             var date = value.ToDateTime();
             key = key.Truncate(TimeSpan.FromMinutes(1)); // Truncate to whole minute
-            return key <= date;
+            return key.ToUniversalTime() <= date.ToUniversalTime();
         }
 
         public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
