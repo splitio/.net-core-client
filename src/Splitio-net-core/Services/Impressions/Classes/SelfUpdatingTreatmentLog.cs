@@ -1,15 +1,11 @@
 ﻿using Common.Logging;
-using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-
 
 namespace Splitio.Services.Impressions.Classes
 {
@@ -54,8 +50,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    var impressionsJson = ConvertToJson(impressions);
-                    apiClient.SendBulkImpressions(impressionsJson);
+                    apiClient.SendBulkImpressions(impressions);
                 }
                 catch (Exception e)
                 {
@@ -63,16 +58,6 @@ namespace Splitio.Services.Impressions.Classes
                 }
             }
         }
-
-        private string ConvertToJson(List<KeyImpression> impressions)
-        {
-            var impressionsPerFeature =
-                impressions
-                .GroupBy(item => item.feature)
-                .Select(group => new { testName = group.Key, keyImpressions = group.Select(x => new { keyName = x.keyName, treatment = x.treatment, time = x.time, changeNumber = x.changeNumber, label = x.label, bucketingKey = x.bucketingKey }) });
-            return JsonConvert.SerializeObject(impressionsPerFeature);
-        }
-
 
         public void Log(KeyImpression impression)
         {

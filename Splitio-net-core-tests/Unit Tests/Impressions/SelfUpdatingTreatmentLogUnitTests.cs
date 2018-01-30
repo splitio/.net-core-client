@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Impressions
@@ -11,23 +12,32 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class SelfUpdatingTreatmentLogUnitTests
     {
+        private Mock<ITreatmentSdkApiClient> _apiClientMock;
+        private BlockingQueue<KeyImpression> _queue;
+        private InMemorySimpleCache<KeyImpression> _impressionsCache;
+        private SelfUpdatingTreatmentLog _treatmentLog;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _apiClientMock = new Mock<ITreatmentSdkApiClient>();
+            _queue = new BlockingQueue<KeyImpression>(10);
+            _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
+            _treatmentLog = new SelfUpdatingTreatmentLog(_apiClientMock.Object, 1, _impressionsCache, 10);
+        }
+
         [TestMethod]
         public void LogSuccessfully()
         {
-            //Arrange
-            var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
-            var treatmentLog = new SelfUpdatingTreatmentLog(null, 1, impressionsCache, 10);
-
             //Act
             var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" };
-            treatmentLog.Log(impression);
+            _treatmentLog.Log(impression);
 
             //Assert
             KeyImpression element = null;
             while (element == null)
             {
-                element = queue.Dequeue();
+                element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
             Assert.AreEqual("GetTreatment", element.keyName);
@@ -39,21 +49,16 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestMethod]
         public void LogSuccessfullyUsingBucketingKey()
         {
-            //Arrange
-            var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
-            var treatmentLog = new SelfUpdatingTreatmentLog(null, 1, impressionsCache, 10);
-
             //Act
             Key key = new Key(bucketingKey : "a", matchingKey : "testkey");
             var impression = new KeyImpression() { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey };
-            treatmentLog.Log(impression);
+            _treatmentLog.Log(impression);
 
             //Assert
             KeyImpression element = null;
             while (element == null)
             {
-                element = queue.Dequeue();
+                element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
             Assert.AreEqual("testkey", element.keyName);
@@ -66,20 +71,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestMethod]
         public void LogSuccessfullyAndSendImpressions()
         {
-            //Arrange
-            var apiClientMock = new Mock<ITreatmentSdkApiClient>();
-            var queue = new BlockingQueue<KeyImpression>(10);
-            var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
-            var treatmentLog = new SelfUpdatingTreatmentLog(apiClientMock.Object, 1, impressionsCache, 10);
-
             //Act
-            treatmentLog.Start();
+            _treatmentLog.Start();
             var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" };
-            treatmentLog.Log(impression);
+            _treatmentLog.Log(impression);
 
             //Assert
             Thread.Sleep(2000);
-            apiClientMock.Verify(x => x.SendBulkImpressions(It.IsAny<string>()));
+            _apiClientMock.Verify(x => x.SendBulkImpressions(It.Is<List<KeyImpression>>(list => list.Count == 1)));
         }
     }
 }

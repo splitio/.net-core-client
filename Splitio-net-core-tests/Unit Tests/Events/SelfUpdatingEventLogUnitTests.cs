@@ -4,6 +4,7 @@ using Splitio.Domain;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Shared.Classes;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Events
@@ -11,23 +12,32 @@ namespace Splitio_Tests.Unit_Tests.Events
     [TestClass]
     public class SelfUpdatingEventLogUnitTests
     {
+        private BlockingQueue<Event> _queue;
+        private InMemorySimpleCache<Event> _eventsCache;
+        private Mock<IEventSdkApiClient> _apiClientMock;
+        private SelfUpdatingEventLog _eventLog;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _queue = new BlockingQueue<Event>(10);
+            _eventsCache = new InMemorySimpleCache<Event>(_queue);
+            _apiClientMock = new Mock<IEventSdkApiClient>();
+            _eventLog = new SelfUpdatingEventLog(_apiClientMock.Object, 1, 1, _eventsCache, 10);
+        }
+
         [TestMethod]
         public void LogSuccessfullyWithNoValue()
         {
-            //Arrange
-            var queue = new BlockingQueue<Event>(10);
-            var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(null, 1, 1, eventsCache, 10);
-
             //Act
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
-            eventLog.Log(e);
+            _eventLog.Log(e);
 
             //Assert
             Event element = null;
             while (element == null)
             {
-                element = queue.Dequeue();
+                element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
             Assert.AreEqual("Key1", element.key);
@@ -40,20 +50,15 @@ namespace Splitio_Tests.Unit_Tests.Events
         [TestMethod]
         public void LogSuccessfullyWithValue()
         {
-            //Arrange
-            var queue = new BlockingQueue<Event>(10);
-            var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(null, 1, 1, eventsCache, 10);
-
             //Act
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 };
-            eventLog.Log(e);
+            _eventLog.Log(e);
 
             //Assert
             Event element = null;
             while (element == null)
             {
-                element = queue.Dequeue();
+                element = _queue.Dequeue();
             }
             Assert.IsNotNull(element);
             Assert.AreEqual("Key1", element.key);
@@ -66,39 +71,27 @@ namespace Splitio_Tests.Unit_Tests.Events
         [TestMethod]
         public void LogSuccessfullyAndSendEventsWithNoValue()
         {
-            //Arrange
-            var apiClientMock = new Mock<IEventSdkApiClient>();
-            var queue = new BlockingQueue<Event>(10);
-            var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, 1, eventsCache, 10);
-
             //Act
-            eventLog.Start();
+            _eventLog.Start();
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000 };
-            eventLog.Log(e);
+            _eventLog.Log(e);
 
             //Assert
             Thread.Sleep(2000);
-            apiClientMock.Verify(x => x.SendBulkEvents(It.Is<string>(s => s.IndexOf("value") < 0)));
+            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 1 && list[0].value == null)));
         }
 
         [TestMethod]
         public void LogSuccessfullyAndSendEventsWithValue()
         {
-            //Arrange
-            var apiClientMock = new Mock<IEventSdkApiClient>();
-            var queue = new BlockingQueue<Event>(10);
-            var eventsCache = new InMemorySimpleCache<Event>(queue);
-            var eventLog = new SelfUpdatingEventLog(apiClientMock.Object, 1, 1, eventsCache, 10);
-
             //Act
-            eventLog.Start();
+            _eventLog.Start();
             var e = new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 };
-            eventLog.Log(e);
+            _eventLog.Log(e);
 
             //Assert
             Thread.Sleep(2000);
-            apiClientMock.Verify(x => x.SendBulkEvents(It.Is<string>(s => s.IndexOf("value") > 0)));
+            _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == 1 && list[0].value != null)));
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using Common.Logging;
+using Newtonsoft.Json;
 using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
+using System.Collections.Generic;
 using System.Net;
 
 namespace Splitio.Services.Events.Classes
@@ -13,9 +16,14 @@ namespace Splitio.Services.Events.Classes
 
         public EventSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 
-        public void SendBulkEvents(string events)
+        public void SendBulkEvents(List<Event> events)
         {
-            var response = ExecutePost(EventsUrlTemplate, events);
+            var eventsJson = JsonConvert.SerializeObject(events, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            var response = ExecutePost(EventsUrlTemplate, eventsJson);
             if (response.statusCode != HttpStatusCode.OK)
             {
                 Log.Error(string.Format("Http status executing SendBulkEvents: {0} - {1}", response.statusCode.ToString(), response.content));
