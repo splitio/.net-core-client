@@ -94,7 +94,7 @@ namespace Splitio.Redis.Services.Client.Classes
             segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
             metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
             impressionsCache = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
-            eventsCache = new RedisEventsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
+            eventsCache = new RedisEventsCache(redisAdapter, RedisUserPrefix);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)

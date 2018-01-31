@@ -9,8 +9,8 @@ namespace Splitio.Redis.Services.Cache.Classes
     {
         private const string eventKeyPrefix = "events";
 
-        public RedisEventsCache(IRedisAdapter redisAdapter, string machineIP, string sdkVersion, string userPrefix = null)
-            : base(redisAdapter, machineIP, sdkVersion, userPrefix) 
+        public RedisEventsCache(IRedisAdapter redisAdapter, string userPrefix = null)
+            : base(redisAdapter, userPrefix) 
         {}
 
         public void AddItem(Event item)
