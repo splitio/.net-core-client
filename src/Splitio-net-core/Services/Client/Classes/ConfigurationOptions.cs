@@ -1,4 +1,5 @@
 ﻿using Splitio.Domain;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Services.Client.Classes
@@ -27,7 +28,7 @@ namespace Splitio.Services.Client.Classes
         public string SdkMachineIP { get; set; }
         public int? NumberOfParalellSegmentTasks { get; set; }
         public bool? LabelsEnabled { get; set; }
-        public IListener<KeyImpression> ImpressionListener { get; set; }
+        public IImpressionListener ImpressionListener { get; set; }
         public IListener<Event> EventListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
     }
