@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Splitio.CommonLibraries
 {
@@ -19,6 +20,13 @@ namespace Splitio.CommonLibraries
             {
                 return timestamp.ToDateTime();
             }
+
+            DateTime datetime;
+            if (DateTime.TryParse(timestampString, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out datetime))
+            {
+                return datetime;
+            }
+
             return null;
         }
 

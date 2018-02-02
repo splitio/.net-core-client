@@ -16,6 +16,11 @@ namespace Splitio.Services.Parsing
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
+            if (dataType == DataTypeEnum.DATETIME)
+            {
+                return Match(key.ToDateTime(), attributes, splitClient);
+            }
+
             return value == key;
         }
 
@@ -23,7 +28,7 @@ namespace Splitio.Services.Parsing
         {
             var date = value.ToDateTime();
 
-            return date.Date == key.Date; // Compare just date part
+            return date.ToUniversalTime().Date == key.ToUniversalTime().Date; // Compare just date part
         }
 
         public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
