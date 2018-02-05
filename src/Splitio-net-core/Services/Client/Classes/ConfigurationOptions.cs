@@ -29,7 +29,6 @@ namespace Splitio.Services.Client.Classes
         public int? NumberOfParalellSegmentTasks { get; set; }
         public bool? LabelsEnabled { get; set; }
         public IImpressionListener ImpressionListener { get; set; }
-        public IListener<Event> EventListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
     }
 }

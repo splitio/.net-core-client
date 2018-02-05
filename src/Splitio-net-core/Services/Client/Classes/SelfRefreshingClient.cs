@@ -222,10 +222,6 @@ namespace Splitio.Services.Client.Classes
             eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
             eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
             ((IAsynchronousListener<Event>)eventListener).AddListener(eventLog);
-            if (config.EventListener != null)
-            {
-                ((IAsynchronousListener<Event>)eventListener).AddListener(config.EventListener);
-            }
         }
 
         private void BuildMetricsLog()
