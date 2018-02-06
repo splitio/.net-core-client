@@ -1,12 +1,14 @@
-﻿using Splitio.CommonLibraries;
+﻿using Common.Logging;
+using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Impressions.Classes;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,7 +21,7 @@ namespace Splitio.Redis.Services.Client.Classes
     public class RedisClient : SplitClient
     {
         private RedisSplitParser splitParser;
-        private RedisAdapter redisAdapter; 
+        private RedisAdapter redisAdapter;
 
         private static string SdkVersion;
         private static string SdkSpecVersion;
@@ -39,7 +41,8 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             ReadConfig(config);
             BuildRedisCache();
-            BuildTreatmentLog(config); 
+            BuildTreatmentLog(config);
+            BuildEventLog(config);
             BuildMetricsLog();
             BuildSplitter();
             BuildManager();
@@ -91,17 +94,25 @@ namespace Splitio.Redis.Services.Client.Classes
             segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
             metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
             impressionsCache = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
+            eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var treatmentLog = new RedisTreatmentLog(impressionsCache);
-            impressionListener = new AsynchronousImpressionListener();
-            ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
+            impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
             if (config.ImpressionListener != null)
             {
-                ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
+                ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
             }
+        }
+
+        private void BuildEventLog(ConfigurationOptions config)
+        {
+            var eventLog = new RedisEventLog(eventsCache);
+            eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
+            ((AsynchronousListener<Event>)eventListener).AddListener(eventLog);
         }
 
         private void BuildMetricsLog()

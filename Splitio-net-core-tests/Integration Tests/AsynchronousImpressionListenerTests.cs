@@ -1,17 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Impressions.Classes;
-using Splitio.Domain;
+﻿using Common.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Impressions.Interfaces;
-using System.Threading;
+using Splitio.Domain;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Splitio_Tests.Integration_Tests
 {
     [TestClass]
     public class AsynchronousImpressionListenerTests
     {
-        public class TestListener: IImpressionListener
+        public class TestListener: IListener<KeyImpression>
         {
             public List<KeyImpression> list = new List<KeyImpression>();
 
@@ -21,7 +22,7 @@ namespace Splitio_Tests.Integration_Tests
             }
         }
 
-        public class TestListener2 : IImpressionListener
+        public class TestListener2 : IListener<KeyImpression>
         {
             public List<KeyImpression> list = new List<KeyImpression>();
 
@@ -39,9 +40,10 @@ namespace Splitio_Tests.Integration_Tests
         public void AddTwoListenersAndPerformLogSuccessfully()
         {
             //Arrange
-            var asyncListener = new AsynchronousImpressionListener();
+            var logger = new Mock<ILog>();
+            var asyncListener = new AsynchronousListener<KeyImpression>(logger.Object);
             var listener1 = new TestListener();
-            var listenerMock2 = new Mock<IImpressionListener>();
+            var listenerMock2 = new Mock<IListener<KeyImpression>>();
             asyncListener.AddListener(listener1);
             asyncListener.AddListener(listenerMock2.Object);
 
@@ -59,7 +61,8 @@ namespace Splitio_Tests.Integration_Tests
         public void AddTwoListenersAndPerformLogSuccessfullyWithOneLongRunningTask()
         {
             //Arrange
-            var asyncListener = new AsynchronousImpressionListener();
+            var logger = new Mock<ILog>();
+            var asyncListener = new AsynchronousListener<KeyImpression>(logger.Object);
             var listener1 = new TestListener2();
             var listener2 = new TestListener();
             asyncListener.AddListener(listener1);

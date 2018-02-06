@@ -26,7 +26,7 @@ namespace Splitio.Services.Parsing
             var startDate = start.ToDateTime();
             var endDate = end.ToDateTime();
             key = key.Truncate(TimeSpan.FromMinutes(1)); // Truncate to whole minute
-            return (startDate <= key) && (key <= endDate);
+            return (startDate.ToUniversalTime() <= key.ToUniversalTime()) && (key.ToUniversalTime() <= endDate.ToUniversalTime());
         }
     }
 }

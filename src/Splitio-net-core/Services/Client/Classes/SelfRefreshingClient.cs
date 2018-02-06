@@ -1,14 +1,19 @@
-﻿using Splitio.CommonLibraries;
+﻿using Common.Logging;
+using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Events.Classes;
+using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
@@ -38,6 +43,9 @@ namespace Splitio.Services.Client.Classes
         private static int ConcurrencyLevel;
         private static int TreatmentLogRefreshRate;
         private static int TreatmentLogSize;
+        private static int EventsFirstPushWindow;
+        private static int EventLogRefreshRate;
+        private static int EventLogSize;
         private static string EventsBaseUrl;
         private static int MaxCountCalls;
         private static int MaxTimeBetweenCalls;
@@ -57,9 +65,11 @@ namespace Splitio.Services.Client.Classes
         private ISplitSdkApiClient splitSdkApiClient;
         private ISegmentSdkApiClient segmentSdkApiClient;
         private ITreatmentSdkApiClient treatmentSdkApiClient;
+        private IEventSdkApiClient eventSdkApiClient;
         private IMetricsSdkApiClient metricsSdkApiClient;
         private SelfRefreshingSegmentFetcher selfRefreshingSegmentFetcher;
-        private IImpressionListener treatmentLog;
+        private IListener<KeyImpression> treatmentLog;
+        private IListener<Event> eventLog;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config)
         {
@@ -69,6 +79,7 @@ namespace Splitio.Services.Client.Classes
             BuildSdkApiClients();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
+            BuildEventLog(config);
             BuildSplitter();
             BuildManager();
             Start();
@@ -118,6 +129,9 @@ namespace Splitio.Services.Client.Classes
             ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
             TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30;
             TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000;
+            EventLogRefreshRate = config.EventsPushRate ?? 60;
+            EventLogSize = config.EventsQueueSize ?? 500;
+            EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10;
             MaxCountCalls = config.MaxMetricsCountCallsBeforeFlush ?? 1000;
             MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
@@ -135,6 +149,7 @@ namespace Splitio.Services.Client.Classes
         public void Start()
         {
             ((SelfUpdatingTreatmentLog)treatmentLog).Start();
+            ((SelfUpdatingEventLog)eventLog).Start();
             ((SelfRefreshingSplitFetcher)splitFetcher).Start();
         }
 
@@ -160,6 +175,7 @@ namespace Splitio.Services.Client.Classes
             ((SelfRefreshingSplitFetcher)splitFetcher).Stop(); // Stop + Clear
             ((SelfRefreshingSegmentFetcher)selfRefreshingSegmentFetcher).Stop(); // Stop + Clear
             ((SelfUpdatingTreatmentLog)treatmentLog).Stop(); //Stop + SendBulk + Clear
+            ((SelfUpdatingEventLog)eventLog).Stop(); //Stop + SendBulk + Clear
             metricsLog.Clear(); //Clear
         }
 
@@ -190,16 +206,23 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            impressionsCache = new InMemoryImpressionsCache(new BlockingQueue<KeyImpression>(TreatmentLogSize));
+            impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(TreatmentLogSize));
             treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
-            impressionListener = new AsynchronousImpressionListener();
-            ((AsynchronousImpressionListener)impressionListener).AddListener(treatmentLog);
+            impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
             if (config.ImpressionListener != null)
             {
-                ((AsynchronousImpressionListener)impressionListener).AddListener(config.ImpressionListener);
+                ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
             }
         }
 
+        private void BuildEventLog(ConfigurationOptions config)
+        {
+            eventsCache = new InMemorySimpleCache<Event>(new BlockingQueue<Event>(EventLogSize));
+            eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
+            eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
+            ((IAsynchronousListener<Event>)eventListener).AddListener(eventLog);
+        }
 
         private void BuildMetricsLog()
         {
@@ -227,6 +250,7 @@ namespace Splitio.Services.Client.Classes
             splitSdkApiClient = new SplitSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, metricsLog);
             segmentSdkApiClient = new SegmentSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, metricsLog);
             treatmentSdkApiClient = new TreatmentSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
+            eventSdkApiClient = new EventSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
         }
 
         private void BuildManager()

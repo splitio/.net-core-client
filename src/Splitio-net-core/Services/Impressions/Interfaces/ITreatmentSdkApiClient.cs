@@ -1,7 +1,10 @@
-﻿namespace Splitio.Services.Impressions.Interfaces
+﻿using Splitio.Domain;
+using System.Collections.Generic;
+
+namespace Splitio.Services.Impressions.Interfaces
 {
     public interface ITreatmentSdkApiClient
     {
-        void SendBulkImpressions(string impressions);
+        void SendBulkImpressions(List<KeyImpression> impressions);
     }
 }

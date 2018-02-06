@@ -10,7 +10,13 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Version>3.3.2-rc2</Version>
+    <RootNamespace>Splitio</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
+    <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />

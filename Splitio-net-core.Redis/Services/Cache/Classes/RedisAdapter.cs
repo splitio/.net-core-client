@@ -211,6 +211,19 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public long ListRightPush(string key, RedisValue value)
+        {
+            try
+            {
+                return database.ListRightPush(key, value);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception calling Redis Adapter ListRightPush", e);
+                return 0;
+            }
+        }
+
         public void Flush()
         {
             try
