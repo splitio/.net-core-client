@@ -1,5 +1,12 @@
 CHANGES
 
+3.4.0
+- Add support for .track()
+- Bug fix on date rule matchers
+
+3.3.3
+- Solved Issue 94: Invalid Api key causes high CPU usage
+
 3.3.1
 
 - Bug fix on RedisSplitManager.
