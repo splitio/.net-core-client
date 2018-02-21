@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 3.4.1-rc{build}
+version: 3.4.1
 
 dotnet_csproj:
   patch: true
