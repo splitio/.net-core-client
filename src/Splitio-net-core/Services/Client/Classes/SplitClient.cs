@@ -212,7 +212,7 @@ namespace Splitio.Services.Client.Classes
 
         }
 
-        public bool Track(string key, string trafficType, string eventType, double? value = null)
+        public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
         {
             try
             { 

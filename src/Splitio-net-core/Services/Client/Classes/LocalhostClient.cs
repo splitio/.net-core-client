@@ -32,6 +32,11 @@ namespace Splitio.Services.Client.Classes
             manager = new SplitManager(splitCache);
         }
 
+        public override bool Track(string key, string trafficType, string eventType, double? value = default(double?))
+        {
+            return true;
+        }
+
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             var splits = ParseSplitFile(fullPath);
