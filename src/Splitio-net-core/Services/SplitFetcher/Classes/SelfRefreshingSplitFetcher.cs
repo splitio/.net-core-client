@@ -92,14 +92,14 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
         }
 
-        private void RefreshSplits()
+        private async void RefreshSplits()
         {
             while (true)
             {
                 var changeNumber = splitCache.GetChangeNumber();
                 try
                 {
-                    var result = splitChangeFetcher.Fetch(changeNumber);
+                    var result = await splitChangeFetcher.Fetch(changeNumber);
                     if (result == null)
                     {
                         break;

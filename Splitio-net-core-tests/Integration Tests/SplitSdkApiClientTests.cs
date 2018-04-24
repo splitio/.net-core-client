@@ -11,7 +11,7 @@ namespace Splitio_Tests.Integration_Tests
     {
         [TestMethod]
         [Ignore]
-        public void ExecuteFetchSplitChangesSuccessful()
+        public async void ExecuteFetchSplitChangesSuccessful()
         {
             //Arrange
             var baseUrl = "http://sdk-aws-staging.split.io/api/";
@@ -22,12 +22,11 @@ namespace Splitio_Tests.Integration_Tests
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "net-0.0.0",
                 splitSDKSpecVersion = "1.2",
-                encoding = "gzip"
             };
             var SplitSdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SplitSdkApiClient.FetchSplitChanges(-1);
+            var result = await SplitSdkApiClient.FetchSplitChanges(-1);
   
             //Assert
             Assert.IsTrue(result.Contains("splits"));
@@ -36,13 +35,12 @@ namespace Splitio_Tests.Integration_Tests
 
 
         [TestMethod]
-        public void ExecuteGetShouldReturnEmptyIfNotAuthorized()
+        public async void ExecuteGetShouldReturnEmptyIfNotAuthorized()
         {
             //Arrange
             var baseUrl = "https://sdk.aws.staging.split.io/api";
             var httpHeader = new HTTPHeader()
             {
-                encoding = "gzip",
                 splitSDKMachineIP = "1.0.0.0",
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "net-0.0.0",
@@ -51,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
             var SplitSdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SplitSdkApiClient.FetchSplitChanges(-1);
+            var result = await SplitSdkApiClient.FetchSplitChanges(-1);
 
             //Assert
             Assert.IsTrue(result == String.Empty);

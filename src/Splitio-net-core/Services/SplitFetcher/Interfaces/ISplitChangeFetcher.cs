@@ -1,9 +1,10 @@
 ﻿using Splitio.Domain;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Interfaces
 {
     public interface ISplitChangeFetcher
     {
-        SplitChangesResult Fetch(long since);
+        Task<SplitChangesResult> Fetch(long since);
     }
 }
