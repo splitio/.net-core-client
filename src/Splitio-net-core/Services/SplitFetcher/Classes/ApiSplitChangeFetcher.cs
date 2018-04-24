@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Interfaces;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -13,9 +14,9 @@ namespace Splitio.Services.SplitFetcher.Classes
             this.apiClient = apiClient;
         }
 
-        protected override SplitChangesResult FetchFromBackend(long since)
+        protected override async Task<SplitChangesResult> FetchFromBackend(long since)
         {
-            var fetchResult = apiClient.FetchSplitChanges(since);
+            var fetchResult = await apiClient.FetchSplitChanges(since);
 
             var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(fetchResult);
             return splitChangesResult;

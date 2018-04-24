@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -14,9 +15,9 @@ namespace Splitio.Services.SegmentFetcher.Classes
             this.apiClient = apiClient;
         }
 
-        protected override SegmentChange FetchFromBackend(string name, long since)
+        protected override async Task<SegmentChange> FetchFromBackend(string name, long since)
         {
-            var fetchResult = apiClient.FetchSegmentChanges(name, since);
+            var fetchResult = await apiClient.FetchSegmentChanges(name, since);
 
             var segmentChange = JsonConvert.DeserializeObject<SegmentChange>(fetchResult);
             return segmentChange;

@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -15,11 +16,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             this.filePath = filePath;
         }
 
-        protected override SplitChangesResult FetchFromBackend(long since)
+        protected override async Task<SplitChangesResult> FetchFromBackend(long since)
         {
             var json = File.ReadAllText(filePath);
             var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(json);
-            return splitChangesResult;
+            return await Task.FromResult(splitChangesResult);
         }
     }
 }

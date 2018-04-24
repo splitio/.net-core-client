@@ -24,7 +24,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             gates.RegisterSegment(name);
         }
 
-        public void RefreshSegment()
+        public async void RefreshSegment()
         {        
             while (true)
             {
@@ -32,7 +32,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 try
                 {
-                    var response = segmentChangeFetcher.Fetch(name, changeNumber);
+                    var response = await segmentChangeFetcher.Fetch(name, changeNumber);
                     if (response == null)
                     {
                         break;

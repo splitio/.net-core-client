@@ -42,7 +42,6 @@ namespace Splitio_Tests.Integration_Tests
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "net-0.0.0",
                 splitSDKSpecVersion = "1.2",
-                encoding = "gzip"
             };
             var sdkApiClient = new SegmentSdkApiClient(httpHeader, baseUrl, 10000, 10000);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkApiClient);

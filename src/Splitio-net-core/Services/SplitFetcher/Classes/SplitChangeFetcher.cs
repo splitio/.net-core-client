@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -10,13 +11,13 @@ namespace Splitio.Services.SplitFetcher.Classes
         private SplitChangesResult splitChanges;
         private static readonly ILog Log = LogManager.GetLogger(typeof(SplitChangeFetcher));
 
-        protected abstract SplitChangesResult FetchFromBackend(long since);
+        protected abstract Task<SplitChangesResult> FetchFromBackend(long since);
 
-        public SplitChangesResult Fetch(long since)
+        public async Task<SplitChangesResult> Fetch(long since)
         {
             try
             {
-                splitChanges = FetchFromBackend(since);
+                splitChanges = await FetchFromBackend(since);
             }
             catch(Exception e)
             {
