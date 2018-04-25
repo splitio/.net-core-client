@@ -7,7 +7,7 @@ using Splitio.Domain;
 using Moq;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading;
-
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {
@@ -22,7 +22,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
             .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(@"{
+            .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
                             'abcdz',
@@ -32,7 +32,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                           'removed': [],
                           'since': -1,
                           'till': 10001
-                        }");
+                        }"));
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
             .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(@"{
+            .Returns(Task.FromResult(@"{
                           'name': 'payed',
                           'added': [
                             'abcdz',
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
                           'removed': [],
                           'since': -1,
                           'till': 10001
-                        }");
+                        }"));
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);

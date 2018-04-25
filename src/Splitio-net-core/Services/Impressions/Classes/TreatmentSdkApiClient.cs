@@ -17,11 +17,11 @@ namespace Splitio.Services.Impressions.Classes
 
         public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
 
-        public void SendBulkImpressions(List<KeyImpression> impressions)
+        public async void SendBulkImpressions(List<KeyImpression> impressions)
         {
             var impressionsJson = ConvertToJson(impressions);
 
-            var response = ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
+            var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
             if (response.statusCode != HttpStatusCode.OK)
             {
                 Log.Error(string.Format("Http status executing SendBulkImpressions: {0} - {1}", response.statusCode.ToString(), response.content));

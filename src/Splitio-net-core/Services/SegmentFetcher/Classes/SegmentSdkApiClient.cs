@@ -5,6 +5,7 @@ using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -20,14 +21,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public SegmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
-        public string FetchSegmentChanges(string name, long since)
+        public async Task<string> FetchSegmentChanges(string name, long since)
         {
             var clock = new Stopwatch();
             clock.Start();
             try
             {
                 var requestUri = GetRequestUri(name, since);
-                var response = ExecuteGet(requestUri);
+                var response = await ExecuteGet(requestUri);
                 if (response.statusCode == HttpStatusCode.OK)
                 {
                     if (metricsLog != null)
@@ -36,6 +37,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
                     }
 
+                    Log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
                     return response.content;
                 }
                 else

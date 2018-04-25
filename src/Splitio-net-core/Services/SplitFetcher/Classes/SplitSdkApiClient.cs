@@ -5,6 +5,7 @@ using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -20,14 +21,14 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public SplitSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
-        public string FetchSplitChanges(long since)
+        public async Task<string> FetchSplitChanges(long since)
         {
             var clock = new Stopwatch();
             clock.Start();
             try
             {
                 var requestUri = GetRequestUri(since);
-                var response = ExecuteGet(requestUri);
+                var response = await ExecuteGet(requestUri);
                 if (response.statusCode == HttpStatusCode.OK)
                 {
                     if (metricsLog != null)

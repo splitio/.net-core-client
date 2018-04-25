@@ -1,5 +1,11 @@
 CHANGES
 
+3.4.2
+- Improve async handling
+
+3.4.1
+- Fix track() bug on localhost mode
+
 3.4.0
 - Add support for .track()
 - Bug fix on date rule matchers

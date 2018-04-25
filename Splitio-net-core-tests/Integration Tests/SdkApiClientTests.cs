@@ -10,14 +10,13 @@ namespace Splitio_Tests.Integration_Tests
     {
         [TestMethod]
         [Ignore]
-        public void ExecuteGetSuccessful()
+        public async void ExecuteGetSuccessful()
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
             var httpHeader = new HTTPHeader()
             {
                 authorizationApiKey = "ABCD",
-                encoding = "gzip",
                 splitSDKMachineIP = "1.0.0.0",
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "1",
@@ -26,7 +25,7 @@ namespace Splitio_Tests.Integration_Tests
             var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SdkApiClient.ExecuteGet("/messages?item=msg1");
+            var result = await SdkApiClient.ExecuteGet("/messages?item=msg1");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.OK);
@@ -36,13 +35,12 @@ namespace Splitio_Tests.Integration_Tests
 
         [TestMethod]
         [Ignore]
-        public void ExecuteGetShouldReturnErrorNotAuthorized()
+        public async void ExecuteGetShouldReturnErrorNotAuthorized()
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
             var httpHeader = new HTTPHeader()
             {
-                encoding = "gzip",
                 splitSDKMachineIP = "1.0.0.0",
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "1",
@@ -51,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
             var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.Unauthorized);
@@ -59,14 +57,13 @@ namespace Splitio_Tests.Integration_Tests
 
         [TestMethod]
         [Ignore]
-        public void ExecuteGetShouldReturnNotFoundOnInvalidRequest()
+        public async void ExecuteGetShouldReturnNotFoundOnInvalidRequest()
         {
             //Arrange
             var baseUrl = "http://demo706abcd.mockable.io";
             var httpHeader = new HTTPHeader()
             {
                 authorizationApiKey = "ABCD",
-                encoding = "gzip",
                 splitSDKMachineIP = "1.0.0.0",
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "1",
@@ -75,21 +72,20 @@ namespace Splitio_Tests.Integration_Tests
             var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
 
             //Assert
             Assert.AreEqual(result.statusCode, HttpStatusCode.NotFound);
         }
 
         [TestMethod]
-        public void ExecuteGetShouldReturnEmptyResponseOnInvalidURL()
+        public async void ExecuteGetShouldReturnEmptyResponseOnInvalidURL()
         {
             //Arrange
             var baseUrl = "http://demo70e.iio";
             var httpHeader = new HTTPHeader()
             {
                 authorizationApiKey = "ABCD",
-                encoding = "gzip",
                 splitSDKMachineIP = "1.0.0.0",
                 splitSDKMachineName = "localhost",
                 splitSDKVersion = "1",
@@ -98,7 +94,7 @@ namespace Splitio_Tests.Integration_Tests
             var SdkApiClient = new SdkApiClient(httpHeader, baseUrl, 10000, 10000);
 
             //Act
-            var result = SdkApiClient.ExecuteGet("/messages?item=msg2");
+            var result = await SdkApiClient.ExecuteGet("/messages?item=msg2");
 
             //Assert
             Assert.IsNotNull(result);
