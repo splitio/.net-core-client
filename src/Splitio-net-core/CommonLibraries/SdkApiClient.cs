@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Splitio.CommonLibraries
 {
@@ -16,18 +17,11 @@ namespace Splitio.CommonLibraries
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)
         {
-            if (header.encoding == "gzip")
+            var handler = new HttpClientHandler()
             {
-                HttpClientHandler handler = new HttpClientHandler()
-                {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-                };
-                httpClient = new HttpClient(handler);
-            }
-            else
-            {
-                httpClient = new HttpClient();
-            }
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            httpClient = new HttpClient(handler);
 
             httpClient.BaseAddress = new Uri(baseUrl);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", header.authorizationApiKey);
@@ -41,7 +35,7 @@ namespace Splitio.CommonLibraries
             {
                 httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
             }
-            httpClient.DefaultRequestHeaders.Add("Accept-Encoding", header.encoding);
+            httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
             httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -51,16 +45,16 @@ namespace Splitio.CommonLibraries
             this.metricsLog = metricsLog;
         }
 
-        public virtual HTTPResult ExecuteGet(string requestUri)
+        public virtual async Task<HTTPResult> ExecuteGet(string requestUri)
         {
             var result = new HTTPResult();
             try
             {
-                var task = httpClient.GetAsync(requestUri);
-                task.Wait();
-                var response = task.Result;
-                result.statusCode = response.StatusCode;
-                result.content = response.Content.ReadAsStringAsync().Result;                
+                using (var response = await httpClient.GetAsync(requestUri))
+                {
+                    result.statusCode = response.StatusCode;
+                    result.content = response.Content.ReadAsStringAsync().Result;
+                }
             }
             catch(Exception e)
             {
@@ -69,16 +63,16 @@ namespace Splitio.CommonLibraries
             return result;
         }
 
-        public virtual HTTPResult ExecutePost(string requestUri, string data)
+        public virtual async Task<HTTPResult> ExecutePost(string requestUri, string data)
         {
             var result = new HTTPResult();
             try
             {
-                var task = httpClient.PostAsync(requestUri, new StringContent(data, Encoding.UTF8, "application/json"));
-                task.Wait();
-                var response = task.Result;
-                result.statusCode = response.StatusCode;
-                result.content = response.Content.ReadAsStringAsync().Result;
+                using (var response = await httpClient.PostAsync(requestUri, new StringContent(data, Encoding.UTF8, "application/json")))
+                {
+                    result.statusCode = response.StatusCode;
+                    result.content = response.Content.ReadAsStringAsync().Result;
+                }
             }
             catch (Exception e)
             {

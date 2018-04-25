@@ -240,7 +240,6 @@ namespace Splitio.Services.Client.Classes
         {
             var header = new HTTPHeader();
             header.authorizationApiKey = ApiKey;
-            header.encoding = HttpEncoding;
             header.splitSDKVersion = SdkVersion;
             header.splitSDKSpecVersion = SdkSpecVersion;
             header.splitSDKMachineName = SdkMachineName;
