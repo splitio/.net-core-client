@@ -10,12 +10,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSegment));
 
-        public string name;
-        private IReadinessGatesCache gates;
-        private ISegmentChangeFetcher segmentChangeFetcher;
-        private ISegmentCache segmentCache;
+        public readonly string name;
+        private readonly IReadinessGatesCache gates;
+        private readonly ISegmentChangeFetcher segmentChangeFetcher;
+        private readonly ISegmentCache segmentCache;
 
-        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates,  ISegmentCache segmentCache)
+        public SelfRefreshingSegment(string name, ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates, ISegmentCache segmentCache)
         {
             this.name = name;
             this.segmentChangeFetcher = segmentChangeFetcher;
@@ -25,7 +25,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         }
 
         public async void RefreshSegment()
-        {        
+        {
             while (true)
             {
                 var changeNumber = segmentCache.GetChangeNumber(name);
@@ -51,15 +51,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                         if (response.added.Count() > 0)
                         {
-                            Log.Info(string.Format("Segment {0} - Added : {1}", name, string.Join(" - ", response.added)));
+                            Log.Debug(string.Format("Segment {0} - Added : {1}", name, string.Join(" - ", response.added)));
                         }
                         if (response.removed.Count() > 0)
                         {
-                            Log.Info(string.Format("Segment {0} - Removed : {1}", name, string.Join(" - ", response.removed)));
+                            Log.Debug(string.Format("Segment {0} - Removed : {1}", name, string.Join(" - ", response.removed)));
                         }
                     }
 
-                    segmentCache.SetChangeNumber(name, response.till);                  
+                    segmentCache.SetChangeNumber(name, response.till);
                 }
                 catch (Exception e)
                 {
@@ -67,7 +67,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 }
                 finally
                 {
-                    Log.Info(string.Format("segment {0} fetch before: {1}, after: {2}", name, changeNumber, segmentCache.GetChangeNumber(name)));
+                    Log.Debug(string.Format("segment {0} fetch before: {1}, after: {2}", name, changeNumber, segmentCache.GetChangeNumber(name)));
                 }
             }
         }
