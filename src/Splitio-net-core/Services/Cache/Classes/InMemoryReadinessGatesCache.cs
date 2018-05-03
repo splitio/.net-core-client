@@ -12,6 +12,14 @@ namespace Splitio.Services.Client.Classes
         private static readonly ILog Log = LogManager.GetLogger(typeof(InMemoryReadinessGatesCache));
         private readonly CountdownEvent splitsAreReady = new CountdownEvent(1);
         private readonly Dictionary<string, CountdownEvent> segmentsAreReady = new Dictionary<string, CountdownEvent>();
+        private readonly Stopwatch _splitsReadyTimer = new Stopwatch();
+        private readonly Stopwatch _segmentsReadyTimer = new Stopwatch();
+
+        public InMemoryReadinessGatesCache()
+        {
+            _segmentsReadyTimer.Start();
+            _splitsReadyTimer.Start();
+        }
 
         public bool IsSDKReady(int milliseconds)
         {
@@ -36,9 +44,10 @@ namespace Splitio.Services.Client.Classes
                 splitsAreReady.Signal();
                 if (splitsAreReady.IsSet)
                 {
+                    _splitsReadyTimer.Stop();
                     if (Log.IsDebugEnabled)
                     {
-                        Log.Debug("Splits are ready");
+                        Log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                     }
                 }
             }
@@ -121,9 +130,10 @@ namespace Splitio.Services.Client.Classes
                 timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
             }
 
+            _segmentsReadyTimer.Stop();
             if (Log.IsDebugEnabled)
             {
-                Log.Debug("Segments are ready");
+                Log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
             }
 
             return true;
