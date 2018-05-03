@@ -36,7 +36,10 @@ namespace Splitio.Services.Client.Classes
                 splitsAreReady.Signal();
                 if (splitsAreReady.IsSet)
                 {
-                    Log.Debug("Splits are ready");
+                    if (Log.IsDebugEnabled)
+                    {
+                        Log.Debug("Splits are ready");
+                    }
                 }
             }
         }
@@ -55,7 +58,10 @@ namespace Splitio.Services.Client.Classes
 
             if (countDown.IsSet)
             {
-                Log.Debug(segmentName + " segment is ready");
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug(segmentName + " segment is ready");
+                }
             }
         }
 
@@ -74,7 +80,10 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 segmentsAreReady.Add(segmentName, new CountdownEvent(1));
-                Log.Debug("Registered segment: " + segmentName);
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug("Registered segment: " + segmentName);
+                }
             }
             catch (ArgumentException e)
             {
@@ -112,7 +121,10 @@ namespace Splitio.Services.Client.Classes
                 timeLeft = timeLeft - (int)clock.ElapsedMilliseconds;
             }
 
-            Log.Debug("Segments are ready");
+            if (Log.IsDebugEnabled)
+            {
+                Log.Debug("Segments are ready");
+            }
 
             return true;
         }

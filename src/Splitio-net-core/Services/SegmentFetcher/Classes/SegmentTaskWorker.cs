@@ -42,7 +42,11 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     //Wait indefinitely until a segment is queued
                     if (SegmentTaskQueue.segmentsQueue.TryTake(out segment, -1))
                     {
-                        Log.Debug(string.Format("Segment dequeued: {0}", segment.name));
+                        if (Log.IsDebugEnabled)
+                        {
+                            Log.Debug(string.Format("Segment dequeued: {0}", segment.name));
+                        }
+
                         IncrementCounter();
                         Task task = new Task(() => segment.RefreshSegment(), token);
                         task.ContinueWith((x) => { DecrementCounter(); });

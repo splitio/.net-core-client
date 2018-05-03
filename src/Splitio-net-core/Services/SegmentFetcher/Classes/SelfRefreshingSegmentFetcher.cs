@@ -63,7 +63,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 segment = new SelfRefreshingSegment(name, segmentChangeFetcher, gates, segmentCache);
                 segments.TryAdd(name, segment);
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                }
             }
         }
 
@@ -72,7 +75,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
             foreach (SelfRefreshingSegment segment in segments.Values)
             {
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                }
             }
         }
     }
