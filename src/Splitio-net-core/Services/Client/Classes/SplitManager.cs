@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Common.Logging;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using System.Collections.Generic;
@@ -8,7 +9,8 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        ISplitCache splitCache;
+        protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitManager));
+        private readonly ISplitCache splitCache;
 
         public SplitManager(ISplitCache splitCache)
         {
@@ -40,6 +42,12 @@ namespace Splitio.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
+            if (string.IsNullOrEmpty(featureName))
+            {
+                Log.Error($"{nameof(Split)}: {nameof(featureName)} cannot be null");
+                return null;
+            }
+
             if (splitCache == null)
             {
                 return null;
