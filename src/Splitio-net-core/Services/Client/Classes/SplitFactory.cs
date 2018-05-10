@@ -44,11 +44,11 @@ namespace Splitio.Services.Client.Classes
                     }
                     if (apiKey == "localhost")
                     {
-                        client = new LocalhostClient(options.LocalhostFilePath);
+                        client = new LocalhostClient(options.LocalhostFilePath, Common.Logging.LogManager.GetLogger(typeof(SplitClient)));
                     }
                     else
                     {
-                        client = new SelfRefreshingClient(apiKey, options);
+                        client = new SelfRefreshingClient(apiKey, options, Common.Logging.LogManager.GetLogger(typeof(SplitClient)));
                     }
                     break;
                 case Mode.Consumer:

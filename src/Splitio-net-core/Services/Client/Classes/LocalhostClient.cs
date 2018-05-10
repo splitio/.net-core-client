@@ -16,7 +16,7 @@ namespace Splitio.Services.Client.Classes
         private FileSystemWatcher watcher;
         private string fullPath;
 
-        public LocalhostClient(string filePath, Splitter splitter = null)
+        public LocalhostClient(string filePath, ILog log, Splitter splitter = null) : base(log)
         {
             fullPath = LookupFilePath(filePath);
             var directoryPath = Path.GetDirectoryName(fullPath);

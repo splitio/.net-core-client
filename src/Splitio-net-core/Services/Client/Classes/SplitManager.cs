@@ -42,7 +42,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
-            if (string.IsNullOrEmpty(featureName))
+            if (featureName == null)
             {
                 Log.Error($"{nameof(Split)}: {nameof(featureName)} cannot be null");
                 return null;

@@ -16,7 +16,7 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitClient));
+        protected readonly ILog _log;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string LabelKilled = "killed";
@@ -40,6 +40,11 @@ namespace Splitio.Services.Client.Classes
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
+        public SplitClient(ILog log)
+        {
+            _log = log;
+        }
+
         public ISplitManager GetSplitManager()
         {
             return manager;
@@ -47,7 +52,7 @@ namespace Splitio.Services.Client.Classes
 
         public string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            if (string.IsNullOrEmpty(key))
+            if (key == null)
             {
                 return LogErrorAndReturn($"{nameof(GetTreatment)}: key cannot be null");
             }
@@ -57,9 +62,9 @@ namespace Splitio.Services.Client.Classes
 
         public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            if (string.IsNullOrEmpty(key.matchingKey) || string.IsNullOrEmpty(key.bucketingKey))
+            if (key.matchingKey == null || key.bucketingKey == null)
             {
-                return LogErrorAndReturn($"{nameof(GetTreatment)}: Key should be an object with bucketingKey and matchingKey with valid string properties.   ");
+                return LogErrorAndReturn($"{nameof(GetTreatment)}: Key should be an object with bucketingKey and matchingKey with valid string properties.");
             }
 
             return DoGetTreatment(key, feature, attributes, logMetricsAndImpressions, multiple);
@@ -68,7 +73,7 @@ namespace Splitio.Services.Client.Classes
         private string DoGetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
             // TODO: once we decide if empty string is ok or not, create unit tests
-            if (string.IsNullOrEmpty(feature))
+            if (feature == null)
             {
                 return LogErrorAndReturn($"{nameof(GetTreatment)}: split_name cannot be null");
             }
@@ -92,7 +97,7 @@ namespace Splitio.Services.Client.Classes
 
         private string LogErrorAndReturn(string errorMessage)
         {
-            Log.Error(errorMessage);
+            _log.Error(errorMessage);
             return Control;
         }
 
@@ -133,7 +138,7 @@ namespace Splitio.Services.Client.Classes
                         RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
                     }
 
-                    Log.Warn($"Unknown or invalid feature: {feature}");
+                    _log.Warn($"Unknown or invalid feature: {feature}");
 
                     return Control;
                 }
@@ -150,7 +155,7 @@ namespace Splitio.Services.Client.Classes
                     RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
                 }
 
-                Log.Error($"Exception caught getting treatment for feature: {feature}", e);
+                _log.Error($"Exception caught getting treatment for feature: {feature}", e);
                 return Control;
             }
         }
@@ -244,21 +249,21 @@ namespace Splitio.Services.Client.Classes
         {
             try
             {
-                if (string.IsNullOrEmpty(key))
+                if (key == null)
                 {
-                    Log.Error($"{nameof(Track)}: {nameof(key)} cannot be null");
+                    _log.Error($"{nameof(Track)}: {nameof(key)} cannot be null");
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(trafficType))
+                if (trafficType == null)
                 {
-                    Log.Error($"{nameof(Track)}: {nameof(trafficType)} cannot be null");
+                    _log.Error($"{nameof(Track)}: {nameof(trafficType)} cannot be null");
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(eventType))
+                if (eventType == null)
                 {
-                    Log.Error($"{nameof(Track)}: {nameof(eventType)} cannot be null");
+                    _log.Error($"{nameof(Track)}: {nameof(eventType)} cannot be null");
                     return false;
                 }
 
@@ -275,7 +280,7 @@ namespace Splitio.Services.Client.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception caught trying to track an event", e);
+                _log.Error("Exception caught trying to track an event", e);
                 return false;
             }
         }
