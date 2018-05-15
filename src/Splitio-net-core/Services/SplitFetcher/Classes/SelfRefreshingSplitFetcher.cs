@@ -12,18 +12,17 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
-    public class SelfRefreshingSplitFetcher 
+    public class SelfRefreshingSplitFetcher
     {
         protected ISplitCache splitCache;
         private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher));
         private readonly ISplitChangeFetcher splitChangeFetcher;
         private readonly SplitParser splitParser;
-        private int interval;
-        private CancellationTokenSource cancelTokenSource = new CancellationTokenSource(); 
-        private IReadinessGatesCache gates;
+        private readonly int interval;
+        private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private readonly IReadinessGatesCache gates;
 
-
-        public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher, 
+        public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             SplitParser splitParser, IReadinessGatesCache gates, int interval, ISplitCache splitCache = null)
         {
             this.splitChangeFetcher = splitChangeFetcher;
@@ -61,14 +60,14 @@ namespace Splitio.Services.SplitFetcher.Classes
                 StatusEnum result;
                 var isValidStatus = Enum.TryParse(split.status, out result);
                 if (!isValidStatus || result != StatusEnum.ACTIVE)
-                {                    
+                {
                     splitCache.RemoveSplit(split.name);
                     removedSplits.Add(split);
                 }
                 else
                 {
-                   //Test if its a new Split, remove if existing
-                   bool isRemoved = splitCache.RemoveSplit(split.name);
+                    //Test if its a new Split, remove if existing
+                    bool isRemoved = splitCache.RemoveSplit(split.name);
 
                     if (!isRemoved)
                     {
@@ -83,12 +82,18 @@ namespace Splitio.Services.SplitFetcher.Classes
             if (addedSplits.Count() > 0)
             {
                 var addedFeatureNames = addedSplits.Select(x => x.name).ToList();
-                Log.Info(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
+                }
             }
             if (removedSplits.Count() > 0)
             {
                 var removedFeatureNames = removedSplits.Select(x => x.name).ToList();
-                Log.Info(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
+                if (Log.IsDebugEnabled)
+                {
+                    Log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
+                }
             }
         }
 
@@ -123,7 +128,10 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
                 finally
                 {
-                    Log.Info(string.Format("split fetch before: {0}, after: {1}", changeNumber, splitCache.GetChangeNumber()));
+                    if (Log.IsDebugEnabled)
+                    {
+                        Log.Debug(string.Format("split fetch before: {0}, after: {1}", changeNumber, splitCache.GetChangeNumber()));
+                    }
                 }
             }
         }
