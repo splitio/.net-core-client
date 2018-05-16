@@ -2,6 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Parsing.Classes;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -10,12 +13,13 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         private SplitClientForTesting _splitClientForTesting;
         private Mock<ILog> _logMock = new Mock<ILog>();
+        private ConcurrentDictionary<string, ParsedSplit> _splits = new ConcurrentDictionary<string, ParsedSplit>();
 
         [TestInitialize]
         public void TestInitialize()
         {
             // Arrange
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splits);
         }
 
         [TestMethod]
@@ -82,6 +86,37 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.IsFalse(result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetTreatments_WithNullAttributes_ShouldWork()
+        {
+            // Arrange
+            _splits.TryAdd("testSplit", new ParsedSplit
+            {
+                conditions = new List<ConditionWithLogic>
+                {
+                    new ConditionWithLogic
+                    {
+                        conditionType = ConditionType.WHITELIST,
+                        label = "test",
+                        matcher = new CombiningMatcher
+                        {
+                            combiner = CombinerEnum.AND,
+                            delegates = new List<AttributeMatcher>
+                            {
+                                new AttributeMatcher { attribute = "testAttribute", matcher = new MatchesStringMatcher(""), negate = false }
+                            }
+                        }
+                    }
+                },
+                name = "testSplit"                
+            });
+
+            // Act
+            var result = _splitClientForTesting.GetTreatments("testSplit", new List<string>(), null);
+
+            Assert.IsNotNull(result);
         }
     }
 }
