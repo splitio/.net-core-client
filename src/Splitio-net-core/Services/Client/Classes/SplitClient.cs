@@ -72,7 +72,6 @@ namespace Splitio.Services.Client.Classes
 
         private string DoGetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            // TODO: once we decide if empty string is ok or not, create unit tests
             if (feature == null)
             {
                 return LogErrorAndReturn($"{nameof(GetTreatment)}: split_name cannot be null");
