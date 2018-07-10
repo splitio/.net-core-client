@@ -14,7 +14,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         private IDatabase database;
         private IServer server;
 
-        public RedisAdapter(string host, string port, string password = "", int databaseNumber = 0, 
+        public RedisAdapter(string host, string port, string password = "", int databaseNumber = 0,
             int connectTimeout = 0, int connectRetry = 0, int syncTimeout = 0)
         {
             try
@@ -30,20 +30,25 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
+        public bool IsConnected()
+        {
+            return server?.IsConnected ?? false;
+        }
+
         private static string GetConfig(string host, string port, string password, int connectTimeout, int connectRetry, int syncTimeout)
         {
             var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", host, port, password);
-            
+
             if (connectTimeout > 0)
             {
                 config += ", connectTimeout = " + connectTimeout;
             }
-            
+
             if (connectRetry > 0)
             {
                 config += ", connectRetry = " + connectRetry;
             }
-            
+
             if (syncTimeout > 0)
             {
                 config += ", syncTimeout = " + syncTimeout;

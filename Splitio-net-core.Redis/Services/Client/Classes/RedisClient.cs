@@ -35,7 +35,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private static int RedisConnectRetry;
         private static int RedisSyncTimeout;
         private static string RedisUserPrefix;
-
+        private static int BlockMilisecondsUntilReady;
 
         public RedisClient(ConfigurationOptions config, ILog log) : base(log)
         {
@@ -85,11 +85,17 @@ namespace Splitio.Redis.Services.Client.Classes
             RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
             RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
             LabelsEnabled = config.LabelsEnabled ?? true;
+            BlockMilisecondsUntilReady = config.Ready ?? 0;
         }
 
         private void BuildRedisCache()
         {
             redisAdapter = new RedisAdapter(RedisHost, RedisPort, RedisPassword, RedisDatabase, RedisConnectTimeout, RedisConnectRetry, RedisSyncTimeout);
+            if (BlockMilisecondsUntilReady > 0 && !redisAdapter.IsConnected())
+            {
+                throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds");
+            }
+
             splitCache = new RedisSplitCache(redisAdapter, RedisUserPrefix);
             segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
             metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
