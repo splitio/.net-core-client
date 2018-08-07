@@ -93,7 +93,7 @@ namespace Splitio.Redis.Services.Client.Classes
             redisAdapter = new RedisAdapter(RedisHost, RedisPort, RedisPassword, RedisDatabase, RedisConnectTimeout, RedisConnectRetry, RedisSyncTimeout);
             if (BlockMilisecondsUntilReady > 0 && !redisAdapter.IsConnected())
             {
-                throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds");
+                throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds. Could not connect to Redis");
             }
 
             splitCache = new RedisSplitCache(redisAdapter, RedisUserPrefix);
