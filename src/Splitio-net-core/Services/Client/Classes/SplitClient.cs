@@ -173,7 +173,7 @@ namespace Splitio.Services.Client.Classes
                         {
                             // bucket ranges from 1-100.
                             var bucket = split.algo == AlgorithmEnum.LegacyHash ? splitter.LegacyBucket(key.bucketingKey, split.trafficAllocationSeed) : splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
-                            if (bucket >= split.trafficAllocation)
+                            if (bucket > split.trafficAllocation)
                             {
                                 if (logMetricsAndImpressions)
                                 {
