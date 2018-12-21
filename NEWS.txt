@@ -1,5 +1,23 @@
 NEWS
 
+3.5.0
+- Added Input validation
+- Fix authors and other package metadata
+- Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
+
+3.4.2
+- Improve async handling
+
+3.4.1
+- Fix track() bug on localhost mode
+
+3.4.0
+- Add support for .track()
+- Bug fix on date rule matchers
+
+3.3.3
+- Solved Issue 94: Invalid Api key causes high CPU usage
+
 3.3.1
 
 - No news for this update.

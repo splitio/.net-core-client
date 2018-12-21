@@ -1,8 +1,9 @@
 CHANGES
 
 3.5.0
+- Added Input validation
 - Fix authors and other package metadata
-- Input validation
+- Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
 
 3.4.2
 - Improve async handling
