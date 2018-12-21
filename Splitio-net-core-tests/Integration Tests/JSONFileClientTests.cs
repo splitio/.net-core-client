@@ -224,6 +224,34 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_7.json")]
+        public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsRolloutTreatment()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_7.json", "", _logMock.Object);
+
+            //Act           
+            var result = client.GetTreatment("aaaaaaklmnbv", "ta_bucket1_test", null);
+
+            //Assert
+            Assert.AreEqual("rollout_treatment", result);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\splits_staging_7.json")]
+        public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsDefaultTreatment()
+        {
+            //Arrange
+            var client = new JSONFileClient(@"Resources\splits_staging_7.json", "", _logMock.Object);
+
+            //Act           
+            var result = client.GetTreatment("mauro_test", "ta_bucket1_test", null);
+
+            //Assert
+            Assert.AreEqual("default_treatment", result);
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         public void ExecuteGetTreatmentOnSplitWithSegmentNotInitialized()
         {
