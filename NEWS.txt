@@ -2,6 +2,7 @@ NEWS
 
 3.5.0
 - Added Input validation
+- Adding Block Until Ready for Redis client
 - Fix authors and other package metadata
 - Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
 
