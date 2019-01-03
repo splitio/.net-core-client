@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Splitio.Domain;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Redis.Services.Cache.Classes;
+using Common.Logging;
+using Moq;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -12,7 +14,8 @@ namespace Splitio_Tests.Integration_Tests
     [Ignore]
     public class RedisClientTests
     {
-        ConfigurationOptions config;
+        private ConfigurationOptions config;
+        private Mock<ILog> _logMock = new Mock<ILog>();
 
         [TestInitialize]
         public void Initialization()
@@ -29,7 +32,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnInexistentSplitShouldReturnControl()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "fail", null);
@@ -43,7 +46,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithSegmentShouldReturnOnIfExistent()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             //feature test_jw2 has UserDefinedSegmentMatcher 
@@ -59,7 +62,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithSegmentShouldReturnOffIfNotExistent()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             //feature test_jw2 has UserDefinedSegmentMatcher 
@@ -77,7 +80,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnKilledSplitReturnsDefaultTreatment()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act    
             //Default treatment is off
@@ -92,7 +95,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndUsingBucketingKeyForTreatment()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             var key = new Key("abcdz", "2f726442-abbd-43f0-8373-ada456cff612");
@@ -107,7 +110,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentAndEmptyBucketingKeyShouldReturnControl()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             var key = new Key("abcdz", "");
@@ -122,7 +125,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
             var cache = new RedisSegmentCache(new RedisAdapter("localhost", "6379", ""));
             
             //Act           
@@ -146,7 +149,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithDateMatcherReturnOn()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             Dictionary<string, object> data = new Dictionary<string, object>();
@@ -162,7 +165,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithDateMatcherReturnOff()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             Dictionary<string, object> data = new Dictionary<string, object>();
@@ -178,7 +181,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithWhitelistMatcherReturnOn()
         {
             //Arrange
-            var client = new RedisClient(config);
+            var client = new RedisClient(config, _logMock.Object);
 
             //Act           
             Dictionary<string, object> data = new Dictionary<string, object>();

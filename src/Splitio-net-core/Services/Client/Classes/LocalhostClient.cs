@@ -11,12 +11,13 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
+        private const string DefaultSplitFileName = ".split";
         private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
 
         private FileSystemWatcher watcher;
         private string fullPath;
 
-        public LocalhostClient(string filePath, Splitter splitter = null)
+        public LocalhostClient(string filePath, ILog log, Splitter splitter = null) : base(log)
         {
             fullPath = LookupFilePath(filePath);
             var directoryPath = Path.GetDirectoryName(fullPath);
@@ -51,7 +52,7 @@ namespace Splitio.Services.Client.Classes
             }
             var home = Environment.GetEnvironmentVariable("USERPROFILE");
 
-            var fullPath = Path.Combine(home, filePath);
+            var fullPath = Path.Combine(home, filePath ?? DefaultSplitFileName);
             if (File.Exists(fullPath))
             {
                 return fullPath;

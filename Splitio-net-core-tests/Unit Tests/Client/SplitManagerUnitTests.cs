@@ -294,6 +294,20 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
+        public void SplitWithNullNameShouldReturnNull()
+        {
+            //Arrange
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var manager = new SplitManager(splitCache);
+
+            //Act
+            var result = manager.Split(null);
+
+            //Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
         public void SplitNamessWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange

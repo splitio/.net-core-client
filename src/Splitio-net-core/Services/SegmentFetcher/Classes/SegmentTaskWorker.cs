@@ -8,11 +8,12 @@ namespace Splitio.Services.SegmentFetcher.Classes
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentTaskWorker));
 
-        int numberOfParallelTasks;
-        int counter;
+        private readonly int numberOfParallelTasks;
+        private int counter;
+
         //Worker is always one task, so when it is signaled, after the
         //task stops its wait, this variable is auto-reseted
-        AutoResetEvent waitForExecution = new AutoResetEvent(false);
+        private AutoResetEvent waitForExecution = new AutoResetEvent(false);
 
         public SegmentTaskWorker(int numberOfParallelTasks)
         {
@@ -41,11 +42,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
                     //Wait indefinitely until a segment is queued
                     if (SegmentTaskQueue.segmentsQueue.TryTake(out segment, -1))
                     {
-                        Log.Info(string.Format("Segment dequeued: {0}", segment.name));
+                        if (Log.IsDebugEnabled)
+                        {
+                            Log.Debug(string.Format("Segment dequeued: {0}", segment.name));
+                        }
+
                         IncrementCounter();
                         Task task = new Task(() => segment.RefreshSegment(), token);
-                        task.ContinueWith((x) => { DecrementCounter(); }); 
-                        task.Start();                   
+                        task.ContinueWith((x) => { DecrementCounter(); });
+                        task.Start();
                     }
                 }
                 else

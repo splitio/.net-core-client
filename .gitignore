@@ -15,3 +15,7 @@ Splitio.TestSupport/bin
 Splitio.TestSupport/obj
 Splitio-net-core.Redis/obj
 Splitio-net-core.Redis/bin/
+.vs/Split.io-net-core/v15/Server/sqlite3/storage.ide-wal
+.vs/Split.io-net-core/v15/Server/sqlite3/storage.ide-shm
+.vs/Split.io-net-core/v15/Server/sqlite3/storage.ide
+.vs/Split.io-net-core/v15/Server/sqlite3/db.lock

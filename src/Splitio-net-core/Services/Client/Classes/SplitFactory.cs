@@ -44,11 +44,11 @@ namespace Splitio.Services.Client.Classes
                     }
                     if (apiKey == "localhost")
                     {
-                        client = new LocalhostClient(options.LocalhostFilePath);
+                        client = new LocalhostClient(options.LocalhostFilePath, Common.Logging.LogManager.GetLogger(typeof(SplitClient)));
                     }
                     else
                     {
-                        client = new SelfRefreshingClient(apiKey, options);
+                        client = new SelfRefreshingClient(apiKey, options, Common.Logging.LogManager.GetLogger(typeof(SplitClient)));
                     }
                     break;
                 case Mode.Consumer:
@@ -62,7 +62,7 @@ namespace Splitio.Services.Client.Classes
                             }
                             var redisAssembly = Assembly.Load(new AssemblyName("Splitio-net-core.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
-                            client = (ISplitClient)Activator.CreateInstance(redisType, new Object[] { options });
+                            client = (ISplitClient)Activator.CreateInstance(redisType, new Object[] { options, Common.Logging.LogManager.GetLogger(typeof(SplitClient)) });
 
                         }
                         catch (Exception e)
