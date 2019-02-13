@@ -19,18 +19,23 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var key = string.Format("{0}SPLITIO.impressions", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 
-            var impressions = new List<object>();
+            var lengthRedis = 0L;
 
             foreach (var item in items)
             {
-                impressions.Add(new
+                var impression = new
                 {
                     m = new { s = SdkVersion, i = MachineIp, n = Environment.MachineName },
                     i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time }
-                });
+                };
+
+                lengthRedis = redisAdapter.ListRightPush(key, JsonConvert.SerializeObject(impression));
             }
 
-            redisAdapter.ListRightPush(key, JsonConvert.SerializeObject(impressions));
+            if (lengthRedis == items.Count)
+            {
+                redisAdapter.KeyExpire(key, new TimeSpan(0, 0, 3600));
+            }
         }
     }
 }

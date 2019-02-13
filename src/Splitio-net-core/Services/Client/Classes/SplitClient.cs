@@ -136,17 +136,6 @@ namespace Splitio.Services.Client.Classes
             return treatmentsForFeatures;
         }
 
-        protected virtual void ImpressionLog<T>(IListener<T> listener, IList<T> impressions)
-        {
-            if (listener != null)
-            {
-                foreach (var imp in impressions)
-                {
-                    listener.Log(imp);
-                }
-            }
-        }
-
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
         {
             try
@@ -252,6 +241,17 @@ namespace Splitio.Services.Client.Classes
             else
             {
                 return new TreatmentResult(LabelKilled, split.defaultTreatment, split.changeNumber);
+            }
+        }
+
+        protected virtual void ImpressionLog<T>(IListener<T> listener, IList<T> impressions)
+        {
+            if (listener != null)
+            {
+                foreach (var imp in impressions)
+                {
+                    listener.Log(imp);
+                }
             }
         }
         #endregion

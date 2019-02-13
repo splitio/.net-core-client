@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Splitio_Tests.Integration_Tests
 {
+    [Ignore]
     [TestClass]
     public class SelfRefreshingSplitClientTests
     {
@@ -11,7 +12,7 @@ namespace Splitio_Tests.Integration_Tests
         public void DestroySuccessfully()
         {
             //Arrange
-            var apikey = "r6sp9nott1ldiofpj1dc27oqed7dsn7m2vsi";
+            var apikey = "API_KEY";
 
             var configurations = new ConfigurationOptions();
             configurations.Ready = 60000;

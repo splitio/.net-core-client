@@ -1,4 +1,5 @@
 ﻿using StackExchange.Redis;
+using System;
 
 namespace Splitio.Redis.Services.Cache.Interfaces
 {
@@ -33,5 +34,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         void Flush();
 
         bool IsConnected();
+
+        bool KeyExpire(string key, TimeSpan expiry);
     }
 }
