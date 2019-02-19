@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             cache.AddItem(impressions);
 
             //Assert
-            redisAdapterMock.Verify(mock => mock.ListRightPush(key, It.IsAny<RedisValue>()));
+            redisAdapterMock.Verify(mock => mock.ListRightPush(key, It.IsAny<RedisValue[]>()));
         }
     }
 }
