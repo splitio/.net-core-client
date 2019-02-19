@@ -25,6 +25,8 @@ namespace Splitio.Redis.Services.Cache.Interfaces
 
         long ListRightPush(string key, RedisValue value);
 
+        long ListRightPush(string key, RedisValue[] values);
+
         bool SIsMember(string key, string value);
 
         RedisValue[] SMembers(string key);

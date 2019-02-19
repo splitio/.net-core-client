@@ -2,8 +2,10 @@
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
@@ -19,18 +21,13 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var key = string.Format("{0}SPLITIO.impressions", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 
-            var lengthRedis = 0L;
-
-            foreach (var item in items)
+            var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
-                var impression = new
-                {
-                    m = new { s = SdkVersion, i = MachineIp, n = Environment.MachineName },
-                    i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time }
-                };
+                m = new { s = SdkVersion, i = MachineIp, n = Environment.MachineName },
+                i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time }
+            }));
 
-                lengthRedis = redisAdapter.ListRightPush(key, JsonConvert.SerializeObject(impression));
-            }
+            var lengthRedis = redisAdapter.ListRightPush(key, impressions.Select(i => (RedisValue)i).ToArray());
 
             if (lengthRedis == items.Count)
             {
