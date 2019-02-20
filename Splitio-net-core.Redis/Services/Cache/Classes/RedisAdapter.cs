@@ -240,5 +240,31 @@ namespace Splitio.Redis.Services.Cache.Classes
                 Log.Error("Exception calling Redis Adapter Flush", e);
             }
         }
+
+        public bool KeyExpire(string key, TimeSpan expiry)
+        {
+            try
+            {
+                return database.KeyExpire(key, expiry);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception calling Redis Adapter KeyExpire", e);
+                return false;
+            }
+        }
+
+        public long ListRightPush(string key, RedisValue[] values)
+        {
+            try
+            {
+                return database.ListRightPush(key, values);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception calling Redis Adapter ListRightPush", e);
+                return 0;
+            }
+        }
     }
 }

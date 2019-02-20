@@ -13,5 +13,15 @@ namespace Splitio.Domain
             this.bucketingKeyHadValue = bucketingKey != null;
             this.bucketingKey = bucketingKey ?? matchingKey;
         }
+
+        public bool IsValid()
+        {
+            if (matchingKey == null || bucketingKey == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

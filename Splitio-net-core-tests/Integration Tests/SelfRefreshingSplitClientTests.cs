@@ -1,18 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
-using System;
+using System.Linq;
 
 namespace Splitio_Tests.Integration_Tests
 {
-    [TestClass]
     [Ignore]
+    [TestClass]
     public class SelfRefreshingSplitClientTests
     {
         [TestMethod]
         public void DestroySuccessfully()
         {
             //Arrange
-            String apikey = "WRITE_API_KEY_HERE";
+            var apikey = "API_KEY";
 
             var configurations = new ConfigurationOptions();
             configurations.Ready = 60000;
@@ -27,7 +27,7 @@ namespace Splitio_Tests.Integration_Tests
             var client = factory.Client();
 
             //Act
-            var result1 = client.GetTreatment("littlespoon", "NET_isBetweenNumberWithAttributeValueThatMatches");
+            var result1 = client.GetTreatment("littlespoon", "always_on");
 
             client.Destroy();
 
@@ -38,11 +38,11 @@ namespace Splitio_Tests.Integration_Tests
             var resultDestroy4 = manager.Split("NET_isBetweenNumberWithAttributeValueThatMatches");
 
             //Assert
-            Assert.IsTrue(result1 == "V1");
-            Assert.IsTrue(resultDestroy1 == "control");
-            Assert.AreEqual(resultDestroy2.Count, 0);
-            Assert.AreEqual(resultDestroy3.Count, 0);
-            Assert.IsTrue(resultDestroy4 == null);
+            Assert.AreEqual("on", result1);
+            Assert.AreEqual("control", resultDestroy1);
+            Assert.IsFalse(resultDestroy2.Any());
+            Assert.IsFalse(resultDestroy3.Any());
+            Assert.IsNull(resultDestroy4);
         }
     }
 }
