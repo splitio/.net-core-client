@@ -1,5 +1,8 @@
 NEWS
 
+3.6.0
+- Updated impressions cache for Redis storage to reduce the amount of Redis operations by using a single queue.
+
 3.5.0
 - Added Input validation
 - Adding Block Until Ready for Redis client
