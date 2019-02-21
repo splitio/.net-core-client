@@ -179,7 +179,8 @@ namespace Splitio.Redis.Services.Client.Classes
             {
                 base.ImpressionLog(impressionListener, ImpressionsQueue);
             }
-            else if (impressionListenerRedis != null)
+
+            if (impressionListenerRedis != null)
             {
                 impressionListenerRedis.Log(ImpressionsQueue);
             }
