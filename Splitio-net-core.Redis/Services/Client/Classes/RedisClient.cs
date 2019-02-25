@@ -188,6 +188,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         public override void Destroy()
         {
+            Destroyed = true;
             return;
         }
     }

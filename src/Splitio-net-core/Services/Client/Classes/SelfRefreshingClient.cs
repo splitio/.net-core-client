@@ -88,6 +88,7 @@ namespace Splitio.Services.Client.Classes
                 BlockUntilReady(BlockMilisecondsUntilReady);
             }
             LaunchTaskSchedulerOnReady();
+            Destroyed = false;
         }
 
         private void ReadConfig(ConfigurationOptions config)
@@ -259,7 +260,8 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            this.Stop();
+            Stop();
+            Destroyed = true;
         }
     }
 }

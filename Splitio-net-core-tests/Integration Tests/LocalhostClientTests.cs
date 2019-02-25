@@ -21,9 +21,9 @@ namespace Splitio_Tests.Integration_Tests
             var client = new LocalhostClient(@"Resources\test.splits", _logMock.Object);
 
             //Act
-            var result1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
-            var result3 = client.GetTreatment("", "other_test_feature");
+            var result3 = client.GetTreatment("id", "other_test_feature");
             var result4 = client.GetTreatment("id", "other_test_feature");
 
             //Asert
@@ -44,11 +44,11 @@ namespace Splitio_Tests.Integration_Tests
             Thread.Sleep(50);
 
             //Act
-            var result1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
-            var result3 = client.GetTreatment("", "other_test_feature");
+            var result3 = client.GetTreatment("id", "other_test_feature");
             var result4 = client.GetTreatment("id", "other_test_feature");
-            var result5 = client.GetTreatment("", "other_test_feature2");
+            var result5 = client.GetTreatment("id", "other_test_feature2");
             var result6 = client.GetTreatment("id", "other_test_feature2");
 
             //Assert
@@ -69,13 +69,13 @@ namespace Splitio_Tests.Integration_Tests
 
 
             //Act
-            var result1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var result2 = client.GetTreatment("id", "double_writes_to_cassandra");
 
 
             client.Destroy();
 
-            var resultDestroy1 = client.GetTreatment("", "double_writes_to_cassandra");
+            var resultDestroy1 = client.GetTreatment("id", "double_writes_to_cassandra");
             var manager = client.GetSplitManager();
             var resultDestroy2 = manager.Splits();
             var resultDestroy3 = manager.SplitNames();
