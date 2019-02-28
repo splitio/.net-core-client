@@ -9,8 +9,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitFactoryUnitTests
     {
         [TestMethod]
-        [ExpectedException(typeof(TimeoutException), "SDK was not ready in 1 miliseconds")]
-        public void BuildSplitClientShouldReturnExceptionIfSdkNotReady()
+        public void BuildSplitClientShouldReturnClientDestroyed()
         {
             //Arrange            
             var options = new ConfigurationOptions() { Ready = 1 };
@@ -18,6 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Act         
             var client = factory.Client();
+            Assert.IsTrue(client.IsDestroyed());
         }
 
         [TestMethod]

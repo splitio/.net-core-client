@@ -18,13 +18,13 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (trafficType == null)
             {
-                _log.Error($"{method}: you passed a null or undefined {trafficType}, {trafficType} must be a non-empty string");
+                _log.Error($"{method}: you passed a null traffic_type, traffic_type must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
             if (trafficType == string.Empty)
             {
-                _log.Error($"{method}: you passed an empty {trafficType}, {trafficType} must be a non-empty string");
+                _log.Error($"{method}: you passed an empty traffic_type, traffic_type must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 

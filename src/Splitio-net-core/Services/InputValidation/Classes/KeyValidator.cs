@@ -27,7 +27,7 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (key == null)
             {
-                _log.Error($"{method}: you passed a null or undefined {type}, the {type} must be a non-empty string.");
+                _log.Error($"{method}: you passed a null {type}, the {type} must be a non-empty string.");
                 return false;
             }
 

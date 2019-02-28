@@ -32,8 +32,8 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result);
-            _log.Verify(mock => mock.Error($"{method}: you passed a null or undefined matchingKey, the matchingKey must be a non-empty string."), Times.Once());
-            _log.Verify(mock => mock.Error($"{method}: you passed a null or undefined bucketingKey, the bucketingKey must be a non-empty string."), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed a null matchingKey, the matchingKey must be a non-empty string."), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed a null bucketingKey, the bucketingKey must be a non-empty string."), Times.Once());
         }
 
         [TestMethod]

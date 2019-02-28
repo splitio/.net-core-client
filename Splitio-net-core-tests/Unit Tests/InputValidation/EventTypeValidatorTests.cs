@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result);
-            _log.Verify(mock => mock.Error($"{method}: you passed an empty {eventType}, {eventType} must be a non-empty String"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed an empty event_type, event_type must be a non-empty String"), Times.Once());
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Assert.
             Assert.IsFalse(result);
-            _log.Verify(mock => mock.Error($"{method}: you passed a null or undefined {eventType}, {eventType} must be a non-empty String"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed a null event_type, event_type must be a non-empty String"), Times.Once());
         }
 
         [TestMethod]

@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             apiKeyValidator.Validate(apiKey);
 
             //Assert
-            _log.Verify(mock => mock.Error($"factory instantiation: you passed and empty {apiKey}, {apiKey} must be a non-empty string."), Times.Once());
+            _log.Verify(mock => mock.Error($"factory instantiation: you passed and empty api_key, api_key must be a non-empty string."), Times.Once());
         }
 
         [TestMethod]
@@ -42,7 +42,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             apiKeyValidator.Validate(apiKey);
 
             //Assert
-            _log.Verify(mock => mock.Error($"factory instantiation: you passed a null or undefined {apiKey}, {apiKey} must be a non-empty string."), Times.Once());
+            _log.Verify(mock => mock.Error($"factory instantiation: you passed a null api_key, api_key must be a non-empty string."), Times.Once());
         }
 
         [TestMethod]

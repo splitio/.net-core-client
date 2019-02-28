@@ -47,13 +47,13 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (splitName == null)
             {
-                _log.Error($"{method}: you passed a null or undefined split name, split name must be a non-empty string");
+                _log.Error($"{method}: you passed a null split_name, split_name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 
             if (splitName == string.Empty)
             {
-                _log.Error($"{method}: you passed an empty split name, split name must be a non-empty string");
+                _log.Error($"{method}: you passed an empty split_name, split_name must be a non-empty string");
                 return new ValidatorResult { Success = false };
             }
 

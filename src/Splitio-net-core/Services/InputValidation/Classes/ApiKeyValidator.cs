@@ -16,12 +16,12 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (apiKey == string.Empty)
             {
-                _log.Error($"factory instantiation: you passed and empty {apiKey}, {apiKey} must be a non-empty string.");
+                _log.Error("factory instantiation: you passed and empty api_key, api_key must be a non-empty string.");
             }
 
             if (apiKey == null)
             {
-                _log.Error($"factory instantiation: you passed a null or undefined {apiKey}, {apiKey} must be a non-empty string.");
+                _log.Error("factory instantiation: you passed a null api_key, api_key must be a non-empty string.");
             }
         }
     }

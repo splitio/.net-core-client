@@ -73,6 +73,8 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config, ILog log) : base(log)
         {
+            Destroyed = false;
+
             ApiKey = apiKey;
             ReadConfig(config);
             BuildSdkReadinessGates();
@@ -88,7 +90,6 @@ namespace Splitio.Services.Client.Classes
                 BlockUntilReady(BlockMilisecondsUntilReady);
             }
             LaunchTaskSchedulerOnReady();
-            Destroyed = false;
         }
 
         private void ReadConfig(ConfigurationOptions config)
@@ -143,7 +144,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!gates.IsSDKReady(BlockMilisecondsUntilReady))
             {
-                throw new TimeoutException(string.Format("SDK was not ready in {0} miliseconds", BlockMilisecondsUntilReady));
+                Destroy();
             }
         }
 

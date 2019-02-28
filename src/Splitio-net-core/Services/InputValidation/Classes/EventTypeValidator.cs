@@ -19,13 +19,13 @@ namespace Splitio.Services.InputValidation.Classes
         {
             if (eventType == string.Empty)
             {
-                _log.Error($"{method}: you passed an empty {eventType}, {eventType} must be a non-empty String");
+                _log.Error($"{method}: you passed an empty event_type, event_type must be a non-empty String");
                 return false;
             }
 
             if (eventType == null)
             {
-                _log.Error($"{method}: you passed a null or undefined {eventType}, {eventType} must be a non-empty String");
+                _log.Error($"{method}: you passed a null event_type, event_type must be a non-empty String");
                 return false;
             }
 

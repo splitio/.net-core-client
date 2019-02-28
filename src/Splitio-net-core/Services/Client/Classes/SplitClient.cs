@@ -118,11 +118,7 @@ namespace Splitio.Services.Client.Classes
 
             CheckClientStatus();
 
-            if (!_keyValidator.IsValid(key, nameof(GetTreatments)))
-            {
-                treatmentsForFeatures.Add(features.First(), Control);
-            }
-            else
+            if (_keyValidator.IsValid(key, nameof(GetTreatments)))
             {
                 features = _splitNameValidator.SplitNamesAreValid(features, nameof(GetTreatments));
 
@@ -150,6 +146,10 @@ namespace Splitio.Services.Client.Classes
                 }
 
                 ImpressionLog(impressionListener, ImpressionsQueue);
+            }
+            else
+            {
+                treatmentsForFeatures.Add(features.First(), Control);
             }
 
             ClearItemsAddedToTreatmentCache(key.matchingKey);
@@ -188,6 +188,11 @@ namespace Splitio.Services.Client.Classes
         }
 
         public abstract void Destroy();
+
+        public bool IsDestroyed()
+        {
+            return Destroyed;
+        }
         #endregion
 
         #region Protected Methods

@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Asserts.
             Assert.IsFalse(result.Success);
-            _log.Verify(mock => mock.Error($"{method}: you passed a null or undefined {trafficType}, {trafficType} must be a non-empty string"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed a null traffic_type, traffic_type must be a non-empty string"), Times.Once());
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
 
             // Asserts.
             Assert.IsFalse(result.Success);
-            _log.Verify(mock => mock.Error($"{method}: you passed an empty {trafficType}, {trafficType} must be a non-empty string"), Times.Once());
+            _log.Verify(mock => mock.Error($"{method}: you passed an empty traffic_type, traffic_type must be a non-empty string"), Times.Once());
         }
 
         [TestMethod]
