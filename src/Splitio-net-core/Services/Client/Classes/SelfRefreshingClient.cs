@@ -144,7 +144,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!gates.IsSDKReady(BlockMilisecondsUntilReady))
             {
-                Destroy();
+                throw new TimeoutException(string.Format("SDK was not ready in {0} miliseconds", BlockMilisecondsUntilReady));
             }
         }
 
