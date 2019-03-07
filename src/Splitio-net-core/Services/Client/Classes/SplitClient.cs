@@ -4,6 +4,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -17,6 +19,10 @@ namespace Splitio.Services.Client.Classes
     public abstract class SplitClient : ISplitClient
     {
         protected readonly ILog _log;
+        protected readonly IKeyValidator _keyValidator;
+        protected readonly ISplitNameValidator _splitNameValidator;
+        protected readonly IEventTypeValidator _eventTypeValidator;
+        protected readonly ITrafficTypeValidator _trafficTypeValidator;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string LabelKilled = "killed";
@@ -26,6 +32,7 @@ namespace Splitio.Services.Client.Classes
         protected const string LabelTrafficAllocationFailed = "not in split";
 
         protected static bool LabelsEnabled;
+        protected static bool Destroyed;
 
         protected Splitter splitter;
         protected IListener<KeyImpression> impressionListener;
@@ -45,6 +52,10 @@ namespace Splitio.Services.Client.Classes
         public SplitClient(ILog log)
         {
             _log = log;
+            _keyValidator = new KeyValidator(_log);
+            _splitNameValidator = new SplitNameValidator(_log);
+            _eventTypeValidator = new EventTypeValidator(_log);
+            _trafficTypeValidator = new TrafficTypeValidator(_log);
         }
 
         public ISplitManager GetSplitManager()
@@ -62,12 +73,15 @@ namespace Splitio.Services.Client.Classes
         {
             ImpressionsQueue = new List<KeyImpression>();
 
-            if (!key.IsValid())
-            {
-                _log.Error($"{nameof(GetTreatment)}: Key should be an object with bucketingKey and matchingKey with valid string properties.");
+            CheckClientStatus();
 
-                return Control;
-            }
+            if (!_keyValidator.IsValid(key, nameof(GetTreatment))) return Control;
+
+            var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, nameof(GetTreatment));
+
+            if (!splitNameResult.Success) return Control;
+
+            feature = splitNameResult.Value;
 
             var start = CurrentTimeHelper.CurrentTimeMillis();
             var clock = new Stopwatch();
@@ -102,19 +116,17 @@ namespace Splitio.Services.Client.Classes
             var treatmentsForFeatures = new Dictionary<string, string>();
             ImpressionsQueue = new List<KeyImpression>();
 
-            if (!key.IsValid())
-            {
-                _log.Error($"{nameof(GetTreatment)}: Key should be an object with bucketingKey and matchingKey with valid string properties.");
+            CheckClientStatus();
 
-                treatmentsForFeatures.Add(features.First(), Control);
-            }
-            else
+            if (_keyValidator.IsValid(key, nameof(GetTreatments)))
             {
+                features = _splitNameValidator.SplitNamesAreValid(features, nameof(GetTreatments));
+
                 var start = CurrentTimeHelper.CurrentTimeMillis();
                 var clock = new Stopwatch();
                 clock.Start();
 
-                foreach (string feature in features)
+                foreach (var feature in features)
                 {
                     var treatmentResult = DoGetTreatment(key, feature, attributes, true);
 
@@ -130,6 +142,10 @@ namespace Splitio.Services.Client.Classes
 
                 ImpressionLog(impressionListener, ImpressionsQueue);
             }
+            else
+            {
+                treatmentsForFeatures.Add(features.First(), Control);
+            }
 
             ClearItemsAddedToTreatmentCache(key.matchingKey);
 
@@ -138,30 +154,20 @@ namespace Splitio.Services.Client.Classes
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
         {
+            CheckClientStatus();
+
+            var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
+            var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, nameof(trafficType));
+            var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
+
+            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult) return false;
+
             try
             {
-                if (key == null)
-                {
-                    _log.Error($"{nameof(Track)}: {nameof(key)} cannot be null");
-                    return false;
-                }
-
-                if (trafficType == null)
-                {
-                    _log.Error($"{nameof(Track)}: {nameof(trafficType)} cannot be null");
-                    return false;
-                }
-
-                if (eventType == null)
-                {
-                    _log.Error($"{nameof(Track)}: {nameof(eventType)} cannot be null");
-                    return false;
-                }
-
                 eventListener.Log(new Event
                 {
                     key = key,
-                    trafficTypeName = trafficType,
+                    trafficTypeName = trafficTypeResult.Value,
                     eventTypeId = eventType,
                     value = value,
                     timestamp = CurrentTimeHelper.CurrentTimeMillis()
@@ -177,6 +183,11 @@ namespace Splitio.Services.Client.Classes
         }
 
         public abstract void Destroy();
+
+        public bool IsDestroyed()
+        {
+            return Destroyed;
+        }
         #endregion
 
         #region Protected Methods
@@ -297,6 +308,14 @@ namespace Splitio.Services.Client.Classes
             }
 
             treatmentCache = temporaryTreatmentCache;
+        }
+
+        private void CheckClientStatus()
+        {
+            if (Destroyed)
+            {
+                _log.Error("Client has already been destroyed - no calls possible");
+            }
         }
         #endregion
     }

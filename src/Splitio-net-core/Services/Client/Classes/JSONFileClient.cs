@@ -59,6 +59,7 @@ namespace Splitio.Services.Client.Classes
         {
             splitCache.Clear();
             segmentCache.Clear();
+            Destroyed = true;
         }
     }
 }

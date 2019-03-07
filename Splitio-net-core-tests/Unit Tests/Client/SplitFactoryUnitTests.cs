@@ -10,7 +10,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         [TestMethod]
         [ExpectedException(typeof(TimeoutException), "SDK was not ready in 1 miliseconds")]
-        public void BuildSplitClientShouldReturnExceptionIfSdkNotReady()
+        public void BuildSplitClientShouldReturnClientDestroyed()
         {
             //Arrange            
             var options = new ConfigurationOptions() { Ready = 1 };

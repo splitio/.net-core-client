@@ -31,6 +31,8 @@ namespace Splitio.Services.Client.Classes
             splitCache = new InMemorySplitCache(splits);
             BuildSplitter(splitter);
             manager = new SplitManager(splitCache);
+
+            Destroyed = false;
         }
 
         public override bool Track(string key, string trafficType, string eventType, double? value = default(double?))
@@ -127,6 +129,7 @@ namespace Splitio.Services.Client.Classes
         {
             watcher.Dispose();
             splitCache.Clear();
+            Destroyed = true;
         }
     }
 }

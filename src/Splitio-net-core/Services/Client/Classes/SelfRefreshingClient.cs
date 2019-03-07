@@ -73,6 +73,8 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config, ILog log) : base(log)
         {
+            Destroyed = false;
+
             ApiKey = apiKey;
             ReadConfig(config);
             BuildSdkReadinessGates();
@@ -259,7 +261,8 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            this.Stop();
+            Stop();
+            Destroyed = true;
         }
     }
 }
