@@ -128,16 +128,11 @@ namespace Splitio.Services.Client.Classes
 
                 foreach (var feature in features)
                 {
-                    var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, nameof(GetTreatment));
+                    var treatmentResult = DoGetTreatment(key, feature, attributes, true);
 
-                    if (splitNameResult.Success)
-                    {
-                        var treatmentResult = DoGetTreatment(key, splitNameResult.Value, attributes, true);
+                    treatmentsForFeatures.Add(feature, treatmentResult.Treatment);
 
-                        treatmentsForFeatures.Add(splitNameResult.Value, treatmentResult.Treatment);
-
-                        ImpressionsQueue.Add(BuildImpression(key.matchingKey, splitNameResult.Value, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
-                    }
+                    ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
                 }
 
                 if (metricsLog != null)

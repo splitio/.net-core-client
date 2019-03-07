@@ -31,16 +31,19 @@ namespace Splitio.Services.InputValidation.Classes
                 return splitNames;
             }
 
-            var splits = new List<string>();
+            var dicSplits = new Dictionary<string, string>();
 
             foreach (var name in splitNames)
             {
-                var splitName = CheckWhiteSpaces(name, method);
+                var splitNameResult = SplitNameIsValid(name, method);
 
-                if (!splits.Contains(splitName)) splits.Add(splitName);
+                if (splitNameResult.Success)
+                {
+                    try { dicSplits.Add(splitNameResult.Value, splitNameResult.Value); } catch { }
+                }
             }
 
-            return splits;
+            return dicSplits.Keys.ToList();
         }
 
         public ValidatorResult SplitNameIsValid(string splitName, string method)
