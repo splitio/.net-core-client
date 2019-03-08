@@ -37,7 +37,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSplitClient()
         {
-            options = options == null ? new ConfigurationOptions() : options;
+            options = options ?? new ConfigurationOptions();
 
             if (!options.Ready.HasValue)
             {
