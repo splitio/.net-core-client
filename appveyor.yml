@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 3.5.0
+version: 4.0.0
 
 dotnet_csproj:
   patch: true
@@ -11,6 +11,9 @@ dotnet_csproj:
 configuration: Release
 
 before_build:
+ - choco install redis-64
+ - redis-server --service-install
+ - redis-server --service-start
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 

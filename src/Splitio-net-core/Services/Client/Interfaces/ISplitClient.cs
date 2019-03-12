@@ -14,8 +14,11 @@ namespace Splitio.Services.Client.Interfaces
         Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null);
 
         Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null);
+
         bool Track(string key, string trafficType, string eventType, double? value = null);
 
         void Destroy();
+
+        bool IsDestroyed();
     }
 }

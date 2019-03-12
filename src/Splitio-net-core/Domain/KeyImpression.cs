@@ -4,7 +4,7 @@ namespace Splitio.Domain
 {
     public class KeyImpression
     {
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public string feature { get; set; }
         public string keyName { get; set; }
         public string treatment { get; set; }

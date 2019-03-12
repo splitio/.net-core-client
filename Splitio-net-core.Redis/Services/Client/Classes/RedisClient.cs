@@ -9,6 +9,7 @@ using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +23,8 @@ namespace Splitio.Redis.Services.Client.Classes
     {
         private RedisSplitParser splitParser;
         private RedisAdapter redisAdapter;
+        private IListener<IList<KeyImpression>> impressionListenerRedis;
+        private ISimpleCache<IList<KeyImpression>> impressionsCacheRedis;
 
         private static string SdkVersion;
         private static string SdkSpecVersion;
@@ -91,6 +94,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildRedisCache()
         {
             redisAdapter = new RedisAdapter(RedisHost, RedisPort, RedisPassword, RedisDatabase, RedisConnectTimeout, RedisConnectRetry, RedisSyncTimeout);
+
             if (BlockMilisecondsUntilReady > 0 && !redisAdapter.IsConnected())
             {
                 throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds. Could not connect to Redis");
@@ -99,17 +103,19 @@ namespace Splitio.Redis.Services.Client.Classes
             splitCache = new RedisSplitCache(redisAdapter, RedisUserPrefix);
             segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
             metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
-            impressionsCache = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
+            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
             eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            var treatmentLog = new RedisTreatmentLog(impressionsCache);
-            impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
-            ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
+            var treatmentLog = new RedisTreatmentLog(impressionsCacheRedis);
+            impressionListenerRedis = new AsynchronousListener<IList<KeyImpression>>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            ((AsynchronousListener<IList<KeyImpression>>)impressionListenerRedis).AddListener(treatmentLog);
+
             if (config.ImpressionListener != null)
             {
+                impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
                 ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
             }
         }
@@ -141,46 +147,48 @@ namespace Splitio.Redis.Services.Client.Classes
             splitParser = new RedisSplitParser(segmentCache);
         }
 
-        protected override string GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true)
+        protected override TreatmentResult GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            long start = CurrentTimeHelper.CurrentTimeMillis();
-            var clock = new Stopwatch();
-            clock.Start();
-
             try
             {
                 var split = splitCache.GetSplit(feature);
 
                 if (split == null)
                 {
-                    if (logMetricsAndImpressions)
-                    {
-                        //if split definition was not found, impression label = "definition not found"
-                        RecordStats(key, feature, null, LabelSplitNotFound, start, Control, SdkGetTreatment, clock);
-                    }
 
                     _log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
-                    return Control;
+
+                    return new TreatmentResult(LabelSplitNotFound, Control, null);
                 }
 
                 ParsedSplit parsedSplit = splitParser.Parse((Split)split);
 
-                var treatment = GetTreatment(key, parsedSplit, attributes, start, clock, this, logMetricsAndImpressions);
-
-                return treatment;
+                return GetTreatment(key, parsedSplit, attributes, this);
             }
             catch (Exception e)
             {
-                //if there was an exception, impression label = "exception"
-                RecordStats(key, feature, null, LabelException, start, Control, SdkGetTreatment, clock);
-
                 _log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
-                return Control;
+
+                return new TreatmentResult(LabelException, Control, null);
+            }
+        }
+
+        protected override void ImpressionLog<T>(IListener<T> listener, IList<T> impressions)
+        {
+            if (impressionListener != null)
+            {
+                base.ImpressionLog(impressionListener, ImpressionsQueue);
+            }
+
+            if (impressionListenerRedis != null)
+            {
+                impressionListenerRedis.Log(ImpressionsQueue);
             }
         }
 
         public override void Destroy()
         {
+            Destroyed = true;
             return;
         }
     }

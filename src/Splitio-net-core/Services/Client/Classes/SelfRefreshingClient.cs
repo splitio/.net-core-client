@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
-    public class SelfRefreshingClient: SplitClient
+    public class SelfRefreshingClient : SplitClient
     {
         private static string ApiKey;
         private static string BaseUrl;
@@ -73,6 +73,8 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config, ILog log) : base(log)
         {
+            Destroyed = false;
+
             ApiKey = apiKey;
             ReadConfig(config);
             BuildSdkReadinessGates();
@@ -94,7 +96,7 @@ namespace Splitio.Services.Client.Classes
         {
             BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? "https://sdk.split.io" : config.Endpoint;
             EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? "https://events.split.io" : config.EventsEndpoint;
-            SplitsRefreshRate = config.FeaturesRefreshRate ?? 60;
+            SplitsRefreshRate = config.FeaturesRefreshRate ?? 5;
             SegmentRefreshRate = config.SegmentsRefreshRate ?? 60;
             HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
@@ -259,7 +261,8 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            this.Stop();
+            Stop();
+            Destroyed = true;
         }
     }
 }

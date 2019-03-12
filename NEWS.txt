@@ -1,5 +1,10 @@
 NEWS
 
+4.0.0
+- BREAKING CHANGE: Updated impressions cache for Redis storage to reduce the amount of Redis operations by using a single queue. Must use Synchronizer 2.x or above with this or newer SDK versions if you are using Redis mode. 
+- Improved Input validation to provide better and faster feedback in case of missuse.
+- Updated FeaturesRefreshRate to be 5 seconds.
+
 3.5.0
 - Added Input validation
 - Adding Block Until Ready for Redis client

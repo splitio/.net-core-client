@@ -2,6 +2,8 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,10 +13,12 @@ namespace Splitio.Services.Client.Classes
     {
         protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitManager));
         private readonly ISplitCache splitCache;
+        private readonly ISplitNameValidator _splitNameValidator;
 
         public SplitManager(ISplitCache splitCache)
         {
             this.splitCache = splitCache;
+            _splitNameValidator = new SplitNameValidator(Log);
         }
 
         public List<SplitView> Splits()
@@ -42,16 +46,14 @@ namespace Splitio.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
-            if (featureName == null)
+            var result = _splitNameValidator.SplitNameIsValid(featureName, nameof(Split));
+
+            if (splitCache == null || !result.Success)
             {
-                Log.Error($"{nameof(Split)}: {nameof(featureName)} cannot be null");
                 return null;
             }
 
-            if (splitCache == null)
-            {
-                return null;
-            }
+            featureName = result.Value;
 
             var split = (ParsedSplit)splitCache.GetSplit(featureName);
 
