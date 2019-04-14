@@ -1,5 +1,8 @@
 NEWS
 
+4.0.1
+- Bug fix InvalidOperationException in ImpressionsLog(). "Collection was modified; enumeration operation may not execute".
+
 4.0.0
 - BREAKING CHANGE: Updated impressions cache for Redis storage to reduce the amount of Redis operations by using a single queue. Must use Synchronizer 2.x or above with this or newer SDK versions if you are using Redis mode. 
 - Improved Input validation to provide better and faster feedback in case of missuse.

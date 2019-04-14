@@ -47,8 +47,6 @@ namespace Splitio.Services.Client.Classes
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
-        protected IList<KeyImpression> ImpressionsQueue;
-
         public SplitClient(ILog log)
         {
             _log = log;
@@ -71,8 +69,6 @@ namespace Splitio.Services.Client.Classes
 
         public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            ImpressionsQueue = new List<KeyImpression>();
-
             CheckClientStatus();
 
             if (!_keyValidator.IsValid(key, nameof(GetTreatment))) return Control;
@@ -96,9 +92,10 @@ namespace Splitio.Services.Client.Classes
                     metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
                 }
 
-                ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
-
-                ImpressionLog(impressionListener, ImpressionsQueue);
+                ImpressionLog(new List<KeyImpression>
+                {
+                    BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
+                });
             }
 
             return result.Treatment;
@@ -114,7 +111,7 @@ namespace Splitio.Services.Client.Classes
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, string>();
-            ImpressionsQueue = new List<KeyImpression>();
+            var ImpressionsQueue = new List<KeyImpression>();
 
             CheckClientStatus();
 
@@ -140,7 +137,7 @@ namespace Splitio.Services.Client.Classes
                     metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
                 }
 
-                ImpressionLog(impressionListener, ImpressionsQueue);
+                ImpressionLog(ImpressionsQueue);
             }
             else
             {
@@ -255,13 +252,13 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        protected virtual void ImpressionLog<T>(IListener<T> listener, IList<T> impressions)
+        protected virtual void ImpressionLog(List<KeyImpression> impressionsQueue)
         {
-            if (listener != null)
+            if (impressionListener != null)
             {
-                foreach (var imp in impressions)
+                foreach (var imp in impressionsQueue)
                 {
-                    listener.Log(imp);
+                    impressionListener.Log(imp);
                 }
             }
         }
