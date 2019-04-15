@@ -18,6 +18,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitClientForTesting = new SplitClientForTesting(_logMock.Object);
         }
 
+        #region GetTreatment
         [TestMethod]
         public void GetTreatment_ShouldReturnControl_WithNullKey()
         {
@@ -50,7 +51,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("control", result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
+        #endregion
 
+        #region Track
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullKey()
         {
@@ -83,5 +86,19 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsFalse(result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
+        #endregion
+
+        #region GetTreatmentWithConfig
+        [TestMethod]
+        public void GetTreatmentWithConfig()
+        {
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig(string.Empty, string.Empty);
+
+            // Assert
+            Assert.AreEqual("control", result.Value);
+            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+        #endregion
     }
 }
