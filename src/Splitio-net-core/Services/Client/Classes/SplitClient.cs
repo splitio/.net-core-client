@@ -240,7 +240,7 @@ namespace Splitio.Services.Client.Classes
                     {
                         var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-                        return new TreatmentResult(condition.label, treatment, split.changeNumber);
+                        return new TreatmentResult(condition.label, treatment, split.changeNumber, split.configurations);
                     }
                 }
 
