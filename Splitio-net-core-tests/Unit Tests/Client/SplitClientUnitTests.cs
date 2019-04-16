@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -53,6 +54,66 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
         #endregion
 
+        #region GetTreatmentWithConfig
+        [TestMethod]
+        public void GetTreatmentWithConfig_WithEmptyKey_ShouldReturnControl()
+        {
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig(string.Empty, string.Empty);
+
+            // Assert
+            Assert.AreEqual("control", result.Treatment);
+            Assert.IsNull(result.Config);
+            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WithNullKey_ShouldReturnControl()
+        {
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig((Key)null, string.Empty);
+
+            // Assert
+            Assert.AreEqual("control", result.Treatment);
+            Assert.IsNull(result.Config);
+            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+        #endregion
+
+        #region GetTreatmentsWithConfig
+        [TestMethod]
+        public void GetTreatmentsWithConfig_WithEmptyKey_ShouldReturnControl()
+        {
+            // Act
+            var results = _splitClientForTesting.GetTreatmentsWithConfig(string.Empty, new List<string> { string.Empty });
+
+            // Assert
+            foreach (var res in results)
+            {
+                Assert.AreEqual("control", res.Value.Treatment);
+                Assert.IsNull(res.Value.Config);
+            }
+
+            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfig_WithNullKey_ShouldReturnControl()
+        {
+            // Act
+            var results = _splitClientForTesting.GetTreatmentsWithConfig((Key)null, new List<string> { string.Empty });
+
+            // Assert
+            foreach (var res in results)
+            {
+                Assert.AreEqual("control", res.Value.Treatment);
+                Assert.IsNull(res.Value.Config);
+            }
+
+            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+        #endregion
+
         #region Track
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullKey()
@@ -85,19 +146,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.IsFalse(result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
-        }
-        #endregion
-
-        #region GetTreatmentWithConfig
-        [TestMethod]
-        public void GetTreatmentWithConfig()
-        {
-            // Act
-            var result = _splitClientForTesting.GetTreatmentWithConfig(string.Empty, string.Empty);
-
-            // Assert
-            Assert.AreEqual("control", result.Value);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
         #endregion
     }

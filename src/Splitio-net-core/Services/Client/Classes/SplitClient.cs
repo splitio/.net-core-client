@@ -62,20 +62,19 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Public Methods
-
-        public Treatment GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
+        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
             return GetTreatmentWithConfig(new Key(key, null), feature, attributes, logMetricsAndImpressions, multiple);
         }
 
-        public Treatment GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
+        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
             var result = GetTreatmentResult(key, feature, attributes, logMetricsAndImpressions, multiple);
 
-            return new Treatment
+            return new SplitResult
             {
-                Value = result.Treatment,
-                Configurations = result.Configurations
+                Treatment = result.Treatment,
+                Config = result.Configurations
             };
         }
 
@@ -91,22 +90,21 @@ namespace Splitio.Services.Client.Classes
             return result.Treatment;
         }
 
-        public Dictionary<string, Treatment> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
             return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
         }
 
-        public Dictionary<string, Treatment> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
             var results = GetTreatmentsResult(key, features, attributes);
-            var treatmentsForFeatures = new Dictionary<string, Treatment>();
 
-            foreach (var res in results)
-            {
-                treatmentsForFeatures.Add(res.Key, new Treatment { Value = res.Value.Treatment, Configurations = res.Value.Configurations });
-            }
-
-            return treatmentsForFeatures;
+            return results
+                .ToDictionary(r => r.Key, r => new SplitResult
+                {
+                    Treatment = r.Value.Treatment,
+                    Config = r.Value.Configurations
+                });
         }
 
         public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
@@ -117,14 +115,9 @@ namespace Splitio.Services.Client.Classes
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
             var results = GetTreatmentsResult(key, features, attributes);
-            var treatmentsForFeatures = new Dictionary<string, string>();
 
-            foreach (var res in results)
-            {
-                treatmentsForFeatures.Add(res.Key, res.Value.Treatment);
-            }
-
-            return treatmentsForFeatures;
+            return results
+                .ToDictionary(r => r.Key, r => r.Value.Treatment);
         }
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
@@ -279,7 +272,7 @@ namespace Splitio.Services.Client.Classes
                 treatmentsForFeatures.Add(features.First(), new TreatmentResult(LabelSplitNotFound, Control, null));
             }
 
-            ClearItemsAddedToTreatmentCache(key.matchingKey);
+            ClearItemsAddedToTreatmentCache(key?.matchingKey);
 
             return treatmentsForFeatures;
         }

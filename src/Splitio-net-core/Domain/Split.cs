@@ -2,7 +2,7 @@
 
 namespace Splitio.Domain
 {
-    public class Split: SplitBase
+    public class Split : SplitBase
     {
         public string name { get; set; }
         public int seed { get; set; }
