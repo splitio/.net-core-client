@@ -17,8 +17,8 @@ namespace Splitio.Services.InputValidation.Classes
 
         public bool IsValid(Key key, string method)
         {
-            var matchingKeyIsValid = Validate(key.matchingKey, method, nameof(key.matchingKey));
-            var bucketingKeyIsValid = Validate(key.bucketingKey, method, nameof(key.bucketingKey));
+            var matchingKeyIsValid = Validate(key?.matchingKey, method, nameof(key.matchingKey));
+            var bucketingKeyIsValid = Validate(key?.bucketingKey, method, nameof(key.bucketingKey));
 
             return matchingKeyIsValid && bucketingKeyIsValid;
         }
