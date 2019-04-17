@@ -9,5 +9,6 @@ namespace Splitio.Domain
         public bool killed { get; set; }
         public List<string> treatments { get; set; }
         public long changeNumber { get; set; }
+        public object configs { get; set; }
     }
 }
