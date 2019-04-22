@@ -14,5 +14,6 @@ namespace Splitio.Domain
         public AlgorithmEnum algo { get; set; }
         public int trafficAllocation { get; set; }
         public int trafficAllocationSeed { get; set; }
+        public object configurations { get; set; }
     }
 }
