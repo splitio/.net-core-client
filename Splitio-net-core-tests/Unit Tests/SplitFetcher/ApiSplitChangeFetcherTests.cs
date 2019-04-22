@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.SplitFetcher.Interfaces;
-using Splitio.Services.SplitFetcher.Classes;
-using System.Linq;
 using Splitio.Domain;
+using Splitio.Services.SplitFetcher.Classes;
+using Splitio.Services.SplitFetcher.Interfaces;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests
@@ -14,7 +14,7 @@ namespace Splitio_Tests.Unit_Tests
     {
         [TestMethod]
         [Description("Test a Json that changes its structure and is deserialized without exception. Contains: a field renamed, a field removed and a field added.")]
-        public async void ExecuteJsonDeserializeSuccessfulWithChangeInJsonFormat()
+        public async Task ExecuteJsonDeserializeSuccessfulWithChangeInJsonFormat()
         {
             //Arrange
             Mock<ISplitSdkApiClient> apiMock = new Mock<ISplitSdkApiClient>();
@@ -33,7 +33,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async void FetchSplitChangesSuccessfull()
+        public async Task FetchSplitChangesSuccessfull()
         {
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
@@ -105,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async void FetchSplitChangesSuccessfullVerifyAlgorithmIsLegacy()
+        public async Task FetchSplitChangesSuccessfullVerifyAlgorithmIsLegacy()
         {
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
@@ -170,7 +170,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async void FetchSplitChangesSuccessfullVerifyAlgorithmIsMurmur()
+        public async Task FetchSplitChangesSuccessfullVerifyAlgorithmIsMurmur()
         {
             //Arrange
             var apiClient = new Mock<ISplitSdkApiClient>();
@@ -235,7 +235,7 @@ namespace Splitio_Tests.Unit_Tests
         }
 
         [TestMethod]
-        public async void FetchSplitChangesWithExcepionSouldReturnNull()
+        public async Task FetchSplitChangesWithExcepionSouldReturnNull()
         {
             var apiClient = new Mock<ISplitSdkApiClient>();
             apiClient
@@ -248,6 +248,77 @@ namespace Splitio_Tests.Unit_Tests
 
             //Assert
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task FetchSplitChangesSuccessfull_WhenConfigurationsIsNotNull()
+        {
+            //Arrange
+            var apiClient = new Mock<ISplitSdkApiClient>();
+            apiClient
+            .Setup(x => x.FetchSplitChanges(It.IsAny<long>()))
+            .Returns(Task.FromResult(@"{
+                          'splits': [
+                            {
+                              'trafficTypeName': 'user',
+                              'name': 'Test_1',
+                              'seed': 673896442,
+                              'status': 'ACTIVE',
+                              'killed': false,
+                              'algo': 2,
+                              'defaultTreatment': 'off',
+                              'changeNumber': 1470855828956,
+                              'configurations': {
+                                'on': {'size':15, 'test':20},
+                                'off': {'size':10},
+                              },
+                              'conditions': [
+                                {
+                                  'matcherGroup': {
+                                    'combiner': 'AND',
+                                    'matchers': [
+                                      {
+                                        'keySelector': {
+                                          'trafficType': 'user',
+                                          'attribute': null
+                                        },
+                                        'matcherType': 'ALL_KEYS',
+                                        'negate': false,
+                                        'userDefinedSegmentMatcherData': null,
+                                        'whitelistMatcherData': null,
+                                        'unaryNumericMatcherData': null,
+                                        'betweenMatcherData': null
+                                      }
+                                    ]
+                                  },
+                                  'partitions': [
+                                    {
+                                      'treatment': 'on',
+                                      'size': 0
+                                    },
+                                    {
+                                      'treatment': 'off',
+                                      'size': 100
+                                    }
+                                  ]
+                                }
+                              ]
+                            }   
+                          ],
+                          'since': -1,
+                          'till': 1470855828956
+                        }"));
+
+            var apiFetcher = new ApiSplitChangeFetcher(apiClient.Object);
+
+            //Act
+            var result = await apiFetcher.Fetch(-1);
+
+            //Assert
+            Assert.IsNotNull(result);
+            var split = result.splits.First();
+            Assert.AreEqual(AlgorithmEnum.Murmur, (AlgorithmEnum)split.algo);
+            Assert.IsNotNull(split.configurations);
         }
     }
 }
