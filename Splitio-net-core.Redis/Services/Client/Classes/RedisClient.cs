@@ -1,5 +1,4 @@
 ﻿using Common.Logging;
-using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Events.Classes;
@@ -12,7 +11,6 @@ using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -173,16 +171,13 @@ namespace Splitio.Redis.Services.Client.Classes
             }
         }
 
-        protected override void ImpressionLog<T>(IListener<T> listener, IList<T> impressions)
+        protected override void ImpressionLog(List<KeyImpression> impressionsQueue)
         {
-            if (impressionListener != null)
-            {
-                base.ImpressionLog(impressionListener, ImpressionsQueue);
-            }
+            base.ImpressionLog(impressionsQueue);
 
             if (impressionListenerRedis != null)
             {
-                impressionListenerRedis.Log(ImpressionsQueue);
+                impressionListenerRedis.Log(impressionsQueue);
             }
         }
 
