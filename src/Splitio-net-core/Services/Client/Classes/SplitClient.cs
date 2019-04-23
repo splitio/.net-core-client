@@ -25,6 +25,9 @@ namespace Splitio.Services.Client.Classes
         protected readonly ITrafficTypeValidator _trafficTypeValidator;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
+        protected const string SdkGetTreatments = "sdk.getTreatments";
+        protected const string SdkGetTreatmentWithConfig = "sdk.getTreatmentWithConfig";
+        protected const string SdkGetTreatmentsWithConfig = "sdk.getTreatmentsWithConfig";
         protected const string LabelKilled = "killed";
         protected const string LabelDefaultRule = "default rule";
         protected const string LabelSplitNotFound = "definition not found";
@@ -62,6 +65,22 @@ namespace Splitio.Services.Client.Classes
         }
 
         #region Public Methods
+        public SplitResult GetTreatmentWithConfig(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
+        {
+            return GetTreatmentWithConfig(new Key(key, null), feature, attributes, logMetricsAndImpressions, multiple);
+        }
+
+        public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
+        {
+            var result = GetTreatmentResult(key, feature, SdkGetTreatmentWithConfig, nameof(GetTreatmentWithConfig), attributes, logMetricsAndImpressions, multiple);
+
+            return new SplitResult
+            {
+                Treatment = result.Treatment,
+                Config = result.Configurations
+            };
+        }
+
         public string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
             return GetTreatment(new Key(key, null), feature, attributes, logMetricsAndImpressions, multiple);
@@ -69,84 +88,39 @@ namespace Splitio.Services.Client.Classes
 
         public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            CheckClientStatus();
-
-            if (!_keyValidator.IsValid(key, nameof(GetTreatment))) return Control;
-
-            var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, nameof(GetTreatment));
-
-            if (!splitNameResult.Success) return Control;
-
-            feature = splitNameResult.Value;
-
-            var start = CurrentTimeHelper.CurrentTimeMillis();
-            var clock = new Stopwatch();
-            clock.Start();
-
-            var result = DoGetTreatment(key, feature, attributes, multiple);
-
-            if (logMetricsAndImpressions)
-            {
-                if (metricsLog != null)
-                {
-                    metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
-                }
-
-                ImpressionLog(new List<KeyImpression>
-                {
-                    BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
-                });
-            }
+            var result = GetTreatmentResult(key, feature, SdkGetTreatment, nameof(GetTreatment), attributes, logMetricsAndImpressions, multiple);
 
             return result.Treatment;
         }
 
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(string key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            return GetTreatmentsWithConfig(new Key(key, null), features, attributes);
+        }
+
+        public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
+        {
+            var results = GetTreatmentsResult(key, features, SdkGetTreatmentsWithConfig, nameof(GetTreatmentsWithConfig), attributes);
+
+            return results
+                .ToDictionary(r => r.Key, r => new SplitResult
+                {
+                    Treatment = r.Value.Treatment,
+                    Config = r.Value.Configurations
+                });
+        }
+
         public Dictionary<string, string> GetTreatments(string key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var keys = new Key(key, null);
-
-            return GetTreatments(keys, features, attributes);
+            return GetTreatments(new Key(key, null), features, attributes);
         }
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var treatmentsForFeatures = new Dictionary<string, string>();
-            var ImpressionsQueue = new List<KeyImpression>();
+            var results = GetTreatmentsResult(key, features, SdkGetTreatments, nameof(GetTreatments), attributes);
 
-            CheckClientStatus();
-
-            if (_keyValidator.IsValid(key, nameof(GetTreatments)))
-            {
-                features = _splitNameValidator.SplitNamesAreValid(features, nameof(GetTreatments));
-
-                var start = CurrentTimeHelper.CurrentTimeMillis();
-                var clock = new Stopwatch();
-                clock.Start();
-
-                foreach (var feature in features)
-                {
-                    var treatmentResult = DoGetTreatment(key, feature, attributes, true);
-
-                    treatmentsForFeatures.Add(feature, treatmentResult.Treatment);
-
-                    ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
-                }
-
-                if (metricsLog != null)
-                {
-                    metricsLog.Time(SdkGetTreatment, clock.ElapsedMilliseconds);
-                }
-
-                ImpressionLog(ImpressionsQueue);
-            }
-            else
-            {
-                treatmentsForFeatures.Add(features.First(), Control);
-            }
-
-            ClearItemsAddedToTreatmentCache(key.matchingKey);
-
-            return treatmentsForFeatures;
+            return results
+                .ToDictionary(r => r.Key, r => r.Value.Treatment);
         }
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
@@ -265,6 +239,81 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
+        private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string operation, string method, Dictionary<string, object> attributes = null)
+        {
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            var ImpressionsQueue = new List<KeyImpression>();
+
+            CheckClientStatus();
+
+            if (_keyValidator.IsValid(key, method))
+            {
+                features = _splitNameValidator.SplitNamesAreValid(features, method);
+
+                var start = CurrentTimeHelper.CurrentTimeMillis();
+                var clock = new Stopwatch();
+                clock.Start();
+
+                foreach (var feature in features)
+                {
+                    var treatmentResult = DoGetTreatment(key, feature, attributes, true);
+
+                    treatmentsForFeatures.Add(feature, treatmentResult);
+
+                    ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
+                }
+
+                if (metricsLog != null)
+                {
+                    metricsLog.Time(operation, clock.ElapsedMilliseconds);
+                }
+
+                ImpressionLog(ImpressionsQueue);
+            }
+            else
+            {
+                treatmentsForFeatures.Add(features.First(), new TreatmentResult(LabelSplitNotFound, Control, null));
+            }
+
+            ClearItemsAddedToTreatmentCache(key?.matchingKey);
+
+            return treatmentsForFeatures;
+        }
+
+        private TreatmentResult GetTreatmentResult(Key key, string feature, string operation, string method, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
+        {
+            CheckClientStatus();
+
+            if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(LabelException, Control, null);
+
+            var splitNameResult = _splitNameValidator.SplitNameIsValid(feature, method);
+
+            if (!splitNameResult.Success) return new TreatmentResult(LabelException, Control, null);
+
+            feature = splitNameResult.Value;
+
+            var start = CurrentTimeHelper.CurrentTimeMillis();
+            var clock = new Stopwatch();
+            clock.Start();
+
+            var result = DoGetTreatment(key, feature, attributes, multiple);
+
+            if (logMetricsAndImpressions)
+            {
+                if (metricsLog != null)
+                {
+                    metricsLog.Time(operation, clock.ElapsedMilliseconds);
+                }
+
+                ImpressionLog(new List<KeyImpression>
+                {
+                    BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
+                });
+            }
+
+            return result;
+        }
+
         private TreatmentResult DoGetTreatment(Key key, string feature, Dictionary<string, object> attributes = null, bool multiple = false)
         {
             if (feature == null)
