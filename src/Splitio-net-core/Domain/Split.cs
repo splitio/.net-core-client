@@ -15,6 +15,6 @@ namespace Splitio.Domain
         public int? algo { get; set; }
         public int trafficAllocation { get; set; }
         public int? trafficAllocationSeed { get; set; }
-        public object configurations { get; set; }
+        public string configurations { get; set; }
     }
 }

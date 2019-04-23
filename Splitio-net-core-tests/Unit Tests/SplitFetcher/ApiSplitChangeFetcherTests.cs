@@ -269,8 +269,8 @@ namespace Splitio_Tests.Unit_Tests
                               'defaultTreatment': 'off',
                               'changeNumber': 1470855828956,
                               'configurations': {
-                                'on': {'size':15, 'test':20},
-                                'off': {'size':10},
+                                'on': '{\'size\':15,\'test\':20}',
+                                'off' : '{\'size\':10}'
                               },
                               'conditions': [
                                 {

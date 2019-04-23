@@ -3,6 +3,6 @@
     public class SplitResult
     {
         public string Treatment { get; set; }
-        public object Config { get; set; }
+        public string Config { get; set; }
     }
 }
