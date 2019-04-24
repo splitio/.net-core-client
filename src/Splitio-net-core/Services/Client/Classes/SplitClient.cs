@@ -1,4 +1,5 @@
 ﻿using Common.Logging;
+using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
@@ -13,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -77,7 +79,7 @@ namespace Splitio.Services.Client.Classes
             return new SplitResult
             {
                 Treatment = result.Treatment,
-                Config = result.Configurations
+                Config = result.Configs
             };
         }
 
@@ -106,7 +108,7 @@ namespace Splitio.Services.Client.Classes
                 .ToDictionary(r => r.Key, r => new SplitResult
                 {
                     Treatment = r.Value.Treatment,
-                    Config = r.Value.Configurations
+                    Config = r.Value.Configs
                 });
         }
 
@@ -175,7 +177,11 @@ namespace Splitio.Services.Client.Classes
                     return new TreatmentResult(LabelSplitNotFound, Control, null);
                 }
 
-                return GetTreatment(key, split, attributes, this);
+                var treatmentResult = GetTreatment(key, split, attributes, this);
+
+                treatmentResult.Configs = split.configurations == null || !split.configurations.Any() ? null : split.configurations[treatmentResult.Treatment];
+
+                return treatmentResult;
             }
             catch (Exception e)
             {
@@ -210,11 +216,12 @@ namespace Splitio.Services.Client.Classes
                     }
 
                     var combiningMatcher = condition.matcher;
+
                     if (combiningMatcher.Match(key, attributes, splitClient))
                     {
                         var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-                        return new TreatmentResult(condition.label, treatment, split.changeNumber, split.configurations);
+                        return new TreatmentResult(condition.label, treatment, split.changeNumber);
                     }
                 }
 

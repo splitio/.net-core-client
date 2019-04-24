@@ -373,7 +373,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Splits_WithConfigs_ReturnSuccessfully()
         {
             //Arrange
-            var configurations = JsonConvert.SerializeObject(new { On = new { Name = "Test Config" } });
+            var configurations = new Dictionary<string, string>
+            {
+                { "On", "\"Name = \"Test Config\"" }
+            };
+
             var conditionsWithLogic = new List<ConditionWithLogic>();
             var conditionWithLogic = new ConditionWithLogic()
             {
@@ -412,7 +416,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Split_WithConfigs_ReturnSuccessfully()
         {
             //Arrange
-            var configurations = JsonConvert.SerializeObject(new { On = new { Name = "Test Config" } });
+            var configurations = new Dictionary<string, string>
+            {
+                { "On", "\"Name = \"Test Config\"" }
+            };
+
             var conditionsWithLogic = new List<ConditionWithLogic>();
             var conditionWithLogic = new ConditionWithLogic()
             {

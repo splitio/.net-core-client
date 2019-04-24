@@ -37,7 +37,7 @@ namespace Splitio.Services.Parsing
                     algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
                     trafficAllocation = split.trafficAllocation,
                     trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0,
-                    configurations = JsonConvert.SerializeObject(split.configurations)
+                    configurations = split.configurations
                 };
                 parsedSplit = ParseConditions(split, parsedSplit);
                 return parsedSplit;
