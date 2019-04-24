@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Classes;
 using Splitio.Domain;
+using Splitio.Services.Cache.Classes;
+using Splitio.Services.Client.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Splitio.Services.Client.Classes;
-using Newtonsoft.Json;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {

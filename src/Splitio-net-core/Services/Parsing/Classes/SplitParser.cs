@@ -1,5 +1,4 @@
 ﻿using Common.Logging;
-using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Classes;

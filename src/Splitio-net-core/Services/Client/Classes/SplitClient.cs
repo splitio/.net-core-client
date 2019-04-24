@@ -1,5 +1,4 @@
 ﻿using Common.Logging;
-using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
@@ -14,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
