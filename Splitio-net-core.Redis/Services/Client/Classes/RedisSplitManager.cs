@@ -31,7 +31,8 @@ namespace Splitio.Redis.Services.Client.Classes
                     killed = x.killed,
                     changeNumber = x.changeNumber,
                     treatments = (x.conditions.Where(z => z.conditionType.ToUpper() == "ROLLOUT").FirstOrDefault() ?? new ConditionDefinition() { partitions = new List<PartitionDefinition>() }).partitions.Select(y => y.treatment).ToList(),
-                    trafficType = x.trafficTypeName
+                    trafficType = x.trafficTypeName,
+                    configs = x.configurations
                 });
 
             return lightSplits.ToList();
