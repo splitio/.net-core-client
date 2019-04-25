@@ -77,7 +77,7 @@ namespace Splitio.Services.Client.Classes
             return new SplitResult
             {
                 Treatment = result.Treatment,
-                Config = result.Configs
+                Config = result.Config
             };
         }
 
@@ -106,7 +106,7 @@ namespace Splitio.Services.Client.Classes
                 .ToDictionary(r => r.Key, r => new SplitResult
                 {
                     Treatment = r.Value.Treatment,
-                    Config = r.Value.Configs
+                    Config = r.Value.Config
                 });
         }
 
@@ -177,7 +177,7 @@ namespace Splitio.Services.Client.Classes
 
                 var treatmentResult = GetTreatment(key, split, attributes, this);
 
-                treatmentResult.Configs = split.configurations == null || !split.configurations.Any() ? null : split.configurations[treatmentResult.Treatment];
+                treatmentResult.Config = split.configurations == null || !split.configurations.Any() ? null : split.configurations[treatmentResult.Treatment];
 
                 return treatmentResult;
             }

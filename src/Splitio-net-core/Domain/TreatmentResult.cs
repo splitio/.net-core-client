@@ -5,14 +5,14 @@
         public string Label { get; set; }
         public string Treatment { get; set; }
         public long? ChangeNumber { get; set; }
-        public string Configs { get; set; }
+        public string Config { get; set; }
 
         public TreatmentResult(string label, string treatment, long? changeNumber)
         {
             Label = label;
             Treatment = treatment;
             ChangeNumber = changeNumber;
-            Configs = null;
+            Config = null;
         }
     }
 }

@@ -163,7 +163,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
                 var treatmentResult = GetTreatment(key, parsedSplit, attributes, this);
 
-                treatmentResult.Configs = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
+                treatmentResult.Config = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
 
                 return treatmentResult;
             }
