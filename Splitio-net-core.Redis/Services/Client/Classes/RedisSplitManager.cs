@@ -63,7 +63,8 @@ namespace Splitio.Redis.Services.Client.Classes
                 killed = split.killed,
                 changeNumber = split.changeNumber,
                 treatments = treatments,
-                trafficType = split.trafficTypeName
+                trafficType = split.trafficTypeName,
+                configs = split.configurations
             };
 
             return lightSplit;
