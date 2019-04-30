@@ -77,7 +77,7 @@ namespace Splitio.Services.Client.Classes
             return new SplitResult
             {
                 Treatment = result.Treatment,
-                Config = result.Configurations
+                Config = result.Config
             };
         }
 
@@ -106,7 +106,7 @@ namespace Splitio.Services.Client.Classes
                 .ToDictionary(r => r.Key, r => new SplitResult
                 {
                     Treatment = r.Value.Treatment,
-                    Config = r.Value.Configurations
+                    Config = r.Value.Config
                 });
         }
 
@@ -175,7 +175,11 @@ namespace Splitio.Services.Client.Classes
                     return new TreatmentResult(LabelSplitNotFound, Control, null);
                 }
 
-                return GetTreatment(key, split, attributes, this);
+                var treatmentResult = GetTreatment(key, split, attributes, this);
+
+                treatmentResult.Config = split.configurations == null || !split.configurations.Any() ? null : split.configurations[treatmentResult.Treatment];
+
+                return treatmentResult;
             }
             catch (Exception e)
             {
@@ -210,11 +214,12 @@ namespace Splitio.Services.Client.Classes
                     }
 
                     var combiningMatcher = condition.matcher;
+
                     if (combiningMatcher.Match(key, attributes, splitClient))
                     {
                         var treatment = splitter.GetTreatment(key.bucketingKey, split.seed, condition.partitions, split.algo);
 
-                        return new TreatmentResult(condition.label, treatment, split.changeNumber, split.configurations);
+                        return new TreatmentResult(condition.label, treatment, split.changeNumber);
                     }
                 }
 

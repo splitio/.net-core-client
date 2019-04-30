@@ -268,9 +268,9 @@ namespace Splitio_Tests.Unit_Tests
                               'algo': 2,
                               'defaultTreatment': 'off',
                               'changeNumber': 1470855828956,
-                              'configurations': {
-                                'on': {'size':15, 'test':20},
-                                'off': {'size':10},
+                              'configurations': { 
+                                'on': '{ size: 15 }',
+                                'off':'{ size: 10 }'
                               },
                               'conditions': [
                                 {
