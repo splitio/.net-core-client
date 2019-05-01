@@ -35,7 +35,8 @@ namespace Splitio.Services.Parsing
                     trafficTypeName = split.trafficTypeName,
                     algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
                     trafficAllocation = split.trafficAllocation,
-                    trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0
+                    trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0,
+                    configurations = split.configurations
                 };
                 parsedSplit = ParseConditions(split, parsedSplit);
                 return parsedSplit;

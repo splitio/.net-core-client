@@ -159,9 +159,13 @@ namespace Splitio.Redis.Services.Client.Classes
                     return new TreatmentResult(LabelSplitNotFound, Control, null);
                 }
 
-                ParsedSplit parsedSplit = splitParser.Parse((Split)split);
+                var parsedSplit = splitParser.Parse((Split)split);
 
-                return GetTreatment(key, parsedSplit, attributes, this);
+                var treatmentResult = GetTreatment(key, parsedSplit, attributes, this);
+
+                treatmentResult.Config = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
+
+                return treatmentResult;
             }
             catch (Exception e)
             {

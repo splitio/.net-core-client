@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Cache.Classes;
 using Splitio.Domain;
+using Splitio.Services.Cache.Classes;
+using Splitio.Services.Client.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Splitio.Services.Client.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -366,6 +366,92 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(6, result.Count);
             var firstResult = result.Find(x => x == "test1");
             Assert.AreEqual(firstResult, "test1");
+        }
+
+        [TestMethod]
+        public void Splits_WithConfigs_ReturnSuccessfully()
+        {
+            //Arrange
+            var configurations = new Dictionary<string, string>
+            {
+                { "On", "\"Name = \"Test Config\"" }
+            };
+
+            var conditionsWithLogic = new List<ConditionWithLogic>();
+            var conditionWithLogic = new ConditionWithLogic()
+            {
+                partitions = new List<PartitionDefinition>()
+                {
+                    new PartitionDefinition(){size = 100, treatment = "on"}
+                }
+            };
+            conditionsWithLogic.Add(conditionWithLogic);
+
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+
+            var manager = new SplitManager(splitCache);
+
+            //Act
+            var result = manager.Splits();
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(6, result.Count);
+            var test1Result = result.Find(res => res.name == "test1");
+            Assert.IsNotNull(test1Result.configs);
+            var test2Result = result.Find(res => res.name == "test2");
+            Assert.IsNotNull(test2Result.configs);
+            var test3Result = result.Find(res => res.name == "test3");
+            Assert.IsNull(test3Result.configs);
+        }
+
+        [TestMethod]
+        public void Split_WithConfigs_ReturnSuccessfully()
+        {
+            //Arrange
+            var configurations = new Dictionary<string, string>
+            {
+                { "On", "\"Name = \"Test Config\"" }
+            };
+
+            var conditionsWithLogic = new List<ConditionWithLogic>();
+            var conditionWithLogic = new ConditionWithLogic()
+            {
+                partitions = new List<PartitionDefinition>()
+                {
+                    new PartitionDefinition(){size = 100, treatment = "on"}
+                }
+            };
+            conditionsWithLogic.Add(conditionWithLogic);
+
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
+            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+
+            var manager = new SplitManager(splitCache);
+
+            //Act
+            var result1 = manager.Split("test1");
+            var result2 = manager.Split("test2");
+            var result3 = manager.Split("test3");
+
+            //Assert
+            Assert.IsNotNull(result1);
+            Assert.IsNotNull(result1.configs);
+            Assert.IsNotNull(result2);
+            Assert.IsNotNull(result2.configs);
+            Assert.IsNotNull(result3);
+            Assert.IsNull(result3.configs);
         }
     }
 }

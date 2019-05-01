@@ -1,5 +1,11 @@
 CHANGES
 
+4.1.0
+- Added Dynamic Configurations support through two new methods that mimick the regular ones, changing the type of what is returned.
+  - GetTreatmentWithConfig: Same as getTreatment, but instead of a string it returns a map with treatment and config as a stringified JSON.
+  - GetTreatmentWithConfig: Same as getTreatments, but instead of a map of string it returns a map of objects with treatment and config as a stringified JSON.
+- Added configs to SplitViews returned by the manager module.
+
 4.0.1
 - Bug fix InvalidOperationException in ImpressionsLog(). "Collection was modified; enumeration operation may not execute".
 

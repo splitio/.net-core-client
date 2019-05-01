@@ -37,7 +37,8 @@ namespace Splitio.Services.Client.Classes
                     killed = x.killed,
                     changeNumber = x.changeNumber,
                     treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? new ConditionWithLogic() { partitions = new List<PartitionDefinition>() }).partitions.Select(y => y.treatment).ToList(),
-                    trafficType = x.trafficTypeName
+                    trafficType = x.trafficTypeName,
+                    configs = x.configurations
                 });
 
             return lightSplits.ToList();
@@ -72,7 +73,8 @@ namespace Splitio.Services.Client.Classes
                 killed = split.killed,
                 changeNumber = split.changeNumber,
                 treatments = treatments,
-                trafficType = split.trafficTypeName
+                trafficType = split.trafficTypeName,
+                configs = split.configurations
             };
 
             return lightSplit;
