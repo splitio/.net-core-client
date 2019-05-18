@@ -52,6 +52,12 @@
     <None Update="Resources\segment_payed.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\split.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\split.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\splits_staging.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -177,8 +177,11 @@ namespace Splitio.Services.Client.Classes
 
                 var treatmentResult = GetTreatment(key, split, attributes, this);
 
-                treatmentResult.Config = split.configurations == null || !split.configurations.Any() ? null : split.configurations[treatmentResult.Treatment];
-
+                if (split.configurations != null && split.configurations.ContainsKey(treatmentResult.Treatment))
+                {
+                    treatmentResult.Config = split.configurations[treatmentResult.Treatment];
+                }
+                
                 return treatmentResult;
             }
             catch (Exception e)
@@ -202,7 +205,9 @@ namespace Splitio.Services.Client.Classes
                         if (split.trafficAllocation < 100)
                         {
                             // bucket ranges from 1-100.
-                            var bucket = split.algo == AlgorithmEnum.LegacyHash ? splitter.LegacyBucket(key.bucketingKey, split.trafficAllocationSeed) : splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
+                            var bucket = split.algo == AlgorithmEnum.LegacyHash 
+                                ? splitter.LegacyBucket(key.bucketingKey, split.trafficAllocationSeed) 
+                                : splitter.Bucket(key.bucketingKey, split.trafficAllocationSeed);
 
                             if (bucket > split.trafficAllocation)
                             {

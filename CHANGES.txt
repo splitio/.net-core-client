@@ -1,5 +1,8 @@
 CHANGES
 
+4.1.2
+- Updated localhost mode. Now besides supporting the old text files with `.split` extension (to be deprecated soon), we support YAML (.yaml/.yml) files with more options. Read more in our docs!
+
 4.1.1
 - Bugfix: SDK return error when posting events successfully.
 

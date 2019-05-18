@@ -1,7 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.Client.Classes;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Redis.Services.Client.Classes;
+using Splitio.Services.Client.Classes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -122,6 +124,82 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Act         
             var client = factory.Client();
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yaml")]
+        public void BuildSplitClient_WithLocalhostApiKeyAndIsYamlFile_ReturnsLocalhostClient()
+        {
+            // Arrange.
+            var splitNamesExpected = new List<string>
+            {
+                "testing_split_on",
+                "testing_split_only_wl",
+                "testing_split_with_wl",
+                "testing_split_off_with_config",
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yaml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+
+            // Act.
+            var splitsResult = manager.Splits();
+
+            // Assert.
+            Assert.AreEqual(splitNamesExpected.Count, splitsResult.Count);
+            foreach (var splitName in splitNamesExpected)
+            {
+                var split = splitsResult.FirstOrDefault(sr => sr.name.Equals(splitName));
+                Assert.IsNotNull(split);
+
+                var splitResult = manager.Split(splitName);
+                Assert.IsNotNull(splitResult);
+                Assert.IsFalse(splitResult.killed);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yml")]
+        public void BuildSplitClient_WithLocalhostApiKeyAndIsYmlFile_ReturnsLocalhostClient()
+        {
+            // Arrange.
+            var splitNamesExpected = new List<string>
+            {
+                "testing_split_on",
+                "testing_split_only_wl",
+                "testing_split_with_wl",
+                "testing_split_off_with_config",
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+
+            // Act.
+            var splitsResult = manager.Splits();
+
+            // Assert.
+            Assert.AreEqual(splitNamesExpected.Count, splitsResult.Count);
+            foreach (var splitName in splitNamesExpected)
+            {
+                var split = splitsResult.FirstOrDefault(sr => sr.name.Equals(splitName));
+                Assert.IsNotNull(split);
+
+                var splitResult = manager.Split(splitName);
+                Assert.IsNotNull(splitResult);
+                Assert.IsFalse(splitResult.killed);
+            }
         }
     }
 }
