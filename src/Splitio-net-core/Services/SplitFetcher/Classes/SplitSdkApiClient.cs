@@ -25,11 +25,13 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             var clock = new Stopwatch();
             clock.Start();
+
             try
             {
                 var requestUri = GetRequestUri(since);
                 var response = await ExecuteGet(requestUri);
-                if (response.statusCode == HttpStatusCode.OK)
+
+                if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
                     if (metricsLog != null)
                     {
