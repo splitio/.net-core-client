@@ -15,14 +15,17 @@ namespace Splitio.Services.Impressions.Classes
         
         private static readonly ILog Log = LogManager.GetLogger(typeof(TreatmentSdkApiClient));
 
-        public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
+        public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
+            : base(header, baseUrl, connectionTimeOut, readTimeout)
+        { }
 
         public async void SendBulkImpressions(List<KeyImpression> impressions)
         {
             var impressionsJson = ConvertToJson(impressions);
 
             var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
-            if (response.statusCode != HttpStatusCode.OK)
+
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendBulkImpressions: {0} - {1}", response.statusCode.ToString(), response.content));
             }

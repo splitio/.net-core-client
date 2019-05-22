@@ -11,12 +11,15 @@ namespace Splitio.Services.Metrics.Classes
 
         private static readonly ILog Log = LogManager.GetLogger(typeof(MetricsSdkApiClient));
 
-        public MetricsSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
+        public MetricsSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
+            : base(header, baseUrl, connectionTimeOut, readTimeout)
+        { }
 
         public async void SendCountMetrics(string metrics)
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "counters"), metrics);
-            if (response.statusCode != HttpStatusCode.OK)
+
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendCountMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
@@ -25,7 +28,8 @@ namespace Splitio.Services.Metrics.Classes
         public async void SendTimeMetrics(string metrics)
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "times"), metrics);
-            if (response.statusCode != HttpStatusCode.OK)
+
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendTimeMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
@@ -34,7 +38,8 @@ namespace Splitio.Services.Metrics.Classes
         public async void SendGaugeMetrics(string metrics)
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "gauge"), metrics);
-            if (response.statusCode != HttpStatusCode.OK)
+
+            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendGaugeMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
