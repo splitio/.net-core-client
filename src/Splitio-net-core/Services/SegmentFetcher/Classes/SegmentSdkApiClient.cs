@@ -45,26 +45,18 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     return response.content;
                 }
-                else if (response.statusCode == HttpStatusCode.Forbidden)
-                {
-                    if (metricsLog != null)
-                    {
-                        metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                    }
-
-                    Log.Error("factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk");
-
-                    return string.Empty;
-                }
 
                 if (metricsLog != null)
                 {
                     metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
                 }
 
-                Log.Error(string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
+                Log.Error(response.statusCode == HttpStatusCode.Forbidden
+                    ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
+                    : string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
 
                 return string.Empty;
+               
             }
             catch (Exception e)
             {
