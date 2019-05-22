@@ -25,7 +25,7 @@ namespace Splitio.Services.Impressions.Classes
 
             var response = await ExecutePost(TestImpressionsUrlTemplate, impressionsJson);
 
-            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendBulkImpressions: {0} - {1}", response.statusCode.ToString(), response.content));
             }

@@ -19,7 +19,7 @@ namespace Splitio.Services.Metrics.Classes
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "counters"), metrics);
 
-            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendCountMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
@@ -29,7 +29,7 @@ namespace Splitio.Services.Metrics.Classes
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "times"), metrics);
 
-            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendTimeMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
@@ -39,7 +39,7 @@ namespace Splitio.Services.Metrics.Classes
         {
             var response = await ExecutePost(MetricsUrlTemplate.Replace("{endpoint}", "gauge"), metrics);
 
-            if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
+            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendGaugeMetrics: {0} - {1}", response.statusCode.ToString(), response.content));
             }
