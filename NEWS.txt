@@ -1,5 +1,8 @@
 NEWS
 
+4.1.1
+- Bugfix: SDK return error when posting events successfully.
+
 4.1.0
 - Added Dynamic Configurations support through two new methods that mimick the regular ones, changing the type of what is returned.
   - GetTreatmentWithConfig: Same as getTreatment, but instead of a string it returns a map with treatment and config as a stringified JSON.
