@@ -2,21 +2,26 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class SplitClientUnitTests
-    {
-        private SplitClientForTesting _splitClientForTesting;
+    {        
         private Mock<ILog> _logMock;
+        private Mock<IListener<WrappedEvent>> _eventListenerMock;
+
+        private SplitClientForTesting _splitClientForTesting;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _logMock = new Mock<ILog>();
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object);
+            _eventListenerMock = new Mock<IListener<WrappedEvent>>();
+
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _eventListenerMock.Object);
         }
 
         #region GetTreatment
@@ -146,6 +151,68 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.IsFalse(result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
+        }
+
+        [TestMethod]
+        public void Track_WithProperties_RetunrsTrue()
+        {
+            // Arrange. 
+            decimal decimalValue = 111;
+            float floatValue = 112;
+            double doubleValue = 113;
+            short shortValue = 114;
+            int intValue = 115;
+            long longValue = 116;
+            ushort ushortValue = 117;
+            uint uintValue = 118;
+            ulong ulongValue = 119;
+
+            var properties = new Dictionary<string, object>
+            {
+                { "property_1", "value1" },
+                { "property_2", new ParsedSplit() },
+                { "property_3", false },
+                { "property_4", null },
+                { "property_5", decimalValue },
+                { "property_6", floatValue },
+                { "property_7", doubleValue },
+                { "property_8", shortValue },
+                { "property_9", intValue },
+                { "property_10", longValue },
+                { "property_11", ushortValue },
+                { "property_12", uintValue },
+                { "property_13", ulongValue }
+            };        
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _logMock.Verify(mock => mock.Warn("Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties != null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals("user")
+                                                                              && we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Track_WhenPropertiesIsNull_ReturnsTrue()
+        {
+            // Arrange.
+            Dictionary<string, object> properties = null;            
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals("user")
+                                                                              && we.Event.value == 132)), Times.Once);
         }
         #endregion
     }

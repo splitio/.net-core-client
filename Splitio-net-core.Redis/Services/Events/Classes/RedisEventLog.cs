@@ -3,16 +3,16 @@ using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Redis.Services.Events.Classes
 {
-    public class RedisEventLog : IListener<Event>
+    public class RedisEventLog : IListener<WrappedEvent>
     {
-        private ISimpleCache<Event> eventsCache;
+        private ISimpleCache<WrappedEvent> eventsCache;
 
-        public RedisEventLog(ISimpleCache<Event> eventsCache)
+        public RedisEventLog(ISimpleCache<WrappedEvent> eventsCache)
         {
             this.eventsCache = eventsCache;
         }
 
-        public void Log(Event item)
+        public void Log(WrappedEvent item)
         {
             eventsCache.AddItem(item);
         }

@@ -4,5 +4,6 @@
     {
         public bool Success { get; set; }
         public string Value { get; set; }
+        public object ObjValue { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly ITrafficTypeValidator _trafficTypeValidator;
+        protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string SdkGetTreatments = "sdk.getTreatments";
@@ -39,12 +40,12 @@ namespace Splitio.Services.Client.Classes
 
         protected Splitter splitter;
         protected IListener<KeyImpression> impressionListener;
-        protected IListener<Event> eventListener;
+        protected IListener<WrappedEvent> eventListener;
         protected IMetricsLog metricsLog;
         protected ISplitManager manager;
         protected IMetricsCache metricsCache;
         protected ISimpleCache<KeyImpression> impressionsCache;
-        protected ISimpleCache<Event> eventsCache;
+        protected ISimpleCache<WrappedEvent> eventsCache;
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
 
@@ -57,6 +58,7 @@ namespace Splitio.Services.Client.Classes
             _splitNameValidator = new SplitNameValidator(_log);
             _eventTypeValidator = new EventTypeValidator(_log);
             _trafficTypeValidator = new TrafficTypeValidator(_log);
+            _eventPropertiesValidator = new EventPropertiesValidator(_log);
         }
 
         public ISplitManager GetSplitManager()
@@ -123,25 +125,34 @@ namespace Splitio.Services.Client.Classes
                 .ToDictionary(r => r.Key, r => r.Value.Treatment);
         }
 
-        public virtual bool Track(string key, string trafficType, string eventType, double? value = null)
+        public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
             CheckClientStatus();
 
             var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
             var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, nameof(trafficType));
             var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
+            var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
 
-            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult) return false;
+            if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
+                return false;
 
             try
             {
-                eventListener.Log(new Event
+                var eventToLog = new Event
                 {
                     key = key,
                     trafficTypeName = trafficTypeResult.Value,
                     eventTypeId = eventType,
                     value = value,
-                    timestamp = CurrentTimeHelper.CurrentTimeMillis()
+                    timestamp = CurrentTimeHelper.CurrentTimeMillis(),
+                    properties = (Dictionary<string, object>)eventPropertiesResult.Value
+                };
+
+                eventListener.Log(new WrappedEvent
+                {
+                    Event = eventToLog,
+                    Size = eventPropertiesResult.EventSize
                 });
 
                 return true;

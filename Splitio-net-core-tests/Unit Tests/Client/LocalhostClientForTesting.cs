@@ -10,7 +10,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         public LocalhostClientForTesting(string filePath, ILog log, Splitter splitter = null) : base(filePath, log, splitter) { }
 
-        public IListener<Event> GetEventListener()
+        public IListener<WrappedEvent> GetEventListener()
         {
             return base.eventListener;
         }

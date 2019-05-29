@@ -121,8 +121,8 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEventLog(ConfigurationOptions config)
         {
             var eventLog = new RedisEventLog(eventsCache);
-            eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
-            ((AsynchronousListener<Event>)eventListener).AddListener(eventLog);
+            eventListener = new AsynchronousListener<WrappedEvent>(LogManager.GetLogger("AsynchronousEventListener"));
+            ((AsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
         }
 
         private void BuildMetricsLog()
