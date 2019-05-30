@@ -14,7 +14,9 @@ namespace Splitio.Services.Events.Classes
         
         private static readonly ILog Log = LogManager.GetLogger(typeof(EventSdkApiClient));
 
-        public EventSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) : base(header, baseUrl, connectionTimeOut, readTimeout) { }
+        public EventSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
+            : base(header, baseUrl, connectionTimeOut, readTimeout)
+        { }
 
         public async void SendBulkEvents(List<Event> events)
         {
@@ -24,7 +26,8 @@ namespace Splitio.Services.Events.Classes
             });
 
             var response = await ExecutePost(EventsUrlTemplate, eventsJson);
-            if (response.statusCode != HttpStatusCode.OK)
+
+            if ((int)response.statusCode < (int)HttpStatusCode.OK || (int)response.statusCode >= (int)HttpStatusCode.Ambiguous)
             {
                 Log.Error(string.Format("Http status executing SendBulkEvents: {0} - {1}", response.statusCode.ToString(), response.content));
             }

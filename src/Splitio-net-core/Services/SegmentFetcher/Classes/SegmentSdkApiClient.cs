@@ -30,40 +30,33 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 var requestUri = GetRequestUri(name, since);
                 var response = await ExecuteGet(requestUri);
 
-                switch (response.statusCode)
+                if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    case HttpStatusCode.OK:
-                        if (metricsLog != null)
-                        {
-                            metricsLog.Time(SegmentFetcherTime, clock.ElapsedMilliseconds);
-                            metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                        }
+                    if (metricsLog != null)
+                    {
+                        metricsLog.Time(SegmentFetcherTime, clock.ElapsedMilliseconds);
+                        metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
+                    }
 
-                        if (Log.IsDebugEnabled)
-                        {
-                            Log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
-                        }
+                    if (Log.IsDebugEnabled)
+                    {
+                        Log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
+                    }
 
-                        return response.content;
-                    case HttpStatusCode.Forbidden:
-                        if (metricsLog != null)
-                        {
-                            metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                        }
-
-                        Log.Error("factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk");
-
-                        return string.Empty;
-                    default:
-                        if (metricsLog != null)
-                        {
-                            metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
-                        }
-
-                        Log.Error(string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
-
-                        return string.Empty;
+                    return response.content;
                 }
+
+                if (metricsLog != null)
+                {
+                    metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
+                }
+
+                Log.Error(response.statusCode == HttpStatusCode.Forbidden
+                    ? "factory instantiation: you passed a browser type api_key, please grab an api key from the Split console that is of type sdk"
+                    : string.Format("Http status executing FetchSegmentChanges: {0} - {1}", response.statusCode.ToString(), response.content));
+
+                return string.Empty;
+               
             }
             catch (Exception e)
             {
