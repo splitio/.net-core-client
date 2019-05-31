@@ -10,8 +10,6 @@ namespace Splitio.Services.Shared.Classes
 {
     public class YamlLocalhostFileService : AbstractLocalhostFileService
     {
-        protected override bool IsYamlExtension => true;
-        
         public YamlLocalhostFileService(ILog log)
         {
             _log = log;

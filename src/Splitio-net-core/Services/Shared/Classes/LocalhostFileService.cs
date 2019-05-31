@@ -1,6 +1,7 @@
 ﻿using Common.Logging;
 using Splitio.Domain;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -8,8 +9,6 @@ namespace Splitio.Services.Shared.Classes
 {
     public class LocalhostFileService : AbstractLocalhostFileService
     {
-        protected override bool IsYamlExtension => false;
-
         public LocalhostFileService(ILog log)
         {
             _log = log;
@@ -39,8 +38,15 @@ namespace Splitio.Services.Shared.Classes
                         continue;
                     }
 
-                    splits.TryAdd(feature_treatment[0], CreateParsedSplit(feature_treatment[0], feature_treatment[1]));
-                    _log.Info("100% of keys will see " + feature_treatment[1] + " for " + feature_treatment[0]);
+                    var splitName = feature_treatment[0];
+                    var treatment = feature_treatment[1];
+                    var conditions = new List<ConditionWithLogic>
+                    {
+                        CreateCondition(treatment)
+                    };
+
+                    splits.TryAdd(splitName, CreateParsedSplit(splitName, treatment, conditions));
+                    _log.Info("100% of keys will see " + treatment + " for " + splitName);
 
                 }
             }

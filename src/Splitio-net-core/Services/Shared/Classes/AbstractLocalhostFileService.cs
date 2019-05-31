@@ -10,7 +10,6 @@ namespace Splitio.Services.Shared.Classes
     public abstract class AbstractLocalhostFileService : ILocalhostFileService
     {
         protected const string Control = "control";
-        protected abstract bool IsYamlExtension { get; }
 
         protected ILog _log;
 
@@ -22,7 +21,6 @@ namespace Splitio.Services.Shared.Classes
             {
                 name = name,
                 seed = 0,
-                killed = IsYamlExtension ? false : true,
                 defaultTreatment = treatment,
                 conditions = codnitions,
                 algo = AlgorithmEnum.Murmur,
