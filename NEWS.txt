@@ -27,7 +27,7 @@ NEWS
 - Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
 
 3.4.2
-- Improve async handling
+- Improve async handling.
 
 3.4.1
 - Fix track() bug on localhost mode
