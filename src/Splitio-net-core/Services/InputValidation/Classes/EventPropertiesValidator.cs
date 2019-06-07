@@ -33,9 +33,7 @@ namespace Splitio.Services.InputValidation.Classes
                 size += entry.Key.Length;
                 var value = entry.Value;
 
-                if (value == null) continue;
-
-                if (!IsNumeric(value) && !(value is bool) && !(value is string))
+                if (!(value is null) && !IsNumeric(value) && !(value is bool) && !(value is string))
                 {
                     _log.Warn($"Property {value.GetType()} is of invalid type. Setting value to null");
                     value = null;
@@ -65,6 +63,8 @@ namespace Splitio.Services.InputValidation.Classes
 
         private bool IsNumeric(object value)
         {
+            if (value == null) return false;
+
             var valueTypeCode = Type.GetTypeCode(value.GetType());
 
             switch (valueTypeCode)

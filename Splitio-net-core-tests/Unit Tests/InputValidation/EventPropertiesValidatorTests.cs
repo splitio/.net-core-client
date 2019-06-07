@@ -85,7 +85,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.AreEqual("value1", dicResult["property_1"]);
             Assert.IsNull(dicResult["property_2"]);
             Assert.IsFalse((bool)dicResult["property_3"]);
-            Assert.IsFalse(dicResult.ContainsKey("property_4"));
+            Assert.IsNull(dicResult["property_4"]);
             Assert.AreEqual(decimalValue, dicResult["property_5"]);
             Assert.AreEqual(floatValue, dicResult["property_6"]);
             Assert.AreEqual(doubleValue, dicResult["property_7"]);
