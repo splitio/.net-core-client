@@ -80,6 +80,21 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             // Assert.
             Assert.IsTrue(result.Success);
             Assert.IsNotNull(result.Value);
+
+            var dicResult = (Dictionary<string, object>)result.Value;
+            Assert.AreEqual("value1", dicResult["property_1"]);
+            Assert.IsNull(dicResult["property_2"]);
+            Assert.IsFalse((bool)dicResult["property_3"]);
+            Assert.IsFalse(dicResult.ContainsKey("property_4"));
+            Assert.AreEqual(decimalValue, dicResult["property_5"]);
+            Assert.AreEqual(floatValue, dicResult["property_6"]);
+            Assert.AreEqual(doubleValue, dicResult["property_7"]);
+            Assert.AreEqual(shortValue, dicResult["property_8"]);
+            Assert.AreEqual(intValue, dicResult["property_9"]);
+            Assert.AreEqual(longValue, dicResult["property_10"]);
+            Assert.AreEqual(ushortValue, dicResult["property_11"]);
+            Assert.AreEqual(uintValue, dicResult["property_12"]);
+            Assert.AreEqual(ulongValue, dicResult["property_13"]);
             Assert.IsTrue(result.EventSize == sizeExpected);
 
             _log.Verify(mock => mock.Warn($"Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
