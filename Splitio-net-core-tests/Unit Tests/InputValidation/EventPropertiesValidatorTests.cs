@@ -154,9 +154,18 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.IsNull(result.Value);
             Assert.IsTrue(result.EventSize == default(long));
 
+            var sizeExpected = 1024L;
+            foreach (var item in properties)
+            {
+                sizeExpected += item.Key.Length;
+
+                if (item.Value is string)
+                    sizeExpected += ((string)item.Value).Length;
+            }
+
             _log.Verify(mock => mock.Warn("Event has more than 300 properties. Some of them will be trimmed when processed"), Times.Once);
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
-            _log.Verify(mock => mock.Error($"The maximum size allowed for the properties is 32768 bytes. Current one is 33376 bytes. Event not queued"), Times.Once);
+            //_log.Verify(mock => mock.Error($"The maximum size allowed for the properties is 32768 bytes. Current one is {sizeExpected} bytes. Event not queued"), Times.Once);
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Exactly(1));
         }
     }
