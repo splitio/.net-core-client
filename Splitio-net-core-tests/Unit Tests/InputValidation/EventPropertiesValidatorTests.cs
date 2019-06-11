@@ -139,6 +139,7 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
         public void IsValid_WhenPropertiesBytesIsBiggerThanWeSupport_ReturnsFalse()
         {
             // Arrange. 
+            var MaxPropertiesLengthBytes = 32 * 1024;
             var properties = new Dictionary<string, object>();
 
             for (int i = 0; i < 400; i++)
@@ -154,18 +155,20 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
             Assert.IsNull(result.Value);
             Assert.IsTrue(result.EventSize == default(long));
 
-            var sizeExpected = 1024L;
+            var size = 1024L;
             foreach (var item in properties)
             {
-                sizeExpected += item.Key.Length;
+                size += item.Key.Length;
 
                 if (item.Value is string)
-                    sizeExpected += ((string)item.Value).Length;
+                    size += ((string)item.Value).Length;
+
+                if (size >= MaxPropertiesLengthBytes) break;
             }
 
             _log.Verify(mock => mock.Warn("Event has more than 300 properties. Some of them will be trimmed when processed"), Times.Once);
             _log.Verify(mock => mock.Warn(It.IsAny<string>()), Times.Exactly(1));
-            //_log.Verify(mock => mock.Error($"The maximum size allowed for the properties is 32768 bytes. Current one is {sizeExpected} bytes. Event not queued"), Times.Once);
+            _log.Verify(mock => mock.Error($"The maximum size allowed for the properties is 32768 bytes. Current one is {size} bytes. Event not queued"), Times.Once);
             _log.Verify(mock => mock.Error(It.IsAny<string>()), Times.Exactly(1));
         }
     }
