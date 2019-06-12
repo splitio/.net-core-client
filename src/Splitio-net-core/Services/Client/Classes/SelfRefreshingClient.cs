@@ -69,7 +69,7 @@ namespace Splitio.Services.Client.Classes
         private IMetricsSdkApiClient metricsSdkApiClient;
         private SelfRefreshingSegmentFetcher selfRefreshingSegmentFetcher;
         private IListener<KeyImpression> treatmentLog;
-        private IListener<Event> eventLog;
+        private IListener<WrappedEvent> eventLog;
 
         public SelfRefreshingClient(string apiKey, ConfigurationOptions config, ILog log) : base(log)
         {
@@ -132,7 +132,7 @@ namespace Splitio.Services.Client.Classes
             TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30;
             TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000;
             EventLogRefreshRate = config.EventsPushRate ?? 60;
-            EventLogSize = config.EventsQueueSize ?? 500;
+            EventLogSize = config.EventsQueueSize ?? 5000;
             EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10;
             MaxCountCalls = config.MaxMetricsCountCallsBeforeFlush ?? 1000;
             MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
@@ -220,10 +220,10 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildEventLog(ConfigurationOptions config)
         {
-            eventsCache = new InMemorySimpleCache<Event>(new BlockingQueue<Event>(EventLogSize));
+            eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(EventLogSize));
             eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
-            eventListener = new AsynchronousListener<Event>(LogManager.GetLogger("AsynchronousEventListener"));
-            ((IAsynchronousListener<Event>)eventListener).AddListener(eventLog);
+            eventListener = new AsynchronousListener<WrappedEvent>(LogManager.GetLogger("AsynchronousEventListener"));
+            ((IAsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
         }
 
         private void BuildMetricsLog()

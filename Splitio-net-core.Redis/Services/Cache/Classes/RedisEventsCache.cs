@@ -5,7 +5,7 @@ using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisEventsCache : RedisCacheBase, ISimpleCache<Event>
+    public class RedisEventsCache : RedisCacheBase, ISimpleCache<WrappedEvent>
     {
         private const string eventKeyPrefix = "events";
         private readonly string _machineName;
@@ -20,13 +20,13 @@ namespace Splitio.Redis.Services.Cache.Classes
             _sdkVersion = sdkVersion;
         }
 
-        public void AddItem(Event item)
+        public void AddItem(WrappedEvent item)
         {
             var key = redisKeyPrefix + eventKeyPrefix;
             var eventJson = JsonConvert.SerializeObject(new
             {
                 m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
-                e = item
+                e = item.Event
             });
             redisAdapter.ListRightPush(key, eventJson);
         }

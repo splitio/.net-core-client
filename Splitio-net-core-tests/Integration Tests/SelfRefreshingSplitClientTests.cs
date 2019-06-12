@@ -90,7 +90,7 @@ namespace Splitio_Tests.Integration_Tests
                 }
             }
         }
-                
+        
         [TestMethod]
         public void DestroySuccessfully()
         {
