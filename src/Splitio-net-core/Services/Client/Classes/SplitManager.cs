@@ -36,14 +36,13 @@ namespace Splitio.Services.Client.Classes
                     name = x.name,
                     killed = x.killed,
                     changeNumber = x.changeNumber,
-                    treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? new ConditionWithLogic() { partitions = new List<PartitionDefinition>() }).partitions.Select(y => y.treatment).ToList(),
+                    treatments = (x.conditions.Where(z => z.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? x.conditions.FirstOrDefault())?.partitions.Select(y => y.treatment).ToList(),
                     trafficType = x.trafficTypeName,
                     configs = x.configurations
                 });
 
             return lightSplits.ToList();
         }
-
 
         public SplitView Split(string featureName)
         {
@@ -63,7 +62,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var condition = split.conditions.Where(x => x.conditionType == ConditionType.ROLLOUT).FirstOrDefault();
+            var condition = split.conditions.Where(x => x.conditionType == ConditionType.ROLLOUT).FirstOrDefault() ?? split.conditions.FirstOrDefault();
 
             var treatments = condition != null ? condition.partitions.Select(y => y.treatment).ToList() : new List<string>();
 
@@ -79,8 +78,7 @@ namespace Splitio.Services.Client.Classes
 
             return lightSplit;
         }
-
-
+        
         public List<string> SplitNames()
         {
             if (splitCache == null)

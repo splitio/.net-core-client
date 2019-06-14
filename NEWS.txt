@@ -1,5 +1,14 @@
 NEWS
 
+4.1.3
+- Added support for optional event properties via our client.track() method. Read more in our docs!
+
+4.1.2
+- Updated localhost mode. Now besides supporting the old text files with `.split` extension (to be deprecated soon), we support YAML (.yaml/.yml) files with more options. Read more in our docs!
+
+4.1.1
+- Bugfix: SDK return error when posting events successfully.
+
 4.1.0
 - Added Dynamic Configurations support through two new methods that mimick the regular ones, changing the type of what is returned.
   - GetTreatmentWithConfig: Same as getTreatment, but instead of a string it returns a map with treatment and config as a stringified JSON.
@@ -21,7 +30,7 @@ NEWS
 - Fix an issue when Traffic Allocation is set to 1 and the resulting bucket is also 1.
 
 3.4.2
-- Improve async handling
+- Improve async handling.
 
 3.4.1
 - Fix track() bug on localhost mode

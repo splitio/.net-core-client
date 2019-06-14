@@ -2,32 +2,50 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
         private const string DefaultSplitFileName = ".split";
+        private const string SplitFileYml = ".yml";
+        private const string SplitFileYaml = ".yaml";
         private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
 
-        private FileSystemWatcher watcher;
-        private string fullPath;
+        private ILocalhostFileService _localhostFileService;
+
+        private readonly FileSystemWatcher _watcher;
+        private readonly string FullPath;
 
         public LocalhostClient(string filePath, ILog log, Splitter splitter = null) : base(log)
         {
-            fullPath = LookupFilePath(filePath);
-            var directoryPath = Path.GetDirectoryName(fullPath);
+            FullPath = LookupFilePath(filePath);
 
-            watcher = new FileSystemWatcher(directoryPath != string.Empty ? directoryPath : Directory.GetCurrentDirectory(), Path.GetFileName(fullPath));
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
-            watcher.Changed += new FileSystemEventHandler(OnFileChanged);
-            watcher.EnableRaisingEvents = true;
+            if (FullPath.ToLower().EndsWith(SplitFileYaml) || FullPath.ToLower().EndsWith(SplitFileYml))
+            {
+                _localhostFileService = new YamlLocalhostFileService(Log);
+            }
+            else
+            {
+                Log.Warn("Localhost mode: .split/.splits mocks will be deprecated soon in favor of YAML files, which provide more targeting power. Take a look in our documentation.");
 
-            var splits = ParseSplitFile(fullPath);
+                _localhostFileService = new LocalhostFileService(Log);
+            }
+
+            var directoryPath = Path.GetDirectoryName(FullPath);
+
+            _watcher = new FileSystemWatcher(directoryPath != string.Empty ? directoryPath : Directory.GetCurrentDirectory(), Path.GetFileName(FullPath));
+            _watcher.NotifyFilter = NotifyFilters.LastWrite;
+            _watcher.Changed += new FileSystemEventHandler(OnFileChanged);
+            _watcher.EnableRaisingEvents = true;
+
+            var splits = ParseSplitFile(FullPath);
             splitCache = new InMemorySplitCache(splits);
             BuildSplitter(splitter);
             manager = new SplitManager(splitCache);
@@ -35,89 +53,41 @@ namespace Splitio.Services.Client.Classes
             Destroyed = false;
         }
 
-        public override bool Track(string key, string trafficType, string eventType, double? value = default(double?))
+        public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)
         {
             return true;
         }
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            var splits = ParseSplitFile(fullPath);
+            var splits = ParseSplitFile(FullPath);
             splitCache = new InMemorySplitCache(splits);
         }
 
         private string LookupFilePath(string filePath)
         {
-            if (File.Exists(filePath))
-            {
-                return filePath;
-            }
-            var home = Environment.GetEnvironmentVariable("USERPROFILE");
+            var filePathLowerCase = filePath.ToLower();
 
-            var fullPath = Path.Combine(home, filePath ?? DefaultSplitFileName);
-            if (File.Exists(fullPath))
+            if (filePathLowerCase.Equals(DefaultSplitFileName))
             {
-                return fullPath;
+                var home = Environment.GetEnvironmentVariable("USERPROFILE");
+                filePath = Path.Combine(home, filePath);
+
+                filePathLowerCase = filePath.ToLower();
             }
 
-            throw new DirectoryNotFoundException("Splits file could not be found");
+            if (!(filePathLowerCase.EndsWith(SplitFileYml) || filePathLowerCase.EndsWith(SplitFileYaml) || filePathLowerCase.EndsWith(DefaultSplitFileName) || filePathLowerCase.EndsWith(".splits")))
+                throw new Exception($"Invalid extension specified for Splits mock file. Accepted extensions are \".yml\" and \".yaml\". Your specified file is {filePath}");
+
+            if (!File.Exists(filePath))
+                throw new DirectoryNotFoundException($"Split configuration not found in ${filePath} - Please review your Split file location.");
+
+            return filePath;
         }
 
         private ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath)
         {
-            ConcurrentDictionary<string, ParsedSplit> splits = new ConcurrentDictionary<string, ParsedSplit>();
-
-            string line;
-
-            StreamReader file = new StreamReader(File.OpenText(filePath).BaseStream);
-            
-            while ((line = file.ReadLine()) != null)
-            {
-                line = line.Trim();
-                if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
-                {
-                    continue;
-                }
-
-                string[] feature_treatment = Regex.Split(line, @"\s+");
-
-                if (feature_treatment.Length != 2)
-                {
-                    Log.Info("Ignoring line since it does not have exactly two columns: " + line);
-                    continue;
-                }
-
-                splits.TryAdd(feature_treatment[0], CreateParsedSplit(feature_treatment[0], feature_treatment[1]));
-                Log.Info("100% of keys will see " + feature_treatment[1] + " for " + feature_treatment[0]);
-
-            }
-
-            file.Dispose();
-
-            return splits;
-        }
-
-        /// <summary>
-        /// Creates a ParsedSplit instance that always returns 
-        /// treatment specified in input file. It is implemented this way
-        /// for simplification. When a split is killed, the client 
-        /// returns default treatment for that feature.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="treatment"></param>
-        /// <returns></returns>
-        private ParsedSplit CreateParsedSplit(string name, string treatment)
-        {
-            var split = new ParsedSplit()
-            {
-                name = name,
-                seed = 0,
-                killed = true,
-                defaultTreatment = treatment,
-                conditions = null
-            };
-
-            return split;
+            return _localhostFileService.ParseSplitFile(filePath);
         }
 
         private void BuildSplitter(Splitter splitter)
@@ -127,7 +97,7 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            watcher.Dispose();
+            _watcher.Dispose();
             splitCache.Clear();
             Destroyed = true;
         }

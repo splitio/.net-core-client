@@ -4,6 +4,7 @@ using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -97,7 +98,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(firstResult.changeNumber, 10000);
             Assert.AreEqual(firstResult.killed, false);
             Assert.AreEqual(firstResult.trafficType, "user");
-            Assert.AreEqual(firstResult.treatments.Count, 0);
+            Assert.AreEqual(conditionWithLogic.partitions.Count, firstResult.treatments.Count);
         }
 
         [TestMethod]
@@ -191,7 +192,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         }
 
         [TestMethod]
-        public void SplitReturnEmptyTreatmentsWhenNoRolloutCondition()
+        public void SplitReturnDefaultTreatmentsWhenNoRolloutCondition()
         {
             //Arrange
             var conditionsWithLogic = new List<ConditionWithLogic>();
@@ -221,7 +222,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(result.name, "test1");
-            Assert.AreEqual(result.treatments.Count, 0);
+            Assert.AreEqual(conditionWithLogic.partitions.Count, result.treatments.Count);
         }
 
         [TestMethod]
@@ -452,6 +453,161 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsNotNull(result2.configs);
             Assert.IsNotNull(result3);
             Assert.IsNull(result3.configs);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yaml")]
+        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOn_ReturnsSplit()
+        {
+            // Arrange.
+            var splitViewExpected = new SplitView
+            {
+                name = "testing_split_on",
+                treatments = new List<string> { "on" }
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yaml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+            
+            // Act.
+            var splitViewResult = manager.Split("testing_split_on");
+
+            // Assert.
+            Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
+            Assert.IsFalse(splitViewResult.killed);
+            Assert.IsNull(splitViewResult.configs);
+            Assert.IsNull(splitViewResult.trafficType);
+            Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);
+            foreach (var treatment in splitViewExpected.treatments)
+            {
+                Assert.IsNotNull(splitViewResult.treatments.FirstOrDefault(t => t == treatment));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yaml")]
+        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOnlyWl_ReturnsSplit()
+        {
+            // Arrange.
+            var splitViewExpected = new SplitView
+            {
+                name = "testing_split_only_wl",
+                treatments = new List<string> { "whitelisted" },
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yaml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+
+            // Act.
+            var splitViewResult = manager.Split("testing_split_only_wl");
+
+            // Assert.
+            Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
+            Assert.IsFalse(splitViewResult.killed);
+            Assert.IsNull(splitViewResult.configs);
+            Assert.IsNull(splitViewResult.trafficType);
+            Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yaml")]
+        public void Split_WithLocalhostClient_WhenNameIsTestingSplitWithWl_ReturnsSplit()
+        {
+            // Arrange.
+            var splitViewExpected = new SplitView
+            {
+                name = "testing_split_with_wl",
+                treatments = new List<string> { "not_in_whitelist" },
+                configs = new Dictionary<string, string>
+                {
+                    { "not_in_whitelist", "{\"color\": \"green\"}" },
+                    { "multi_key_wl", "{\"color\": \"brown\"}" }
+                }
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yaml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+
+            // Act.
+            var splitViewResult = manager.Split("testing_split_with_wl");
+
+            // Assert.
+            Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
+            Assert.IsFalse(splitViewResult.killed);
+            Assert.IsNull(splitViewResult.trafficType);
+            Assert.AreEqual(splitViewExpected.configs.Count, splitViewResult.configs.Count);
+            foreach (var config in splitViewExpected.configs)
+            {
+                Assert.AreEqual(config.Value, splitViewResult.configs[config.Key]);
+            }
+
+            Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);
+            foreach (var treatment in splitViewExpected.treatments)
+            {
+                Assert.IsNotNull(splitViewResult.treatments.FirstOrDefault(t => t == treatment));
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\split.yaml")]
+        public void Split_WithLocalhostClient_WhenNameIsTestingSplitOffWithConfig_ReturnsSplit()
+        {
+            // Arrange.
+            var splitViewExpected = new SplitView
+            {
+                name = "testing_split_off_with_config",
+                treatments = new List<string> { "off" },
+                configs = new Dictionary<string, string>
+                {
+                    { "off", "{\"color\": \"green\"}" }
+                }
+            };
+
+            var configurationOptions = new ConfigurationOptions
+            {
+                LocalhostFilePath = @"Resources\split.yaml",
+                Ready = 500
+            };
+
+            var factory = new SplitFactory("localhost", configurationOptions);
+            var manager = factory.Manager();
+
+            // Act.
+            var splitViewResult = manager.Split("testing_split_off_with_config");
+
+            // Assert.
+            Assert.AreEqual(splitViewExpected.name, splitViewResult.name);
+            Assert.IsFalse(splitViewResult.killed);
+            Assert.IsNull(splitViewResult.trafficType);
+            Assert.AreEqual(splitViewExpected.configs.Count, splitViewResult.configs.Count);
+            foreach (var config in splitViewExpected.configs)
+            {
+                Assert.AreEqual(config.Value, splitViewResult.configs[config.Key]);
+            }
+
+            Assert.AreEqual(splitViewExpected.treatments.Count, splitViewResult.treatments.Count);
+            foreach (var treatment in splitViewExpected.treatments)
+            {
+                Assert.IsNotNull(splitViewResult.treatments.FirstOrDefault(t => t == treatment));
+            }
         }
     }
 }
