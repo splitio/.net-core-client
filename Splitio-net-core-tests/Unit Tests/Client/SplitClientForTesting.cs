@@ -1,5 +1,6 @@
 ﻿using Common.Logging;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Shared.Interfaces;
