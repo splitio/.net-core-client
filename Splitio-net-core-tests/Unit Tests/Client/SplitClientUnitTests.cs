@@ -3,6 +3,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Client.Interfaces;
+using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Parsing;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
@@ -12,6 +16,9 @@ namespace Splitio_Tests.Unit_Tests.Client
     {        
         private Mock<ILog> _logMock;
         private Mock<IListener<WrappedEvent>> _eventListenerMock;
+        private Mock<ISplitCache> _splitCacheMock;
+        private Mock<Splitter> _splitterMock;
+        private Mock<CombiningMatcher> _combiningMatcher;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -19,9 +26,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TestInitialize()
         {
             _logMock = new Mock<ILog>();
+            _splitCacheMock = new Mock<ISplitCache>();
+            _splitterMock = new Mock<Splitter>();
+            _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _eventListenerMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object);
         }
 
         #region GetTreatment
@@ -83,6 +93,242 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.IsNull(result.Config);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_ShouldReturnOnWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var treatmentExpected = "on";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment: "off", configurations: configurations);
+
+            _combiningMatcher
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Returns(true);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            _splitterMock
+                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns(treatmentExpected);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(treatmentExpected, result.Treatment);
+            var configExpected = configurations[treatmentExpected];
+            Assert.AreEqual(configExpected, result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenNotMach_ShouldReturnDefaultTreatmentWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations);
+
+            _combiningMatcher
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Returns(false);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(defaultTreatment, result.Treatment);
+            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(configExpected, result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenConfigIsNull_ShouldReturnOn()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var treatmentExpected = "on";
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment);
+
+            _combiningMatcher
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Returns(true);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            _splitterMock
+                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns(treatmentExpected);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(treatmentExpected, result.Treatment);
+            Assert.IsNull(result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenIsKilled_ShouldReturnDefaultTreatmentWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment, killed: true, configurations: configurations);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(defaultTreatment, result.Treatment);
+            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(configExpected, result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenTrafficAllocationIsSmallerThanBucket_ShouldReturnDefaultTreatmentWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(defaultTreatment, result.Treatment);
+            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(configExpected, result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenConditionTypeIsWhitelist_ShouldReturnOntWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var treatmentExpected = "on";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var conditions = new List<ConditionWithLogic>
+            {
+                new  ConditionWithLogic
+                {
+                    conditionType = ConditionType.WHITELIST,
+                    label = "default rule",
+                    partitions = new List<PartitionDefinition>
+                    {
+                        new PartitionDefinition
+                        {
+                            size = 100,
+                            treatment = "on"
+                        },
+                        new PartitionDefinition
+                        {
+                            size = 0,
+                            treatment = "off"
+                        }
+                    },
+                    matcher = _combiningMatcher.Object
+                }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20, conditions: conditions);
+
+            _combiningMatcher
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Returns(true);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            _splitterMock
+                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns(treatmentExpected);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(treatmentExpected, result.Treatment);
+            var configExpected = configurations[treatmentExpected];
+            Assert.AreEqual(configExpected, result.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenConditionsIsEmpty_ShouldReturnDefaultTreatmenttWithConfig()
+        {
+            // Arrange
+            var feature = "always_on";
+            var defaultTreatment = "off";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20, conditions: new List<ConditionWithLogic>());
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(feature))
+                .Returns(parsedSplit);
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
+
+            // Assert
+            Assert.AreEqual(defaultTreatment, result.Treatment);
+            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(configExpected, result.Config);
+        }
         #endregion
 
         #region GetTreatmentsWithConfig
@@ -116,6 +362,79 @@ namespace Splitio_Tests.Unit_Tests.Client
             }
 
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfig_ShouldReturnTreatmentsWithConfigs()
+        {
+            // Arrange
+            var treatmenOn = "always_on";
+            var treatmenOff = "always_off";
+            var configurations = new Dictionary<string, string>
+            {
+                { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
+                { "on", "{\"name\": \"mauro\"}" }
+            };
+
+            var offConditions = new List<ConditionWithLogic>
+            {
+                new  ConditionWithLogic
+                {
+                    conditionType = ConditionType.ROLLOUT,
+                    label = "default rule",
+                    partitions = new List<PartitionDefinition>
+                    {
+                        new PartitionDefinition
+                        {
+                            size = 100,
+                            treatment = "off"
+                        },
+                        new PartitionDefinition
+                        {
+                            size = 0,
+                            treatment = "on"
+                        }
+                    },
+                    matcher = _combiningMatcher.Object
+                }
+            };
+
+            var parsedSplitOn = GetParsedSplit(treatmenOn, defaultTreatment: "off", configurations: configurations);
+            var parsedSplitOff = GetParsedSplit(treatmenOff, defaultTreatment: "on", configurations: configurations, conditions: offConditions, seed: 2095087413);
+
+            _combiningMatcher
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Returns(true);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(treatmenOn))
+                .Returns(parsedSplitOn);
+
+            _splitCacheMock
+                .Setup(mock => mock.GetSplit(treatmenOff))
+                .Returns(parsedSplitOff);
+
+            _splitterMock
+                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
+                .Returns("on");
+
+            _splitterMock
+                .Setup(mock => mock.GetTreatment("user", 2095087413, It.IsAny<List<PartitionDefinition>>(), AlgorithmEnum.Murmur))
+                .Returns("off");
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentsWithConfig("user", new List<string> { treatmenOff, treatmenOn });
+
+            // Assert
+            var resultOn = result[parsedSplitOn.name];
+            Assert.AreEqual("on", resultOn.Treatment);
+            var configExpected = configurations[resultOn.Treatment];
+            Assert.AreEqual(configExpected, resultOn.Config);
+
+            var resultOff = result[parsedSplitOff.name];
+            Assert.AreEqual("off", resultOff.Treatment);
+            configExpected = configurations[resultOff.Treatment];
+            Assert.AreEqual(configExpected, resultOff.Config);
         }
         #endregion
 
@@ -213,6 +532,47 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals("user")
                                                                               && we.Event.value == 132)), Times.Once);
+        }
+        #endregion
+
+        #region Private Methods
+        private ParsedSplit GetParsedSplit(string name, string defaultTreatment, bool killed = false, Dictionary<string, string> configurations = null, List<ConditionWithLogic> conditions = null, int? trafficAllocation = null, int? seed = null)
+        {
+            return new ParsedSplit
+            {
+                algo = AlgorithmEnum.Murmur,
+                changeNumber = 1556063594549,
+                defaultTreatment = defaultTreatment,
+                killed = killed,
+                name = name,
+                seed = seed ?? 2095087412,
+                trafficAllocation = trafficAllocation ?? 100,
+                trafficAllocationSeed = -1953939473,
+                trafficTypeName = "user",
+                configurations = configurations,
+                conditions = conditions ?? new List<ConditionWithLogic>
+                {
+                    new  ConditionWithLogic
+                    {
+                        conditionType = ConditionType.ROLLOUT,
+                        label = "default rule",
+                        partitions = new List<PartitionDefinition>
+                        {
+                            new PartitionDefinition
+                            {
+                                size = 100,
+                                treatment = "on"
+                            },
+                            new PartitionDefinition
+                            {
+                                size = 0,
+                                treatment = "off"
+                            }
+                        },
+                        matcher = _combiningMatcher.Object
+                    }
+                }
+            };
         }
         #endregion
     }
