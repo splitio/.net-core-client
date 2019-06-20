@@ -2,11 +2,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Parsing;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
@@ -19,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<ISplitCache> _splitCacheMock;
         private Mock<Splitter> _splitterMock;
         private Mock<CombiningMatcher> _combiningMatcher;
+        private ITrafficTypesCache _trafficTypesCache;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -30,8 +31,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitterMock = new Mock<Splitter>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
+            _trafficTypesCache = new InMemoryTrafficTypesCache();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _trafficTypesCache);
         }
 
         #region GetTreatment
@@ -520,7 +522,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Track_WhenPropertiesIsNull_ReturnsTrue()
         {
             // Arrange.
-            Dictionary<string, object> properties = null;            
+            Dictionary<string, object> properties = null;
 
             // Act.
             var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
@@ -532,6 +534,60 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals("user")
                                                                               && we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Track_WhenTraffictTypeDoesNotExist_ReturnsTrue()
+        {
+            // Arrange.
+            var types = new List<string>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                types.Add($"type_{i}");
+            }
+
+            _trafficTypesCache.Load(types);
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", "traffict_type", "event_type", 132);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals("traffict_type")
+                                                                              && we.Event.value == 132)), Times.Once);
+
+            _logMock.Verify(mock => mock.Warn("Track: Traffic Type traffict_type does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Once);
+        }
+
+        [TestMethod]
+        public void Track_WhenTraffictTypeExists_ReturnsTrue()
+        {
+            // Arrange.
+            var types = new List<string>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                types.Add($"type_{i}");
+            }
+
+            _trafficTypesCache.Load(types);
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", "type_10", "event_type", 132);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals("type_10")
+                                                                              && we.Event.value == 132)), Times.Once);
+
+            _logMock.Verify(mock => mock.Warn("Track: Traffic Type type_10 does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Never);
         }
         #endregion
 

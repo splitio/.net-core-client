@@ -22,7 +22,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
-        protected readonly ITrafficTypeValidator _trafficTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
@@ -48,6 +47,8 @@ namespace Splitio.Services.Client.Classes
         protected ISimpleCache<WrappedEvent> eventsCache;
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
+        protected ITrafficTypesCache trafficTypesCache;
+        protected ITrafficTypeValidator _trafficTypeValidator;
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
@@ -57,7 +58,6 @@ namespace Splitio.Services.Client.Classes
             _keyValidator = new KeyValidator(_log);
             _splitNameValidator = new SplitNameValidator(_log);
             _eventTypeValidator = new EventTypeValidator(_log);
-            _trafficTypeValidator = new TrafficTypeValidator(_log);
             _eventPropertiesValidator = new EventPropertiesValidator(_log);
         }
 
@@ -128,6 +128,7 @@ namespace Splitio.Services.Client.Classes
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
             CheckClientStatus();
+            _trafficTypeValidator = new TrafficTypeValidator(_log, trafficTypesCache);
 
             var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
             var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, nameof(trafficType));

@@ -27,7 +27,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, splitCache);
+            var trafficTypeCache = new InMemoryTrafficTypesCache();
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, trafficTypeCache, splitCache);
             selfRefreshingSplitFetcher.Start();
             gates.IsSDKReady(1000);
 
@@ -52,7 +53,8 @@ namespace Splitio_Tests.Integration_Tests
             var splitChangesResult = splitChangeFetcher.Fetch(-1);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, splitCache);
+            var trafficTypeCache = new InMemoryTrafficTypesCache();
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, 30, trafficTypeCache, splitCache);
             selfRefreshingSplitFetcher.Start();
             gates.IsSDKReady(1000);
 
@@ -83,6 +85,7 @@ namespace Splitio_Tests.Integration_Tests
                 splitSDKVersion = "net-0.0.0",
                 splitSDKSpecVersion = "1.2",
             };
+
             var sdkApiClient = new SplitSdkApiClient(httpHeader, baseUrl, 10000, 10000);
             var apiSplitChangeFetcher = new ApiSplitChangeFetcher(sdkApiClient);
             var sdkSegmentApiClient = new SegmentSdkApiClient(httpHeader, baseUrl, 10000, 10000);
@@ -91,9 +94,10 @@ namespace Splitio_Tests.Integration_Tests
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4);
 
+            var trafficTypeCache = new InMemoryTrafficTypesCache();
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, splitCache);
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, trafficTypeCache, splitCache);
             selfRefreshingSplitFetcher.Start();
 
             //Act           
@@ -126,13 +130,13 @@ namespace Splitio_Tests.Integration_Tests
             var sdkSegmentApiClient = new SegmentSdkApiClient(httpHeader, baseUrl, 10000, 10000);
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkSegmentApiClient);
             var gates = new InMemoryReadinessGatesCache();
-
+            var trafficTypeCache = new InMemoryTrafficTypesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
             var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, splitCache);
+            var selfRefreshingSplitFetcher = new SelfRefreshingSplitFetcher(apiSplitChangeFetcher, splitParser, gates, 30, trafficTypeCache, splitCache);
             selfRefreshingSplitFetcher.Start();
 
             //Act

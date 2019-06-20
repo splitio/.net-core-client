@@ -1,5 +1,6 @@
 ﻿using Common.Logging;
 using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using System.Linq;
 
@@ -7,11 +8,14 @@ namespace Splitio.Services.InputValidation.Classes
 {
     public class TrafficTypeValidator : ITrafficTypeValidator
     {
-        protected readonly ILog _log;
+        private readonly ILog _log;
+        private readonly ITrafficTypesCache _trafficTypesCache;
 
-        public TrafficTypeValidator(ILog log)
+        public TrafficTypeValidator(ILog log,
+             ITrafficTypesCache trafficTypesCache)
         {
             _log = log;
+            _trafficTypesCache = trafficTypesCache;
         }
 
         public ValidatorResult IsValid(string trafficType, string method)
@@ -33,6 +37,11 @@ namespace Splitio.Services.InputValidation.Classes
                 _log.Warn($"{method}: {trafficType} should be all lowercase - converting string to lowercase");
 
                 trafficType = trafficType.ToLower();
+            }
+
+            if (!_trafficTypesCache.Exists(trafficType))
+            {
+                _log.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console.");
             }
 
             return new ValidatorResult { Success = true, Value = trafficType };

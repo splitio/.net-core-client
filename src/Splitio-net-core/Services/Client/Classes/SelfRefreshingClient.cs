@@ -202,8 +202,11 @@ namespace Splitio.Services.Client.Classes
             selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, gates, segmentRefreshRate, segmentCache, NumberOfParalellSegmentTasks);
             var splitChangeFetcher = new ApiSplitChangeFetcher(splitSdkApiClient);
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
+
             splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
-            splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, splitCache);
+            trafficTypesCache = new InMemoryTrafficTypesCache();
+
+            splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, trafficTypesCache, splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
