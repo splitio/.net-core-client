@@ -16,6 +16,8 @@ namespace Splitio.Services.Cache.Classes
 
         public void Load(List<string> trafficTypes)
         {
+            trafficTypes = trafficTypes.Distinct().ToList();
+
             foreach (var type in trafficTypes)
             {
                 if (!Exists(type))
