@@ -421,38 +421,6 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.IsFalse(result);
         }
 
-        // #############################################################################################################33
-        [TestMethod]
-        public void AddSplit_SaveTrafficType()
-        {
-            //Arrange
-            var splitName = "test_split";
-            var split = BuildSplit(splitName);
-            var splitJson = JsonConvert.SerializeObject(split);
-
-            _redisAdapterMock
-                .Setup(x => x.Set(splitKeyPrefix + "test_split", splitJson))
-                .Returns(true);
-
-            var ttKey = $"{trafficTypeKeyPrefix}{split.trafficTypeName}";
-
-            _redisAdapterMock
-                .Setup(x => x.Set(ttKey, "1"))
-                .Returns(true);
-
-            _redisAdapterMock
-                .Setup(x => x.Get(ttKey))
-                .Returns("1");
-
-            //Act
-            _redisSplitCache.AddSplit(splitName, split);
-
-            //Assert
-            var result = (Split)_redisSplitCache.GetSplit(splitName);
-        }
-
-
-
         private Split BuildSplit(string splitName)
         {
             return new Split
