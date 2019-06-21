@@ -69,6 +69,8 @@ namespace Splitio.Services.Client.Classes
 
         private string LookupFilePath(string filePath)
         {
+            filePath = filePath ?? DefaultSplitFileName;
+
             var filePathLowerCase = filePath.ToLower();
 
             if (filePathLowerCase.Equals(DefaultSplitFileName))
