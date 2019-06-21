@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -51,6 +52,8 @@ namespace Splitio.Services.Client.Classes
             manager = new SplitManager(splitCache);
 
             Destroyed = false;
+
+            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
         public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)

@@ -18,5 +18,7 @@ namespace Splitio.Services.Cache.Interfaces
         List<SplitBase> GetAllSplits();
 
         void Clear();
+
+        bool TrafficTypeExists(string trafficType);
     }
 }

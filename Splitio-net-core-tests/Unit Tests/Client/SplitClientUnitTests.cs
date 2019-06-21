@@ -2,11 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Parsing;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
@@ -532,6 +531,54 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals("user")
                                                                               && we.Event.value == 132)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Track_WhenTraffictTypeDoesNotExist_ReturnsTrue()
+        {
+            // Arrange.
+            var trafficType = "traffict_type";
+
+            _splitCacheMock
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(false);
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", trafficType, "event_type", 132);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals(trafficType)
+                                                                              && we.Event.value == 132)), Times.Once);
+
+            _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Once);
+        }
+
+        [TestMethod]
+        public void Track_WhenTraffictTypeExists_ReturnsTrue()
+        {
+            // Arrange.
+            var trafficType = "traffict_type";
+
+            _splitCacheMock
+                .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(true);
+
+            // Act.
+            var result = _splitClientForTesting.Track("key", trafficType, "event_type", 132);
+
+            // Assert.
+            Assert.IsTrue(result);
+            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+                                                                              && we.Event.key.Equals("key")
+                                                                              && we.Event.eventTypeId.Equals("event_type")
+                                                                              && we.Event.trafficTypeName.Equals(trafficType)
+                                                                              && we.Event.value == 132)), Times.Once);
+
+            _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Never);
         }
         #endregion
 

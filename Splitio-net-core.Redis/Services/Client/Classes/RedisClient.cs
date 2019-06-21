@@ -7,6 +7,7 @@ using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -103,6 +104,8 @@ namespace Splitio.Redis.Services.Client.Classes
             metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
             impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
             eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
+
+            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
