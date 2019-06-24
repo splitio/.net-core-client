@@ -42,7 +42,7 @@ namespace Splitio.Services.Client.Classes
             impressionListener = treatmentLogInstance;
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
-            manager = new SplitManager(splitCache);
+            manager = new SplitManager(splitCache, log);
         }
 
         public void RemoveSplitFromCache(string splitName)

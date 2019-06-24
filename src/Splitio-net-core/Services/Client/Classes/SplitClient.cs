@@ -180,7 +180,7 @@ namespace Splitio.Services.Client.Classes
 
                 if (split == null)
                 {
-                    _log.Warn($"Unknown or invalid feature: {feature}");
+                    _log.Warn($"GetTreatment: you passed {feature} that does not exist in this environment, please double check what Splits exist in the web console.");
 
                     return new TreatmentResult(LabelSplitNotFound, Control, null);
                 }
@@ -280,7 +280,10 @@ namespace Splitio.Services.Client.Classes
 
                     treatmentsForFeatures.Add(feature, treatmentResult);
 
-                    ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
+                    if (!LabelSplitNotFound.Equals(treatmentResult.Label))
+                    {
+                        ImpressionsQueue.Add(BuildImpression(key.matchingKey, feature, treatmentResult.Treatment, start, treatmentResult.ChangeNumber, LabelsEnabled ? treatmentResult.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
+                    }
                 }
 
                 if (metricsLog != null)
@@ -325,10 +328,13 @@ namespace Splitio.Services.Client.Classes
                     metricsLog.Time(operation, clock.ElapsedMilliseconds);
                 }
 
-                ImpressionLog(new List<KeyImpression>
+                if (!LabelSplitNotFound.Equals(result.Label))
                 {
-                    BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
-                });
+                    ImpressionLog(new List<KeyImpression>
+                    {
+                        BuildImpression(key.matchingKey, feature, result.Treatment, start, result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
+                    });
+                }
             }
 
             return result;
