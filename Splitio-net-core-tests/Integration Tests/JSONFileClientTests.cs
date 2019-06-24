@@ -313,7 +313,14 @@ namespace Splitio_Tests.Integration_Tests
             var result = client.GetTreatment("test", "asd", null);
 
             //Assert
-            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && p.feature == "asd" && p.treatment == "control" && p.time > 0 && p.changeNumber == null && p.label == "definition not found" && p.bucketingKey == null)));
+            Assert.AreEqual("control", result);
+            treatmentLogMock.Verify(x => x.Log(It.Is<KeyImpression>(p => p.keyName == "test" && 
+                                                                         p.feature == "asd" && 
+                                                                         p.treatment == "control" && 
+                                                                         p.time > 0 && 
+                                                                         p.changeNumber == null && 
+                                                                         p.label == "definition not found" && 
+                                                                         p.bucketingKey == null)), Times.Never);
         }
 
         [TestMethod]
@@ -618,6 +625,111 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual(resultDestroy2.Count, 0);
             Assert.AreEqual(resultDestroy3.Count, 0);
             Assert.IsTrue(resultDestroy4 == null);
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        [TestMethod]
+        public void GetTreatment_WhenNameDoesntExist_DontLogImpression()
+        {
+            // Arrange.
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var splitName = "not_exist";
+
+            // Act.
+            var result = client.GetTreatment("key", splitName);
+
+            // Assert.
+            Assert.AreEqual("control", result);
+            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            treatmentLogMock.Verify(x => x.Log(It.IsAny<KeyImpression>()), Times.Never);
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        [TestMethod]
+        public void GetTreatments_WhenNameDoesntExist_DontLogImpression()
+        {
+            // Arrange.
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var splitNames = new List<string> { "not_exist", "not_exist_1" };
+
+            // Act.
+            var result = client.GetTreatments("key", splitNames);
+
+            // Assert.
+            foreach (var res in result)
+            {
+                Assert.AreEqual("control", res.Value);
+            }
+
+            foreach (var name in splitNames)
+            {
+                _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {name} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            }
+            
+            treatmentLogMock.Verify(x => x.Log(It.IsAny<KeyImpression>()), Times.Never);
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        [TestMethod]
+        public void Split_Manager_WhenNameDoesntExist_ReturnsNull()
+        {
+            // Arrange.
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var manager = client.GetSplitManager();
+            var splitName = "not_exist";
+
+            // Act.
+            var result = manager.Split(splitName);
+
+            // Assert.
+            Assert.IsNull(result);
+            _logMock.Verify(mock => mock.Warn($"split: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenNameDoesntExist_DontLogImpression()
+        {
+            // Arrange.
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var splitName = "not_exist";
+
+            // Act.
+            var result = client.GetTreatmentWithConfig("key", splitName);
+
+            // Assert.
+            Assert.AreEqual("control", result.Treatment);
+            Assert.IsNull(result.Config);
+            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            treatmentLogMock.Verify(x => x.Log(It.IsAny<KeyImpression>()), Times.Never);
+        }
+
+        [DeploymentItem(@"Resources\splits_staging_3.json")]
+        [TestMethod]
+        public void GetTreatmentsWithConfig_WhenNameDoesntExist_DontLogImpression()
+        {
+            // Arrange.
+            var treatmentLogMock = new Mock<IListener<KeyImpression>>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var splitNames = new List<string> { "not_exist", "not_exist_1" };
+
+            // Act.
+            var result = client.GetTreatmentsWithConfig("key", splitNames);
+
+            // Assert.
+            foreach (var res in result)
+            {
+                Assert.AreEqual("control", res.Value.Treatment);
+                Assert.IsNull(res.Value.Config);
+
+                _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {res.Key} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            }
+
+            treatmentLogMock.Verify(x => x.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
     }
 }

@@ -13,7 +13,8 @@ namespace Splitio_Tests.Unit_Tests.Client
         public SplitClientForTesting(ILog _log, 
             ISplitCache _splitCache, 
             Splitter _splitter, 
-            IListener<WrappedEvent> _eventListener) 
+            IListener<WrappedEvent> _eventListener,
+            IListener<KeyImpression> _impressionListener) 
             : base(_log)
         {
             splitCache = _splitCache;
@@ -21,6 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             eventListener = _eventListener;
 
             _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);
+            impressionListener = _impressionListener;
         }
 
         public override void Destroy() { }

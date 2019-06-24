@@ -16,6 +16,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<ILog> _logMock;
         private Mock<IListener<WrappedEvent>> _eventListenerMock;
         private Mock<ISplitCache> _splitCacheMock;
+        private Mock<IListener<KeyImpression>> _impressionListenerMock;
         private Mock<Splitter> _splitterMock;
         private Mock<CombiningMatcher> _combiningMatcher;
 
@@ -29,8 +30,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitterMock = new Mock<Splitter>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
+            _impressionListenerMock = new Mock<IListener<KeyImpression>>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object);
         }
 
         #region GetTreatment
@@ -65,6 +67,18 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result);
             _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void GetTreatment_WhenNameDoesntExist_ReturnsControl()
+        {
+            // Act
+            var result = _splitClientForTesting.GetTreatment("key", "not_exist");
+
+            // Assert
+            Assert.AreEqual("control", result);
+            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed not_exist that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
         #endregion
 
@@ -328,6 +342,19 @@ namespace Splitio_Tests.Unit_Tests.Client
             var configExpected = configurations[defaultTreatment];
             Assert.AreEqual(configExpected, result.Config);
         }
+
+        [TestMethod]
+        public void GetTreatmentWithConfig_WhenNameDoesntExist_ReturnsControl()
+        {
+            // Act
+            var result = _splitClientForTesting.GetTreatmentWithConfig("key", "not_exist");
+
+            // Assert
+            Assert.AreEqual("control", result.Treatment);
+            Assert.IsNull(result.Config);
+            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed not_exist that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
+        }
         #endregion
 
         #region GetTreatmentsWithConfig
@@ -434,6 +461,26 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual("off", resultOff.Treatment);
             configExpected = configurations[resultOff.Treatment];
             Assert.AreEqual(configExpected, resultOff.Config);
+        }
+
+        [TestMethod]
+        public void GetTreatmentsWithConfig_WhenNameDoesntExist_ReturnsControl()
+        {
+            // Arrange 
+            var splitNames = new List<string> { "not_exist" , "not_exist2" };
+
+            // Act
+            var result = _splitClientForTesting.GetTreatmentsWithConfig("key", splitNames);
+
+            // Assert
+            foreach (var res in result)
+            {
+                Assert.AreEqual("control", res.Value.Treatment);
+                Assert.IsNull(res.Value.Config);
+                _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {res.Key} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
+            }
+
+            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
         #endregion
 
