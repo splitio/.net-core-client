@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Cache
@@ -27,60 +28,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void AddAndGetSplitTest()
+        [ExpectedException(typeof(NotImplementedException))]
+        public void AddSplit_ReturnsNotImplementedException()
         {
-            //Arrange
-            var splitName = "test_split";
-            var split = BuildSplit(splitName);
-            var splitJson = JsonConvert.SerializeObject(split);
-
-            _redisAdapterMock
-                .Setup(x => x.Set(splitKeyPrefix + "test_split", splitJson))
-                .Returns(true);
-
-            _redisAdapterMock
-                .Setup(x => x.Get(splitKeyPrefix + "test_split"))
-                .Returns(splitJson);
-
             //Act
-            _redisSplitCache.AddSplit(splitName, split);
-
-            //Assert
-            var result = (Split)_redisSplitCache.GetSplit(splitName);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(splitName, result.name);
-        }
-
-        [TestMethod]
-        public void AddDuplicateSplitTest()
-        {
-            //Arrange
-            var splitName = "test_split";
-            var split = BuildSplit(splitName);
-            var splitJson = JsonConvert.SerializeObject(split);
-
-            _redisAdapterMock
-                .Setup(x => x.Keys(splitKeyPrefix + "*"))
-                .Returns(new RedisKey[]{"test_split"});
-
-            _redisAdapterMock
-                .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
-                .Returns(new RedisValue[]{splitJson});
-
-            var split1 = new Split { name = splitName };
-            _redisSplitCache.AddSplit(splitName, split1);
-
-            var split2 = new Split { name = "test_split_2" };
-
-            //Act
-            _redisSplitCache.AddSplit(splitName, split2);
-
-            //Assert
-            var result = _redisSplitCache.GetAllSplits();
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(((Split)result[0]).name, split1.name);
-            Assert.AreNotEqual(((Split)result[0]).name, split2.name);
+            _redisSplitCache.AddSplit("splitName", new Split());
         }
 
         [TestMethod]
@@ -102,90 +54,19 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
-        public void RemoveSplitTest()
+        [ExpectedException(typeof(NotImplementedException))]
+        public void RemoveSplit_ReturnsNotImplementedException()
         {
-            //Arrange
-            var splitName = "test_split";
-            string value = null;
-
-            _redisAdapterMock
-                .Setup(x => x.Del(splitKeyPrefix + "test_split"))
-                .Returns(true);
-
-            _redisAdapterMock
-                .Setup(x => x.Get(splitKeyPrefix + "test_split"))
-                .Returns(value);
-
             //Act
-            var isRemoved = _redisSplitCache.RemoveSplit(splitName);
-            var result = _redisSplitCache.GetSplit(splitName);
-
-            //Assert
-            Assert.IsTrue(isRemoved);
-            Assert.IsNull(result);
+            var isRemoved = _redisSplitCache.RemoveSplit("splitName");
         }
 
         [TestMethod]
-        public void RemoveSplitShouldReturnFalseOnException()
+        [ExpectedException(typeof(NotImplementedException))]
+        public void SetChangeNumber__ReturnsNotImplementedException()
         {
-            //Arrange
-            var splitName = "test_split";
-
-            _redisAdapterMock
-                .Setup(x => x.Del(splitKeyPrefix + "test_split"))
-                .Returns(false);
-
             //Act
-            var isRemoved = _redisSplitCache.RemoveSplit(splitName);
-
-            //Assert
-            Assert.IsFalse(isRemoved);
-        }
-
-        [TestMethod]
-        public void RemoveSplitsTest()
-        {
-            //Arrange
-            var splitName = "test_split";
-            string value = null;
-
-            _redisAdapterMock
-                .Setup(x => x.Del(It.IsAny<RedisKey[]>()))
-                .Returns(1);
-
-            _redisAdapterMock
-                .Setup(x => x.Get(splitKeyPrefix + "test_split"))
-                .Returns(value);
-
-            //Act
-            var removedCount = _redisSplitCache.RemoveSplits(new List<string>(){splitName});
-            var result = _redisSplitCache.GetSplit(splitName);
-
-            //Assert
-            Assert.AreEqual(1, removedCount);
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void SetAndGetChangeNumberTest()
-        {
-            //Arrange
-            var changeNumber = 1234;
-
-            _redisAdapterMock
-                .Setup(x => x.Set(splitsKeyPrefix + "till", changeNumber.ToString()))
-                .Returns(true);
-
-            _redisAdapterMock
-                .Setup(x => x.Get(splitsKeyPrefix + "till"))
-                .Returns(changeNumber.ToString());
-
-            //Act
-            _redisSplitCache.SetChangeNumber(changeNumber);
-            var result = _redisSplitCache.GetChangeNumber();
-
-            //Assert
-            Assert.AreEqual(changeNumber, result);
+            _redisSplitCache.SetChangeNumber(changeNumber: 123);
         }
 
         [TestMethod]
@@ -217,23 +98,12 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var splitJson2 = JsonConvert.SerializeObject(split);
 
             _redisAdapterMock
-                .Setup(x => x.Set(It.IsAny<string>(), splitJson))
-                .Returns(true);
-
-            _redisAdapterMock
-                .Setup(x => x.Set(It.IsAny<string>(), splitJson2))
-                .Returns(true);
-
-            _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
                 .Returns(new RedisKey[] { "test_split", "test_split2" });
 
             _redisAdapterMock
                 .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
                 .Returns(new RedisValue[] { splitJson, splitJson2 });
-
-            _redisSplitCache.AddSplit(splitName, new Split { name = splitName });
-            _redisSplitCache.AddSplit(splitName2, new Split { name = splitName2 });
 
             //Act
             var result = _redisSplitCache.GetAllSplits();
@@ -285,13 +155,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
 
         [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
         public void FlushTest()
         {
             //Act
             _redisSplitCache.Flush();
-
-            //Assert
-            _redisAdapterMock.Verify(mock => mock.Flush(), Times.Once());
         }
 
         [TestMethod]
@@ -326,6 +194,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.AreEqual(0, result.Count);
         }
 
+        #region TrafficTypeExists
         [TestMethod]
         public void TrafficTypeExists_WhenHasQuantity_ReturnsTrue()
         {
@@ -420,6 +289,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Assert
             Assert.IsFalse(result);
         }
+        #endregion
 
         private Split BuildSplit(string splitName)
         {

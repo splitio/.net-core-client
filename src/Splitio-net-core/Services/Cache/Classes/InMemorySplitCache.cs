@@ -11,6 +11,8 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
 
+        private readonly object _trafficTypeLock = new object();
+
         private ConcurrentDictionary<string, ParsedSplit> _splits;
         private ConcurrentDictionary<string, int> _trafficTypes;
         private long _changeNumber;
@@ -27,7 +29,7 @@ namespace Splitio.Services.Cache.Classes
                 {
                     if (split.Value != null)
                     {
-                        AddTrafficType(split.Value.trafficTypeName);
+                        IncreaseTrafficTypeCount(split.Value.trafficTypeName);
                     }
                 }
             }
@@ -39,14 +41,14 @@ namespace Splitio.Services.Cache.Classes
 
             _splits.TryAdd(splitName, parsedSplit);
 
-            AddTrafficType(parsedSplit.trafficTypeName);
+            IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
         }
 
         public bool RemoveSplit(string splitName)
         {
             var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
 
-            RemoveTrafficType(removedSplit);
+            DecreaseTrafficTypeCount(removedSplit);
 
             return removed;
         }
@@ -95,34 +97,40 @@ namespace Splitio.Services.Cache.Classes
             return exists && quantity > 0;
         }
 
-        private void AddTrafficType(string trafficType)
+        private void IncreaseTrafficTypeCount(string trafficType)
         {
-            if (string.IsNullOrEmpty(trafficType)) return;
-            
-            var ttExists = _trafficTypes.TryGetValue(trafficType, out int quantity);
+            lock (_trafficTypeLock)
+            {
+                if (string.IsNullOrEmpty(trafficType)) return;
 
-            if (ttExists)
-            {
-                _trafficTypes.TryUpdate(trafficType, quantity++, quantity);
-            }
-            else
-            {
-                _trafficTypes.TryAdd(trafficType, 1);
-            }            
-        }
-
-        private void RemoveTrafficType(ParsedSplit split)
-        {
-            if (split != null && !string.IsNullOrEmpty(split.trafficTypeName))
-            {
-                var ttExists = _trafficTypes.TryGetValue(split.trafficTypeName, out int quantity);
+                var ttExists = _trafficTypes.TryGetValue(trafficType, out int quantity);
 
                 if (ttExists)
                 {
-                    var newQuantity = quantity--;
-                    _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
+                    _trafficTypes.TryUpdate(trafficType, quantity++, quantity);
+                }
+                else
+                {
+                    _trafficTypes.TryAdd(trafficType, 1);
+                }
+            }
+        }
 
-                    if (newQuantity <= 0) _trafficTypes.TryRemove(split.trafficTypeName, out int value);
+        private void DecreaseTrafficTypeCount(ParsedSplit split)
+        {
+            lock (_trafficTypeLock)
+            {
+                if (split != null && !string.IsNullOrEmpty(split.trafficTypeName))
+                {
+                    var ttExists = _trafficTypes.TryGetValue(split.trafficTypeName, out int quantity);
+
+                    if (ttExists)
+                    {
+                        var newQuantity = quantity--;
+                        _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
+
+                        if (newQuantity <= 0) _trafficTypes.TryRemove(split.trafficTypeName, out int value);
+                    }
                 }
             }
         }

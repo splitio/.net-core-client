@@ -2,7 +2,6 @@
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
-using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,33 +15,20 @@ namespace Splitio.Redis.Services.Cache.Classes
         public RedisSplitCache(IRedisAdapter redisAdapter, string userPrefix = null) 
             : base(redisAdapter, userPrefix)
         { }
-        
+
         public void AddSplit(string splitName, SplitBase split)
         {
-            var key = redisKeyPrefix + splitKeyPrefix + splitName;
-            var splitJson = JsonConvert.SerializeObject(split);
-
-            redisAdapter.Set(key, splitJson);
-
-            AddTrafficType(split);
+            throw new System.NotImplementedException();
         }
 
         public bool RemoveSplit(string splitName)
         {
-            var key = redisKeyPrefix + splitKeyPrefix + splitName;
-
-            var split = GetSplit(splitName);
-            var removed = redisAdapter.Del(key);
-
-            RemoveTrafficType(removed, split);
-
-            return removed;
+            throw new System.NotImplementedException();
         }
 
         public void SetChangeNumber(long changeNumber)
         {
-            var key = redisKeyPrefix + splitsKeyPrefix + "till";
-            redisAdapter.Set(key, changeNumber.ToString());
+            throw new System.NotImplementedException();
         }
 
         public long GetChangeNumber()
@@ -89,13 +75,12 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public long RemoveSplits(List<string> splitNames)
         {
-            var keys = splitNames.Select(x => (RedisKey)(redisKeyPrefix + splitKeyPrefix + x)).ToArray();
-            return redisAdapter.Del(keys);
+            throw new System.NotImplementedException();
         }
 
         public void Flush()
         {
-            redisAdapter.Flush();
+            throw new System.NotImplementedException();
         }
 
         public void Clear()
@@ -119,48 +104,6 @@ namespace Splitio.Redis.Services.Cache.Classes
         private string GetTrafficTypeKey(string type)
         {
             return $"{redisKeyPrefix}trafficType.{type}";
-        }
-
-        private void AddTrafficType(SplitBase splitBase)
-        {
-            if (splitBase == null) return;
-
-            var split = (Split)splitBase;
-
-            if (string.IsNullOrEmpty(split.trafficTypeName)) return;
-
-            var ttKey = GetTrafficTypeKey(split.trafficTypeName);
-            
-            var value = redisAdapter.Get(ttKey);
-
-            if (string.IsNullOrEmpty(value)) value = "0";
-
-            int.TryParse(value, out int valueInt);
-
-            redisAdapter.Set(ttKey, (valueInt++).ToString());
-        }
-
-        private void RemoveTrafficType(bool removed, SplitBase splitBase)
-        {
-            if (!removed || splitBase == null) return;
-
-            var split = (Split)splitBase;
-
-            if (string.IsNullOrEmpty(split.trafficTypeName)) return;
-
-            var ttKey = GetTrafficTypeKey(split.trafficTypeName);
-            var value = redisAdapter.Get(ttKey);
-
-            int.TryParse(value, out int valueInt);
-
-            if (valueInt <= 0)
-            {
-                redisAdapter.Del(ttKey);
-            }
-            else
-            {
-                redisAdapter.Set(ttKey, (valueInt--).ToString());
-            }
         }
     }
 }
