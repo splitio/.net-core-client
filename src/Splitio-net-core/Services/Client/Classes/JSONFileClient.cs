@@ -22,7 +22,8 @@ namespace Splitio.Services.Client.Classes
             ISegmentCache segmentCacheInstance = null, 
             ISplitCache splitCacheInstance = null, 
             IListener<KeyImpression> treatmentLogInstance = null,
-            bool isLabelsEnabled = true) : base(log)
+            bool isLabelsEnabled = true,
+            bool isReady = false) : base(log)
         {
             segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);
@@ -43,6 +44,8 @@ namespace Splitio.Services.Client.Classes
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
             manager = new SplitManager(splitCache, log);
+
+            Ready = isReady;
         }
 
         public void RemoveSplitFromCache(string splitName)

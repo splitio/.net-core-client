@@ -283,7 +283,7 @@ namespace Splitio.Services.Client.Classes
         {
             if (!IsClientReady(method))
             {
-                return new Dictionary<string, TreatmentResult> { { features.First(), new TreatmentResult(LabelClientNotReady, Control, null) } };
+                return new Dictionary<string, TreatmentResult> { { string.Empty, new TreatmentResult(LabelClientNotReady, Control, null) } };
             }
 
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
