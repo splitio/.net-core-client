@@ -19,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<IListener<KeyImpression>> _impressionListenerMock;
         private Mock<Splitter> _splitterMock;
         private Mock<CombiningMatcher> _combiningMatcher;
+        private Mock<IBlockUntilReadyService> _blockUntilReadyService;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -31,14 +32,22 @@ namespace Splitio_Tests.Unit_Tests.Client
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
             _impressionListenerMock = new Mock<IListener<KeyImpression>>();
+            _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object, _blockUntilReadyService.Object);
+
+            _splitClientForTesting.BlockUntilReady(1000);
         }
 
         #region GetTreatment
         [TestMethod]
         public void GetTreatment_ShouldReturnControl_WithNullKey()
         {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatment((string)null, string.Empty);
 
@@ -50,6 +59,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatment_ShouldReturnControl_WithNullMatchingKey()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatment(new Key(null, string.Empty), string.Empty);
 
@@ -61,6 +75,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatment_ShouldReturnControl_WithNullMatchingAndBucketingKey()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatment(new Key(null, null), string.Empty);
 
@@ -72,6 +91,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatment_WhenNameDoesntExist_ReturnsControl()
         {
+            // Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatment("key", "not_exist");
 
@@ -86,6 +110,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatmentWithConfig_WithEmptyKey_ShouldReturnControl()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig(string.Empty, string.Empty);
 
@@ -98,6 +127,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatmentWithConfig_WithNullKey_ShouldReturnControl()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig((Key)null, string.Empty);
 
@@ -133,6 +167,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
                 .Returns(treatmentExpected);
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
@@ -163,6 +201,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -195,6 +237,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
                 .Returns(treatmentExpected);
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
@@ -220,6 +266,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -247,6 +297,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
@@ -307,6 +361,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
                 .Returns(treatmentExpected);
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
@@ -334,6 +392,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
@@ -346,6 +408,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatmentWithConfig_WhenNameDoesntExist_ReturnsControl()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("key", "not_exist");
 
@@ -361,6 +428,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatmentsWithConfig_WithEmptyKey_ShouldReturnControl()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var results = _splitClientForTesting.GetTreatmentsWithConfig(string.Empty, new List<string> { string.Empty });
 
@@ -377,6 +449,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void GetTreatmentsWithConfig_WithNullKey_ShouldReturnControl()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var results = _splitClientForTesting.GetTreatmentsWithConfig((Key)null, new List<string> { string.Empty });
 
@@ -448,6 +525,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetTreatment("user", 2095087413, It.IsAny<List<PartitionDefinition>>(), AlgorithmEnum.Murmur))
                 .Returns("off");
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentsWithConfig("user", new List<string> { treatmenOff, treatmenOn });
 
@@ -469,6 +550,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Arrange 
             var splitNames = new List<string> { "not_exist" , "not_exist2" };
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.GetTreatmentsWithConfig("key", splitNames);
 
@@ -488,6 +573,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullKey()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.Track(null, string.Empty, string.Empty);
 
@@ -499,6 +589,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullTrafficType()
         {
+            //Arrange 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.Track(string.Empty, null, string.Empty);
 
@@ -510,6 +605,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void Track_ShouldReturnFalse_WithNullEventType()
         {
+            // Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act
             var result = _splitClientForTesting.Track(string.Empty, string.Empty, null);
 
@@ -547,7 +647,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "property_11", ushortValue },
                 { "property_12", uintValue },
                 { "property_13", ulongValue }
-            };        
+            };
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act.
             var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
@@ -566,7 +670,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Track_WhenPropertiesIsNull_ReturnsTrue()
         {
             // Arrange.
-            Dictionary<string, object> properties = null;            
+            Dictionary<string, object> properties = null;
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             // Act.
             var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
@@ -590,6 +698,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.TrafficTypeExists(trafficType))
                 .Returns(false);
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             // Act.
             var result = _splitClientForTesting.Track("key", trafficType, "event_type", 132);
 
@@ -612,6 +724,10 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _splitCacheMock
                 .Setup(mock => mock.TrafficTypeExists(trafficType))
+                .Returns(true);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
             // Act.

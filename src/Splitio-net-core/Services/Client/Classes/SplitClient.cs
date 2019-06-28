@@ -33,9 +33,10 @@ namespace Splitio.Services.Client.Classes
         protected const string LabelSplitNotFound = "definition not found";
         protected const string LabelException = "exception";
         protected const string LabelTrafficAllocationFailed = "not in split";
+        protected const string LabelClientNotReady = "not ready";
 
         protected static bool LabelsEnabled;
-        protected static bool Destroyed;
+        protected bool Destroyed;
 
         protected Splitter splitter;
         protected IListener<KeyImpression> impressionListener;
@@ -48,6 +49,7 @@ namespace Splitio.Services.Client.Classes
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
+        protected IBlockUntilReadyService _blockUntilReadyService;
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
@@ -126,12 +128,15 @@ namespace Splitio.Services.Client.Classes
 
         public virtual bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null)
         {
-            CheckClientStatus();
+            if (Destroyed) return false;
 
-            var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));
-            var trafficTypeResult = _trafficTypeValidator.IsValid(trafficType, nameof(trafficType));
+            var keyResult = _keyValidator.IsValid(new Key(key, null), nameof(Track));            
             var eventTypeResult = _eventTypeValidator.IsValid(eventType, nameof(eventType));
             var eventPropertiesResult = _eventPropertiesValidator.IsValid(properties);
+
+            var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
+                ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
+                : new ValidatorResult { Success = true };
 
             if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
                 return false;
@@ -163,12 +168,14 @@ namespace Splitio.Services.Client.Classes
             }
         }
 
-        public abstract void Destroy();
-
         public bool IsDestroyed()
         {
             return Destroyed;
         }
+
+        public abstract void Destroy();
+
+        public abstract void BlockUntilReady(int blockMilisecondsUntilReady);
         #endregion
 
         #region Protected Methods
@@ -256,15 +263,40 @@ namespace Splitio.Services.Client.Classes
                 }
             }
         }
+
+        protected bool IsClientReady(string methodName)
+        {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
+                return false;
+            }
+
+            if (Destroyed)
+            {
+                _log.Error("Client has already been destroyed - No calls possible");
+            }
+
+            return true;
+        }
         #endregion
 
         #region Private Methods
         private Dictionary<string, TreatmentResult> GetTreatmentsResult(Key key, List<string> features, string operation, string method, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
-            var ImpressionsQueue = new List<KeyImpression>();
 
-            CheckClientStatus();
+            if (!IsClientReady(method))
+            {
+                foreach (var feature in features)
+                {
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(LabelClientNotReady, Control, null));
+                }
+
+                return treatmentsForFeatures;
+            }
+            
+            var ImpressionsQueue = new List<KeyImpression>();
 
             if (_keyValidator.IsValid(key, method))
             {
@@ -295,7 +327,10 @@ namespace Splitio.Services.Client.Classes
             }
             else
             {
-                treatmentsForFeatures.Add(features.First(), new TreatmentResult(LabelSplitNotFound, Control, null));
+                foreach (var feature in features)
+                {
+                    treatmentsForFeatures.Add(feature, new TreatmentResult(LabelSplitNotFound, Control, null));
+                }                    
             }
 
             ClearItemsAddedToTreatmentCache(key?.matchingKey);
@@ -305,7 +340,7 @@ namespace Splitio.Services.Client.Classes
 
         private TreatmentResult GetTreatmentResult(Key key, string feature, string operation, string method, Dictionary<string, object> attributes = null, bool logMetricsAndImpressions = true, bool multiple = false)
         {
-            CheckClientStatus();
+            if (!IsClientReady(method)) return new TreatmentResult(LabelClientNotReady, Control, null);
 
             if (!_keyValidator.IsValid(key, method)) return new TreatmentResult(LabelException, Control, null);
 
@@ -380,14 +415,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             treatmentCache = temporaryTreatmentCache;
-        }
-
-        private void CheckClientStatus()
-        {
-            if (Destroyed)
-            {
-                _log.Error("Client has already been destroyed - no calls possible");
-            }
         }
         #endregion
     }

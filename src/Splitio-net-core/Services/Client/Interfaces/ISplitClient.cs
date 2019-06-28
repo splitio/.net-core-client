@@ -17,5 +17,6 @@ namespace Splitio.Services.Client.Interfaces
         bool Track(string key, string trafficType, string eventType, double? value = null, Dictionary<string, object> properties = null);
         void Destroy();
         bool IsDestroyed();
+        void BlockUntilReady(int blockMilisecondsUntilReady);
     }
 }

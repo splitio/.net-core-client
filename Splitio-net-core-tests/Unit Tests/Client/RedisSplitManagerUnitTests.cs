@@ -1,16 +1,28 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Domain;
-using System.Collections.Generic;
-using Splitio.Services.Client.Classes;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
+using Splitio.Domain;
 using Splitio.Redis.Services.Client.Classes;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Shared.Interfaces;
+using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class RedisSplitManagerUnitTests
     {
+        private readonly Mock<ISplitCache> _splitCache;
+        private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
+        private RedisSplitManager manager;
+
+        public RedisSplitManagerUnitTests()
+        {
+            _splitCache = new Mock<ISplitCache>();
+            _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
+
+            manager = new RedisSplitManager(_splitCache.Object, _blockUntilReadyService.Object);
+        }
+
         [TestMethod]
         public void SplitsReturnSuccessfully()
         {
@@ -25,19 +37,25 @@ namespace Splitio_Tests.Unit_Tests.Client
                 }
             };
             conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new Mock<ISplitCache>();
-            var splits = new List<SplitBase>();
-            splits.Add(new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic});
-            splits.Add(new Split() { name = "test2", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test3", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test4", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test5", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test6", conditions = conditionsWithLogic });
-            splitCache.Setup(x => x.GetAllSplits()).Returns(splits);
-            
 
-            var manager = new RedisSplitManager(splitCache.Object);
-            
+            var splits = new List<SplitBase>
+            {
+                new Split { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new Split { name = "test2", conditions = conditionsWithLogic },
+                new Split { name = "test3", conditions = conditionsWithLogic },
+                new Split { name = "test4", conditions = conditionsWithLogic },
+                new Split { name = "test5", conditions = conditionsWithLogic },
+                new Split { name = "test6", conditions = conditionsWithLogic }
+            };
+
+            _splitCache
+                .Setup(x => x.GetAllSplits())
+                .Returns(splits);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             //Act
             var result = manager.Splits();
 
@@ -68,12 +86,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 }
             };
             conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new Mock<ISplitCache>();
-            var split = new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic};
 
-            splitCache.Setup(x => x.GetSplit("test1")).Returns(split);
+            var split = new Split { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic};
 
-            var manager = new RedisSplitManager(splitCache.Object);
+            _splitCache
+                .Setup(x => x.GetSplit("test1"))
+                .Returns(split);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.Split("test1");
@@ -115,13 +137,15 @@ namespace Splitio_Tests.Unit_Tests.Client
             };
             conditionsWithLogic.Add(conditionWithLogic2);
 
-
-            var splitCache = new Mock<ISplitCache>();
             var split = new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic };
 
-            splitCache.Setup(x => x.GetSplit("test1")).Returns(split);
+            _splitCache
+                .Setup(x => x.GetSplit("test1"))
+                .Returns(split);
 
-            var manager = new RedisSplitManager(splitCache.Object);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.Split("test1");
@@ -151,12 +175,15 @@ namespace Splitio_Tests.Unit_Tests.Client
             };
             conditionsWithLogic.Add(conditionWithLogic);
 
-            var splitCache = new Mock<ISplitCache>();
             var split = new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic };
 
-            splitCache.Setup(x => x.GetSplit("test1")).Returns(split);
+            _splitCache
+                .Setup(x => x.GetSplit("test1"))
+                .Returns(split);
 
-            var manager = new RedisSplitManager(splitCache.Object);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.Split("test1");
@@ -171,10 +198,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitReturnsNullWhenInexistent()
         {
-            //Arrange
-            var splitCache = new Mock<ISplitCache>();
-            var manager = new RedisSplitManager(splitCache.Object);
-
             //Act
             var result = manager.Split("test1");
 
@@ -185,9 +208,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitReturnsNullWhenCacheIsNull()
         {
-            //Arrange
-            var manager = new RedisSplitManager(null);
-
             //Act
             var result = manager.Split("test1");
 
@@ -199,9 +219,13 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitsWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange
-            var splitCache = new Mock<ISplitCache>();
-            splitCache.Setup(x => x.GetAllSplits()).Returns(new List<SplitBase>());
-            var manager = new RedisSplitManager(splitCache.Object);
+            _splitCache
+                .Setup(x => x.GetAllSplits())
+                .Returns(new List<SplitBase>());
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.Splits();
@@ -214,9 +238,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitsWhenCacheIsNotInstancedShouldReturnNull()
         {
-            //Arrange
-            var manager = new RedisSplitManager(null);
-
             //Act
             var result = manager.Splits();
 
@@ -227,9 +248,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitWhenCacheIsNotInstancedShouldReturnNull()
         {
-            //Arrange
-            var manager = new RedisSplitManager(null);
-
             //Act
             var result = manager.Split("name");
 
@@ -241,9 +259,13 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitNamessWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange
-            var splitCache = new Mock<ISplitCache>();
-            splitCache.Setup(x => x.GetAllSplits()).Returns(new List<SplitBase>());
-            var manager = new RedisSplitManager(splitCache.Object);
+            _splitCache
+                .Setup(x => x.GetAllSplits())
+                .Returns(new List<SplitBase>());
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.SplitNames();
@@ -256,9 +278,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitNamessWhenCacheIsNotInstancedShouldReturnNull()
         {
-            //Arrange
-            var manager = new RedisSplitManager(null);
-
             //Act
             var result = manager.SplitNames();
 
@@ -279,17 +298,24 @@ namespace Splitio_Tests.Unit_Tests.Client
                 }
             };
             conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new Mock<ISplitCache>();
-            var splits = new List<SplitBase>();
-            splits.Add(new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test2", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test3", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test4", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test5", conditions = conditionsWithLogic });
-            splits.Add(new Split() { name = "test6", conditions = conditionsWithLogic });
-            splitCache.Setup(x => x.GetAllSplits()).Returns(splits);
-            
-            var manager = new RedisSplitManager(splitCache.Object);
+
+            var splits = new List<SplitBase>
+            {
+                new Split() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new Split() { name = "test2", conditions = conditionsWithLogic },
+                new Split() { name = "test3", conditions = conditionsWithLogic },
+                new Split() { name = "test4", conditions = conditionsWithLogic },
+                new Split() { name = "test5", conditions = conditionsWithLogic },
+                new Split() { name = "test6", conditions = conditionsWithLogic }
+            };
+
+            _splitCache
+                .Setup(x => x.GetAllSplits())
+                .Returns(splits);
+
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
             //Act
             var result = manager.SplitNames();

@@ -47,10 +47,67 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildEventLog(config);
             BuildMetricsLog();
             BuildSplitter();
+            BuildBlockUntilReadyService();
             BuildManager();
-            BuildParser();
+            BuildParser();            
         }
 
+        #region Public Methods
+        public override void Destroy()
+        {
+            Destroyed = true;
+            return;
+        }
+
+        public override void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
+        }
+        #endregion
+
+        #region Protected Methods
+        protected override TreatmentResult GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null)
+        {
+            try
+            {
+                var split = splitCache.GetSplit(feature);
+
+                if (split == null)
+                {
+
+                    _log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
+
+                    return new TreatmentResult(LabelSplitNotFound, Control, null);
+                }
+
+                var parsedSplit = splitParser.Parse((Split)split);
+
+                var treatmentResult = GetTreatment(key, parsedSplit, attributes, this);
+
+                treatmentResult.Config = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
+
+                return treatmentResult;
+            }
+            catch (Exception e)
+            {
+                _log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
+
+                return new TreatmentResult(LabelException, Control, null);
+            }
+        }
+
+        protected override void ImpressionLog(List<KeyImpression> impressionsQueue)
+        {
+            base.ImpressionLog(impressionsQueue);
+
+            if (impressionListenerRedis != null)
+            {
+                impressionListenerRedis.Log(impressionsQueue);
+            }
+        }
+        #endregion
+
+        #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
@@ -140,7 +197,7 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildManager()
         {
-            manager = new RedisSplitManager(splitCache);
+            manager = new RedisSplitManager(splitCache, _blockUntilReadyService);
         }
 
         private void BuildParser()
@@ -148,50 +205,10 @@ namespace Splitio.Redis.Services.Client.Classes
             splitParser = new RedisSplitParser(segmentCache);
         }
 
-        protected override TreatmentResult GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null)
+        private void BuildBlockUntilReadyService()
         {
-            try
-            {
-                var split = splitCache.GetSplit(feature);
-
-                if (split == null)
-                {
-
-                    _log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
-
-                    return new TreatmentResult(LabelSplitNotFound, Control, null);
-                }
-
-                var parsedSplit = splitParser.Parse((Split)split);
-
-                var treatmentResult = GetTreatment(key, parsedSplit, attributes, this);
-
-                treatmentResult.Config = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
-
-                return treatmentResult;
-            }
-            catch (Exception e)
-            {
-                _log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
-
-                return new TreatmentResult(LabelException, Control, null);
-            }
+            _blockUntilReadyService = new BlockUntilReadyService();
         }
-
-        protected override void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            base.ImpressionLog(impressionsQueue);
-
-            if (impressionListenerRedis != null)
-            {
-                impressionListenerRedis.Log(impressionsQueue);
-            }
-        }
-
-        public override void Destroy()
-        {
-            Destroyed = true;
-            return;
-        }
+        #endregion
     }
 }
