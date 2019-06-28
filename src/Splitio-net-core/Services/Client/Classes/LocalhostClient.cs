@@ -56,11 +56,26 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
+        #region Public Methods
         public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)
         {
             return true;
         }
 
+        public override void Destroy()
+        {
+            _watcher.Dispose();
+            splitCache.Clear();
+            Destroyed = true;
+        }
+
+        public override void BlockUntilReady()
+        {
+            Ready = true;
+        }
+        #endregion
+
+        #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             var splits = ParseSplitFile(FullPath);
@@ -99,12 +114,6 @@ namespace Splitio.Services.Client.Classes
         {
             this.splitter = splitter ?? new Splitter();
         }
-
-        public override void Destroy()
-        {
-            _watcher.Dispose();
-            splitCache.Clear();
-            Destroyed = true;
-        }
+        #endregion
     }
 }

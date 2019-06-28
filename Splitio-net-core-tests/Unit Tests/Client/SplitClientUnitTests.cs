@@ -33,6 +33,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionListenerMock = new Mock<IListener<KeyImpression>>();
 
             _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object);
+
+            _splitClientForTesting.BlockUntilReady();
         }
 
         #region GetTreatment

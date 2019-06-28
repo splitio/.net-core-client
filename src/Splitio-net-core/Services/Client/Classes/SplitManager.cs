@@ -17,7 +17,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitManager(ISplitCache splitCache, ILog log = null)
         {
-            this._splitCache = splitCache;
+            _splitCache = splitCache;
             _log = log ?? LogManager.GetLogger(typeof(SplitManager));
             _splitNameValidator = new SplitNameValidator(_log);
         }

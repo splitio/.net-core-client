@@ -61,5 +61,10 @@ namespace Splitio.Services.Client.Classes
             segmentCache.Clear();
             Destroyed = true;
         }
+
+        public override void BlockUntilReady()
+        {
+            Ready = true;
+        }
     }
 }

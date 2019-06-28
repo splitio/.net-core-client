@@ -20,6 +20,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Act         
             var client = factory.Client();
+            client.BlockUntilReady();
         }
 
         [TestMethod]
