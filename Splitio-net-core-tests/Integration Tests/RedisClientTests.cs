@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Classes;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 
@@ -17,6 +18,7 @@ namespace Splitio_Tests.Integration_Tests
         private const string PORT = "6379";
         private const string PASSWORD = "";
         private const int DB = 0;
+        private const string API_KEY = "redis_api_key";
 
         private ConfigurationOptions config;
         private Mock<ILog> _logMock = new Mock<ILog>();
@@ -45,7 +47,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             client.BlockUntilReady(1000);
 
@@ -61,7 +63,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             client.BlockUntilReady(1000);
 
@@ -77,7 +79,8 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatment("test", "always_control", null);
@@ -96,7 +99,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff };
 
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             client.BlockUntilReady(1000);
 
@@ -119,7 +122,7 @@ namespace Splitio_Tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             client.BlockUntilReady(1000);
 
@@ -137,8 +140,8 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object);
-
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string>());
 
@@ -156,7 +159,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatmentWithConfig("key", string.Empty);
@@ -172,7 +175,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatment("key", string.Empty);
@@ -187,7 +190,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatments("key", new List<string>());
@@ -205,13 +208,27 @@ namespace Splitio_Tests.Integration_Tests
         public void Track_WhenClientIsNotReady_ReturnsTrue()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");
 
             // Assert.
             Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void Destroy()
+        {
+            //Arrange
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
+
+            //Act
+            client.Destroy();
+
+            //Assert
+            Assert.IsTrue(client.IsDestroyed());
         }
 
         private void LoadSplits()

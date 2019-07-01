@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
@@ -742,6 +743,18 @@ namespace Splitio_Tests.Unit_Tests.Client
                                                                               && we.Event.value == 132)), Times.Once);
 
             _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Never);
+        }
+        #endregion
+
+        #region Destroy
+        [TestMethod]
+        public void Destroy_ShouldsDecreaseFactoryInstatiation()
+        {
+            // Act
+            _splitClientForTesting.Destroy();
+
+            // Assert
+            Assert.IsTrue(_splitClientForTesting.IsDestroyed());
         }
         #endregion
 

@@ -25,9 +25,9 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);
             impressionListener = _impressionListener;
-        }
 
-        public override void Destroy() { }
+            ApiKey = "SplitClientForTesting";
+        }
 
         public override void BlockUntilReady(int blockMilisecondsUntilReady) { }
     }

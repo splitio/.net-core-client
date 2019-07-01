@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,7 @@ namespace Splitio_Tests.Integration_Tests
     public class LocalhostClientTests
     {
         private Mock<ILog> _logMock = new Mock<ILog>();
+        private Mock<IFactoryInstantiationsService> _factoryInstantiationsServiceMock = new Mock<IFactoryInstantiationsService>();
 
         [DeploymentItem(@"Resources\test.splits")]
         [TestMethod]

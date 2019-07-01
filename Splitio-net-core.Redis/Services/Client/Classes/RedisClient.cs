@@ -39,8 +39,12 @@ namespace Splitio.Redis.Services.Client.Classes
         private static string RedisUserPrefix;
         private static int BlockMilisecondsUntilReady;
 
-        public RedisClient(ConfigurationOptions config, ILog log) : base(log)
+        public RedisClient(ConfigurationOptions config, 
+            ILog log,
+            string apiKey) : base(log)
         {
+            ApiKey = apiKey;
+
             ReadConfig(config);
             BuildRedisCache();
             BuildTreatmentLog(config);
@@ -53,12 +57,6 @@ namespace Splitio.Redis.Services.Client.Classes
         }
 
         #region Public Methods
-        public override void Destroy()
-        {
-            Destroyed = true;
-            return;
-        }
-
         public override void BlockUntilReady(int blockMilisecondsUntilReady)
         {
             _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);

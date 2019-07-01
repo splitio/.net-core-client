@@ -49,6 +49,8 @@ namespace Splitio.Services.Client.Classes
             
             _blockUntilReadyService = new BlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService, log);
+
+            ApiKey = "localhost";
         }
 
         public void RemoveSplitFromCache(string splitName)
@@ -63,9 +65,12 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            splitCache.Clear();
-            segmentCache.Clear();
-            Destroyed = true;
+            if (!Destroyed)
+            {
+                splitCache.Clear();
+                segmentCache.Clear();
+                base.Destroy();
+            }
         }
 
         public override void BlockUntilReady(int blockMilisecondsUntilReady)
