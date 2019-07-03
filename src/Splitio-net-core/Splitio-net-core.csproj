@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
     <AssemblyName>Splitio-net-core</AssemblyName>
     <PackageId>Splitio-net-core</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -13,18 +12,35 @@
     <RootNamespace>Splitio</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <DefineConstants>NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
     <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />
     <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <PackageReference Include="Common.Logging" version="3.3.1"/>
+    <PackageReference Include="Common.Logging.Core" version="3.3.1"/>
+    <PackageReference Include="Microsoft.Bcl" version="1.1.10"/>
+    <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168"/>
+    <PackageReference Include="Microsoft.Bcl.Build" version="1.0.21"/>
+    <PackageReference Include="Microsoft.Net.Http" version="2.2.29"/>
+    <PackageReference Include="murmurhash-signed" version="1.0.2"/>
+    <PackageReference Include="Newtonsoft.Json" version="9.0.1"/>
+    <PackageReference Include="YamlDotNet" version="6.0.0"/>
+    <PackageReference Include="YamlDotNet.Signed" version="6.0.0"/>
   </ItemGroup>
 
 </Project>

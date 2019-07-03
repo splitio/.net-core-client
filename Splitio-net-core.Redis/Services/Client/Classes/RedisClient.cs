@@ -108,7 +108,14 @@ namespace Splitio.Redis.Services.Client.Classes
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {
+#if net40
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+#endif
+
+#if NETSTANDARD
+            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+#endif
+
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 
             try
@@ -123,9 +130,15 @@ namespace Splitio.Redis.Services.Client.Classes
 
             try
             {
+#if net40
+                SdkMachineIP = config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#endif
+
+#if NETSTANDARD
                 var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
                 hostAddressesTask.Wait();
                 SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#endif
             }
             catch (Exception e)
             {

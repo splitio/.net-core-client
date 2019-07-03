@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
     <AssemblyName>Splitio-net-core.Redis</AssemblyName>
     <PackageId>Splitio-net-core.Redis</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -12,10 +11,24 @@
     <Version>4.0.0</Version>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <DefineConstants>NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <PackageReference Include="Common.Logging" version="3.3.1"/>
+    <PackageReference Include="Common.Logging.Core" version="3.3.1"/>
+    <PackageReference Include="Microsoft.Bcl" version="1.1.10"/>
+    <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168"/>
+    <PackageReference Include="Microsoft.Bcl.Build" version="1.0.21"/>
+    <PackageReference Include="Newtonsoft.Json" version="9.0.1"/>
+    <PackageReference Include="StackExchange.Redis.StrongName" version="1.2.1"/>
   </ItemGroup>
 
   <ItemGroup>

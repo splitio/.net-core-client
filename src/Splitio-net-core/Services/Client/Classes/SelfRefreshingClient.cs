@@ -133,7 +133,14 @@ namespace Splitio.Services.Client.Classes
             HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
+#if net40
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+#endif
+
+#if NETSTANDARD
+            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+#endif
+
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 
             try
@@ -148,9 +155,14 @@ namespace Splitio.Services.Client.Classes
 
             try
             {
+#if net40
+                SdkMachineIP = config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#endif
+#if NETSTANDARD
                 var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
                 hostAddressesTask.Wait();
                 SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#endif
             }
             catch (Exception e)
             {
@@ -170,23 +182,6 @@ namespace Splitio.Services.Client.Classes
             MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
             LabelsEnabled = config.LabelsEnabled ?? true;
-        }
-
-        private void LaunchTaskSchedulerOnReady()
-        {
-            Task workerTask = Task.Factory.StartNew(
-                () => {
-                    while (true)
-                    {
-                        if (gates.IsSDKReady(0))
-                        {
-                            selfRefreshingSegmentFetcher.StartScheduler();
-                            break;
-                        }
-
-                        Task.Delay(500).Wait();
-                    }
-                });
         }
 
         private void BuildSplitter()
@@ -272,6 +267,6 @@ namespace Splitio.Services.Client.Classes
         {
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(gates, splitFetcher, selfRefreshingSegmentFetcher, treatmentLog, eventLog, _log);
         }
-        #endregion
+#endregion
     }
 }

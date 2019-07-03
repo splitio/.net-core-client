@@ -20,7 +20,18 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             var json = File.ReadAllText(filePath);
             var splitChangesResult = JsonConvert.DeserializeObject<SplitChangesResult>(json);
-            return await Task.FromResult(splitChangesResult);
+
+            SplitChangesResult result = null;
+
+#if net40
+            result = await TaskEx.FromResult(splitChangesResult);
+#endif
+
+#if NETSTANDARD
+            result = await Task.FromResult(splitChangesResult);
+#endif
+
+            return result;
         }
     }
 }

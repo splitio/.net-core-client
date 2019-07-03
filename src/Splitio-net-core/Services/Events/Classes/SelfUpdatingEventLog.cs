@@ -34,10 +34,19 @@ namespace Splitio.Services.Events.Classes
 
         public void Start()
         {
+#if net40
+            ThreadUtils.Delay(firstPushWindow * 1000).ContinueWith((t) => {
+                SendBulkEvents();
+                PeriodicTaskFactory.Start(() => { SendBulkEvents(); }, interval * 1000, cancellationTokenSource.Token);
+            });
+#endif
+
+#if NETSTANDARD
             Task.Delay(firstPushWindow * 1000).ContinueWith((t) => {
                 SendBulkEvents();
                 PeriodicTaskFactory.Start(() => { SendBulkEvents(); }, interval * 1000, cancellationTokenSource.Token);
             });
+#endif            
         }
 
         public void Stop()
