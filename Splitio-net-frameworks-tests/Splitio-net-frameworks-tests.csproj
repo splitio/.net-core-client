@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Splitio_net_frameworks_tests</RootNamespace>
+    <AssemblyName>Splitio-net-frameworks-tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis.StrongName, Version=1.2.1.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Redis.StrongName.1.2.1\lib\net40\StackExchange.Redis.StrongName.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Integration Tests\AsynchronousImpressionListenerTests.cs" />
+    <Compile Include="Integration Tests\JSONFileClientTests.cs" />
+    <Compile Include="Integration Tests\LocalhostClientTests.cs" />
+    <Compile Include="Integration Tests\RedisAdapterTests.cs" />
+    <Compile Include="Integration Tests\RedisClientTests.cs" />
+    <Compile Include="Integration Tests\SdkApiClientTests.cs" />
+    <Compile Include="Integration Tests\SelfRefreshingSegmentFetcherTests.cs" />
+    <Compile Include="Integration Tests\SelfRefreshingSplitClientTests.cs" />
+    <Compile Include="Integration Tests\SelfRefreshingSplitFetcherTests.cs" />
+    <Compile Include="Integration Tests\SplitSdkApiClientTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\SplitsHelper.cs" />
+    <Compile Include="Unit Tests\Cache\ImpressionsCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\InMemoryMetricsCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\RedisCacheBaseTests.cs" />
+    <Compile Include="Unit Tests\Cache\RedisImpressionCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\RedisMetricsCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\RedisSegmentCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\RedisSplitCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\SegmentCacheTests.cs" />
+    <Compile Include="Unit Tests\Cache\SplitCacheTests.cs" />
+    <Compile Include="Unit Tests\Client\LocalhostClientForTesting.cs" />
+    <Compile Include="Unit Tests\Client\LocalhostClientUnitTests.cs" />
+    <Compile Include="Unit Tests\Client\RedisSplitManagerUnitTests.cs" />
+    <Compile Include="Unit Tests\Client\SdkReadinessGatesUnitTests.cs" />
+    <Compile Include="Unit Tests\Client\SplitClientForTesting.cs" />
+    <Compile Include="Unit Tests\Client\SplitClientUnitTests.cs" />
+    <Compile Include="Unit Tests\Client\SplitFactoryUnitTests.cs" />
+    <Compile Include="Unit Tests\Client\SplitManagerUnitTests.cs" />
+    <Compile Include="Unit Tests\CommonLibraries\TypeConverterUnitTests.cs" />
+    <Compile Include="Unit Tests\Events\AsynchronousEventListenerUnitTests.cs" />
+    <Compile Include="Unit Tests\Events\SelfUpdatingEventLogUnitTests.cs" />
+    <Compile Include="Unit Tests\Impressions\AsynchronousImpressionListenerTests.cs" />
+    <Compile Include="Unit Tests\Impressions\RedisTreatmentLogUnitTests.cs" />
+    <Compile Include="Unit Tests\Impressions\SelfUpdatingTreatmentLogUnitTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\ApiKeyValidatorTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\EventPropertiesValidatorTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\EventTypeValidatorTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\KeyValidatorTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\SplitNameValidatorTests.cs" />
+    <Compile Include="Unit Tests\InputValidation\TrafficTypeValidatorTests.cs" />
+    <Compile Include="Unit Tests\Matchers\AllKeysMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\AttributeMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\BetweenMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\CombiningMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\ContainsAllOfSetMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\ContainsAnyOfSetMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\ContainsStringMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\DependencyMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\EndsWithMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\EqualsToSetMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\EqualToBooleanMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\EqualToMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\GreaterOrEqualToMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\LessOrEqualToMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\MatchesStringMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\PartOfSetMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\SplitParserUnitTests.cs" />
+    <Compile Include="Unit Tests\Matchers\StartsWithMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\UserDefinedSegmentMatcherTests.cs" />
+    <Compile Include="Unit Tests\Matchers\WhitelistMatcherTests.cs" />
+    <Compile Include="Unit Tests\Metrics\AsyncMetricsLogUnitTests.cs" />
+    <Compile Include="Unit Tests\Metrics\BinarySearchLatencyTrackerTests.cs" />
+    <Compile Include="Unit Tests\Metrics\InMemoryMetricsLogUnitTests.cs" />
+    <Compile Include="Unit Tests\Metrics\RedisMetricsLogUnitTests.cs" />
+    <Compile Include="Unit Tests\SegmentFetcher\ApiSegmentChangeFetcherUnitTests.cs" />
+    <Compile Include="Unit Tests\SegmentFetcher\SelfRefreshingSegmentFetcherUnitTests.cs" />
+    <Compile Include="Unit Tests\SegmentFetcher\SelfRefreshingSegmentUnitTests.cs" />
+    <Compile Include="Unit Tests\Shared\FactoryInstantiationsServiceTests.cs" />
+    <Compile Include="Unit Tests\SplitFetcher\ApiSplitChangeFetcherTests.cs" />
+    <Compile Include="Unit Tests\Splitters\SplitterTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Resources\--legacy-sample-data-non-alpha-numeric.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\legacy-sample-data-non-alpha-numeric.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\legacy-sample-data.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\murmur3-sample-data-non-alpha-numeric-v2.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\murmur3-sample-data-non-alpha-numeric.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\murmur3-sample-data-v2.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\murmur3-sample-data.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\segment_payed.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\split.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\split.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_5.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_6.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\splits_staging_7.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\test.splits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\regex.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Splitio-net-core.Redis\Splitio.Redis.csproj">
+      <Project>{c12de747-f565-4327-a3ba-6e6b5d5c9bba}</Project>
+      <Name>Splitio.Redis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj">
+      <Project>{1764ae35-67fb-455d-b9db-6914fc9a0783}</Project>
+      <Name>Splitio</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+  </Target>
+</Project>

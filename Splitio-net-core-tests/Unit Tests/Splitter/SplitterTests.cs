@@ -11,36 +11,42 @@ namespace Splitio_Tests.Unit_Tests
     [TestClass]
     public class SplitterTests
     {
+        private readonly string rootFilePath;
+
+        public SplitterTests()
+        {
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
+
         [DeploymentItem(@"Resources\legacy-sample-data.csv")]
         [TestMethod]
         public void VerifyHashAndBucketSampleData()
         {
-            VerifyTestFile(@"Resources\legacy-sample-data.csv", new string[] { "\r\n" });
+            VerifyTestFile($"{rootFilePath}legacy-sample-data.csv", new string[] { "\r\n" });
         }
 
         [DeploymentItem(@"Resources\legacy-sample-data-non-alpha-numeric.csv")]
         [TestMethod]
         public void VerifyHashAndBucketSampleDataNonAlphanumeric()
         {
-            VerifyTestFile(@"Resources\legacy-sample-data-non-alpha-numeric.csv", new string[] { "\n" });
+            VerifyTestFile($"{rootFilePath}legacy-sample-data-non-alpha-numeric.csv", new string[] { "\n" });
         }
-
 
         [DeploymentItem(@"Resources\murmur3-sample-data-v2.csv")]
         [TestMethod]
         public void VerifyMurmur3HashAndBucketSampleData()
         {
-            VerifyTestFile(@"Resources\murmur3-sample-data-v2.csv", new string[] { "\r\n" }, false);
+            VerifyTestFile($"{rootFilePath}murmur3-sample-data-v2.csv", new string[] { "\r\n" }, false);
         }
-
 
         [DeploymentItem(@"Resources\murmur3-sample-data-non-alpha-numeric-v2.csv")]
         [TestMethod]
         public void VerifyMurmur3HashAndBucketSampleDataNonAlphanumeric()
         {
-            VerifyTestFile(@"Resources\murmur3-sample-data-non-alpha-numeric-v2.csv", new string[] { "\n" }, false);
+            VerifyTestFile($"{rootFilePath}murmur3-sample-data-non-alpha-numeric-v2.csv", new string[] { "\n" }, false);
         }
-
 
         private void VerifyTestFile(string file, string[] sepparator, bool legacy = true)
         {
@@ -75,8 +81,6 @@ namespace Splitio_Tests.Unit_Tests
                 }
             }
         }
-
-
 
         [TestMethod]
         public void VerifyCallMurmurOrLegacyDependingOnSplit()

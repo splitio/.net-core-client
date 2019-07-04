@@ -7,7 +7,7 @@ namespace Splitio.CommonLibraries
         public static Task Delay(double milliseconds)
         {
             var tcs = new TaskCompletionSource<bool>();
-#if net40
+#if NETFRAMEWORK
             
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Elapsed += (obj, args) =>

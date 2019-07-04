@@ -11,6 +11,15 @@ namespace Splitio_tests.Unit_Tests.Matchers
     [TestClass]
     public class MatchesStringMatcherTests
     {
+        private readonly string rootFilePath;
+
+        public MatchesStringMatcherTests()
+        {
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
+
         [TestMethod]
         public void MatchShouldReturnTrueOnMatchingKeyString()
         {
@@ -111,7 +120,7 @@ namespace Splitio_tests.Unit_Tests.Matchers
         [TestMethod]
         public void VerifyRegexMatcher()
         {
-            VerifyTestFile(@"Resources\regex.txt", new string[] { "\r\n" });
+            VerifyTestFile($"{rootFilePath}regex.txt", new string[] { "\r\n" });
         }
 
 

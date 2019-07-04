@@ -1,0 +1,36 @@
+﻿using Common.Logging;
+using Splitio.Domain;
+using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Client.Classes;
+using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Shared.Interfaces;
+
+namespace Splitio_net_frameworks_tests.Unit_Tests.Client
+{
+    public class SplitClientForTesting : SplitClient
+    {
+        public SplitClientForTesting(ILog _log,
+            ISplitCache _splitCache,
+            Splitter _splitter,
+            IListener<WrappedEvent> _eventListener,
+            IListener<KeyImpression> _impressionListener,
+            IBlockUntilReadyService blockUntilReadyService,
+            IFactoryInstantiationsService factoryInstantiationsService)
+            : base(_log, factoryInstantiationsService)
+        {
+            splitCache = _splitCache;
+            splitter = _splitter;
+            eventListener = _eventListener;
+            impressionListener = _impressionListener;
+            _blockUntilReadyService = blockUntilReadyService;
+            _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);
+            _factoryInstantiationsService = factoryInstantiationsService;
+        }
+
+        public override void BlockUntilReady()
+        {
+            _blockUntilReadyService.BlockUntilReady();
+        }
+    }
+}

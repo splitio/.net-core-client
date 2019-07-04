@@ -23,14 +23,11 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             SplitChangesResult result = null;
 
-#if net40
-            result = await TaskEx.FromResult(splitChangesResult);
-#endif
-
 #if NETSTANDARD
             result = await Task.FromResult(splitChangesResult);
+#else
+            result = await TaskEx.FromResult(splitChangesResult);
 #endif
-
             return result;
         }
     }
