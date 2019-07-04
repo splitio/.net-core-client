@@ -66,16 +66,13 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
                 else
                 {
-                    //Test if its a new Split, remove if existing
-                    bool isRemoved = splitCache.RemoveSplit(split.name);
+                    var isRemoved = splitCache.AddOrUpdate(split.name, splitParser.Parse(split));
 
                     if (!isRemoved)
                     {
                         //If not existing in _splits, its a new split
                         addedSplits.Add(split);
                     }
-                    parsedSplit = splitParser.Parse(split);
-                    splitCache.AddSplit(parsedSplit.name, parsedSplit);
                 }
             }
 

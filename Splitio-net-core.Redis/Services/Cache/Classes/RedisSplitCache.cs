@@ -16,21 +16,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             : base(redisAdapter, userPrefix)
         { }
 
-        public void AddSplit(string splitName, SplitBase split)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool RemoveSplit(string splitName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetChangeNumber(long changeNumber)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public long GetChangeNumber()
         {
             var key = redisKeyPrefix + splitsKeyPrefix + "till";
@@ -73,16 +58,6 @@ namespace Splitio.Redis.Services.Cache.Classes
             return result;
         }
 
-        public long RemoveSplits(List<string> splitNames)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Flush()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void Clear()
         {
             return;
@@ -104,6 +79,36 @@ namespace Splitio.Redis.Services.Cache.Classes
         private string GetTrafficTypeKey(string type)
         {
             return $"{redisKeyPrefix}trafficType.{type}";
+        }
+
+        public void AddSplit(string splitName, SplitBase split)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool RemoveSplit(string splitName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SetChangeNumber(long changeNumber)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool AddOrUpdate(string splitName, SplitBase split)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public long RemoveSplits(List<string> splitNames)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Flush()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
