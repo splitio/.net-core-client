@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using System.Collections.Concurrent;
-using Splitio.Domain;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -107,6 +107,36 @@ namespace Splitio_Tests.Unit_Tests.Cache
 
             //Assert
             Assert.AreEqual(2, result.Count);
+        }
+
+        [TestMethod]
+        public void AddOrUpdate_WhenUpdateTraffictType_ReturnsTrue()
+        {
+            // Arrange 
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+
+            var splitName = "split_1";
+            var splitName2 = "split_2";
+
+            var split = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_1" };
+            var split2 = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_2" };
+            var split3 = new ParsedSplit { name = splitName, trafficTypeName = "traffic_type_3" };
+            var split4 = new ParsedSplit { name = splitName2, trafficTypeName = "traffic_type_4" };
+
+            splitCache.AddOrUpdate(splitName, split);
+            splitCache.AddOrUpdate(splitName, split2);
+            splitCache.AddOrUpdate(splitName, split3);
+            splitCache.AddOrUpdate(splitName2, split4);
+
+            // Act
+            var result1 = splitCache.TrafficTypeExists("traffic_type_1");
+            var result2 = splitCache.TrafficTypeExists("traffic_type_2");
+            var result3 = splitCache.TrafficTypeExists("traffic_type_3");
+
+            // Assert
+            Assert.IsFalse(result1);
+            Assert.IsFalse(result2);
+            Assert.IsTrue(result3);
         }
     }
 }
