@@ -121,7 +121,7 @@ namespace Splitio.Services.Cache.Classes
         {
             if (string.IsNullOrEmpty(trafficType)) return;
 
-            _trafficTypes.AddOrUpdate(trafficType, 1, (key, oldValue) => oldValue++);
+            _trafficTypes.AddOrUpdate(trafficType, 1, (key, oldValue) => oldValue + 1);
         }
 
         private void DecreaseTrafficTypeCount(ParsedSplit split)
