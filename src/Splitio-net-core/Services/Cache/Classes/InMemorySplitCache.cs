@@ -11,8 +11,6 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
 
-        private readonly object _trafficTypeLock = new object();
-
         private ConcurrentDictionary<string, ParsedSplit> _splits;
         private ConcurrentDictionary<string, int> _trafficTypes;
         private long _changeNumber;
@@ -121,41 +119,27 @@ namespace Splitio.Services.Cache.Classes
 
         private void IncreaseTrafficTypeCount(string trafficType)
         {
-            lock (_trafficTypeLock)
-            {
-                if (string.IsNullOrEmpty(trafficType)) return;
+            if (string.IsNullOrEmpty(trafficType)) return;
 
-                if (_trafficTypes.TryGetValue(trafficType, out int quantity))
-                {
-                    var newValue = quantity + 1;
-
-                    _trafficTypes.TryUpdate(trafficType, newValue, quantity);
-                }
-                else
-                {
-                    _trafficTypes.TryAdd(trafficType, 1);
-                }
-            }
+            _trafficTypes.AddOrUpdate(trafficType, 1, (key, oldValue) => oldValue++);
         }
 
         private void DecreaseTrafficTypeCount(ParsedSplit split)
         {
-            lock (_trafficTypeLock)
+            if (split == null || string.IsNullOrEmpty(split.trafficTypeName)) return;
+            
+            if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
             {
-                if (split != null && !string.IsNullOrEmpty(split.trafficTypeName))
+                if (quantity <= 1)
                 {
-                    if (_trafficTypes.TryGetValue(split.trafficTypeName, out int quantity))
-                    {
-                        var newQuantity = quantity - 1;
+                    _trafficTypes.TryRemove(split.trafficTypeName, out int value);
 
-                        _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
-
-                        if (newQuantity <= 0)
-                        {
-                            _trafficTypes.TryRemove(split.trafficTypeName, out int value);
-                        }
-                    }
+                    return;
                 }
+
+                var newQuantity = quantity - 1;
+
+                _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
             }
         }
     }
