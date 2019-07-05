@@ -66,9 +66,9 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
                 else
                 {
-                    var isRemoved = splitCache.AddOrUpdate(split.name, splitParser.Parse(split));
+                    var isUpdated = splitCache.AddOrUpdate(split.name, splitParser.Parse(split));
 
-                    if (!isRemoved)
+                    if (!isUpdated)
                     {
                         //If not existing in _splits, its a new split
                         addedSplits.Add(split);

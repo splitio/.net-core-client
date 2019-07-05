@@ -11,7 +11,6 @@ namespace Splitio.Services.Cache.Classes
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
 
-        private readonly object _splitLock = new object();
         private readonly object _trafficTypeLock = new object();
 
         private ConcurrentDictionary<string, ParsedSplit> _splits;
@@ -38,39 +37,42 @@ namespace Splitio.Services.Cache.Classes
 
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
-            lock (_splitLock)
+            var parsedSplit = (ParsedSplit)split;
+
+            var exists = _splits.TryGetValue(splitName, out ParsedSplit oldSplit);
+
+            if (exists)
             {
-                var isRemoved = RemoveSplit(splitName);
-
-                AddSplit(splitName, split);
-
-                return isRemoved;
+                DecreaseTrafficTypeCount(oldSplit);
             }
+
+            _splits.AddOrUpdate(splitName, parsedSplit, (key, oldValue) => parsedSplit);
+            
+            IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
+
+            return exists;
         }
 
         public void AddSplit(string splitName, SplitBase split)
         {
-            lock (_splitLock)
-            { 
-                var parsedSplit = (ParsedSplit)split;
+            var parsedSplit = (ParsedSplit)split;
 
-                if (_splits.TryAdd(splitName, parsedSplit))
-                {
-                    IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
-                }
+            if (_splits.TryAdd(splitName, parsedSplit))
+            {
+                IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
             }
         }
 
         public bool RemoveSplit(string splitName)
-        {
-            lock (_splitLock)
+        {            
+            var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
+
+            if (removed)
             {
-                var removed = _splits.TryRemove(splitName, out ParsedSplit removedSplit);
-
                 DecreaseTrafficTypeCount(removedSplit);
+            }            
 
-                return removed;
-            }
+            return removed;
         }
 
         public void SetChangeNumber(long changeNumber)
@@ -90,29 +92,19 @@ namespace Splitio.Services.Cache.Classes
 
         public SplitBase GetSplit(string splitName)
         {
-            lock (_splitLock)
-            {
-                _splits.TryGetValue(splitName, out ParsedSplit value);
+            _splits.TryGetValue(splitName, out ParsedSplit value);
 
-                return value;
-            }
+            return value;
         }
 
         public List<SplitBase> GetAllSplits()
-        {
-            lock (_splitLock)
-            {
-                return _splits.Values.ToList<SplitBase>();
-            }            
+        {            
+            return _splits.Values.ToList<SplitBase>();            
         }
 
         public void Clear()
         {
-            lock (_splitLock)
-            {
-                _splits.Clear();
-            }
-            
+            _splits.Clear();            
             _trafficTypes.Clear();
         }
 
