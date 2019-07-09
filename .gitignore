@@ -25,3 +25,5 @@ Splitio-net-core.Redis/bin/
 /Splitio-net-frameworks-tests/Splitio-net-frameworks-tests.csproj.user
 /.vs
 *.user
+Splitio-net-frameworks-tests/bin/
+Splitio-net-frameworks-tests/obj/
