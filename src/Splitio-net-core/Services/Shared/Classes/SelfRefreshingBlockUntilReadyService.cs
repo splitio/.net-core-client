@@ -1,4 +1,5 @@
-﻿using Splitio.Domain;
+﻿using Common.Logging;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Impressions.Classes;
@@ -14,29 +15,37 @@ namespace Splitio.Services.Shared.Classes
     {
         public bool Ready { get; set; }
 
-        private SelfRefreshingSplitFetcher _splitFetcher;
-        private SelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
-        private IReadinessGatesCache _gates;        
-        private IListener<KeyImpression> _treatmentLog;
-        private IListener<WrappedEvent> _eventLog;
-        
+        private readonly SelfRefreshingSplitFetcher _splitFetcher;
+        private readonly SelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
+        private readonly IReadinessGatesCache _gates;        
+        private readonly IListener<KeyImpression> _treatmentLog;
+        private readonly IListener<WrappedEvent> _eventLog;
+        private readonly ILog _log;
+
         public SelfRefreshingBlockUntilReadyService(IReadinessGatesCache gates,
             SelfRefreshingSplitFetcher splitFetcher,
             SelfRefreshingSegmentFetcher selfRefreshingSegmentFetcher,
             IListener<KeyImpression> treatmentLog,
-            IListener<WrappedEvent> eventLog)
+            IListener<WrappedEvent> eventLog, 
+            ILog log)
         {
             _gates = gates;
             _splitFetcher = splitFetcher;
             _selfRefreshingSegmentFetcher = selfRefreshingSegmentFetcher;
             _treatmentLog = treatmentLog;
             _eventLog = eventLog;
+            _log = log;
         }
 
         public void BlockUntilReady(int blockMilisecondsUntilReady)
         {
             if (!Ready)
             {
+                if (blockMilisecondsUntilReady <= 0)
+                {
+                    _log.Warn("The blockMilisecondsUntilReady param has to be higher than 0.");
+                }
+
                 Start();
 
                 Ready = _gates.IsSDKReady(blockMilisecondsUntilReady);

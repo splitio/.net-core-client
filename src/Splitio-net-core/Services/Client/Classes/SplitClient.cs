@@ -7,6 +7,7 @@ using Splitio.Services.EngineEvaluator;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -35,9 +36,10 @@ namespace Splitio.Services.Client.Classes
         protected const string LabelTrafficAllocationFailed = "not in split";
         protected const string LabelClientNotReady = "not ready";
 
-        protected static bool LabelsEnabled;
+        protected bool LabelsEnabled;
         protected bool Destroyed;
-
+        protected string ApiKey;
+        
         protected Splitter splitter;
         protected IListener<KeyImpression> impressionListener;
         protected IListener<WrappedEvent> eventListener;
@@ -50,6 +52,7 @@ namespace Splitio.Services.Client.Classes
         protected ISegmentCache segmentCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
         protected IBlockUntilReadyService _blockUntilReadyService;
+        protected IFactoryInstantiationsService _factoryInstantiationsService;
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
@@ -60,6 +63,7 @@ namespace Splitio.Services.Client.Classes
             _splitNameValidator = new SplitNameValidator(_log);
             _eventTypeValidator = new EventTypeValidator(_log);
             _eventPropertiesValidator = new EventPropertiesValidator(_log);
+            _factoryInstantiationsService = FactoryInstantiationsService.Instance(log);
         }
 
         public ISplitManager GetSplitManager()
@@ -173,7 +177,14 @@ namespace Splitio.Services.Client.Classes
             return Destroyed;
         }
 
-        public abstract void Destroy();
+        public virtual void Destroy()
+        {
+            if (!Destroyed)
+            {
+                _factoryInstantiationsService.Decrease(ApiKey);
+                Destroyed = true;
+            }
+        }
 
         public abstract void BlockUntilReady(int blockMilisecondsUntilReady);
         #endregion

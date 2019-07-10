@@ -14,17 +14,20 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
+
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
-
+        
         private ILocalhostFileService _localhostFileService;
 
         private readonly FileSystemWatcher _watcher;
         private readonly string FullPath;
 
-        public LocalhostClient(string filePath, ILog log, Splitter splitter = null) : base(log)
+        public LocalhostClient(string filePath, 
+            ILog log,
+            Splitter splitter = null) : base(log)
         {
             FullPath = LookupFilePath(filePath);
 
@@ -53,6 +56,8 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new BlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService);
 
+            ApiKey = "localhost";
+
             Destroyed = false;
 
             _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
@@ -66,9 +71,12 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            _watcher.Dispose();
-            splitCache.Clear();
-            Destroyed = true;
+            if (!Destroyed)
+            {
+                _watcher.Dispose();
+                splitCache.Clear();
+                base.Destroy();
+            }
         }
 
         public override void BlockUntilReady(int blockMilisecondsUntilReady)
