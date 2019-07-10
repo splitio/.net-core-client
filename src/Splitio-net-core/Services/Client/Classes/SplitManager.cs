@@ -11,24 +11,25 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitManager));
-        private readonly ISplitCache splitCache;
+        private readonly ILog _log;
+        private readonly ISplitCache _splitCache;
         private readonly ISplitNameValidator _splitNameValidator;
 
-        public SplitManager(ISplitCache splitCache)
+        public SplitManager(ISplitCache splitCache, ILog log = null)
         {
-            this.splitCache = splitCache;
-            _splitNameValidator = new SplitNameValidator(Log);
+            this._splitCache = splitCache;
+            _log = log ?? LogManager.GetLogger(typeof(SplitManager));
+            _splitNameValidator = new SplitNameValidator(_log);
         }
 
         public List<SplitView> Splits()
         {
-            if (splitCache == null)
+            if (_splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
 
             var lightSplits = currentSplits.Select(x =>
                 new SplitView()
@@ -48,17 +49,19 @@ namespace Splitio.Services.Client.Classes
         {
             var result = _splitNameValidator.SplitNameIsValid(featureName, nameof(Split));
 
-            if (splitCache == null || !result.Success)
+            if (_splitCache == null || !result.Success)
             {
                 return null;
             }
 
             featureName = result.Value;
 
-            var split = (ParsedSplit)splitCache.GetSplit(featureName);
+            var split = (ParsedSplit)_splitCache.GetSplit(featureName);
 
             if (split == null)
             {
+                _log.Warn($"split: you passed {featureName} that does not exist in this environment, please double check what Splits exist in the web console.");
+
                 return null;
             }
 
@@ -81,12 +84,12 @@ namespace Splitio.Services.Client.Classes
         
         public List<string> SplitNames()
         {
-            if (splitCache == null)
+            if (_splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
 
             return currentSplits.Select(x => x.name).ToList();
         }
