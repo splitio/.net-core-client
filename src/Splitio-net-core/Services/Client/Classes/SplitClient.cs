@@ -22,7 +22,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
-        protected readonly ITrafficTypeValidator _trafficTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
@@ -48,6 +47,7 @@ namespace Splitio.Services.Client.Classes
         protected ISimpleCache<WrappedEvent> eventsCache;
         protected ISplitCache splitCache;
         protected ISegmentCache segmentCache;
+        protected ITrafficTypeValidator _trafficTypeValidator;
 
         private ConcurrentDictionary<string, string> treatmentCache = new ConcurrentDictionary<string, string>();
 
@@ -57,7 +57,6 @@ namespace Splitio.Services.Client.Classes
             _keyValidator = new KeyValidator(_log);
             _splitNameValidator = new SplitNameValidator(_log);
             _eventTypeValidator = new EventTypeValidator(_log);
-            _trafficTypeValidator = new TrafficTypeValidator(_log);
             _eventPropertiesValidator = new EventPropertiesValidator(_log);
         }
 

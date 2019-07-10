@@ -8,6 +8,7 @@ using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
@@ -204,6 +205,8 @@ namespace Splitio.Services.Client.Classes
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
             splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, splitCache);
+
+            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
