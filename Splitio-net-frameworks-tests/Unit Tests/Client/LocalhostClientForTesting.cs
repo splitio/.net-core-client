@@ -10,9 +10,8 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
     {
         public LocalhostClientForTesting(string filePath, 
             ILog log, 
-            IFactoryInstantiationsService factoryInstantiationsService, 
             Splitter splitter = null,
-            bool isDestroyed = false) : base(filePath, log, factoryInstantiationsService, splitter)
+            bool isDestroyed = false) : base(filePath, log, splitter)
         {
             Destroyed = isDestroyed;
         }

@@ -22,7 +22,6 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
 
         private ConfigurationOptions config;
         private Mock<ILog> _logMock = new Mock<ILog>();
-        private Mock<IFactoryInstantiationsService> _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
         private IRedisAdapter _redisAdapter;
 
         [TestInitialize]
@@ -48,8 +47,8 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOn()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
-            client.BlockUntilReady();
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatment("test", "always_on", null);
@@ -63,8 +62,8 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatment_WhenFeatureExists_ReturnsOff()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
-            client.BlockUntilReady();
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatment("test", "always_off", null);
@@ -78,8 +77,8 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatment_WhenFeatureDoenstExist_ReturnsControl()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
-            client.BlockUntilReady();
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatment("test", "always_control", null);
@@ -98,8 +97,8 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff };
 
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
-            client.BlockUntilReady();
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatments("test", features, null);
@@ -120,8 +119,8 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
 
             var features = new List<string> { alwaysOn, alwaysOff, alwaysControl };
 
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
-            client.BlockUntilReady();
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
+            client.BlockUntilReady(1000);
 
             //Act           
             var result = client.GetTreatments("test", features, null);
@@ -137,7 +136,7 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string>());
@@ -156,7 +155,7 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatmentWithConfig("key", string.Empty);
@@ -172,7 +171,7 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatment_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatment("key", string.Empty);
@@ -187,7 +186,7 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         public void GetTreatments_WhenClientIsNotReady_ReturnsControl()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.GetTreatments("key", new List<string>());
@@ -202,39 +201,36 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
         }
 
         [TestMethod]
-        public void Track_WhenClientIsNotReady_ReturnsFalse()
+        public void Track_WhenClientIsNotReady_ReturnsTrue()
         {
             // Arrange.
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");
 
             // Assert.
-            Assert.IsFalse(result);
-
-            _logMock.Verify(mock => mock.Error($"Track: the SDK is not ready, the operation cannot be executed."), Times.Once());
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
         public void Destroy()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
 
             //Act
             client.Destroy();
 
             //Assert
             Assert.IsTrue(client.IsDestroyed());
-            _factoryInstantiationsService.Verify(mock => mock.Decrease(API_KEY), Times.Once());
         }
 
         [TestMethod]
         public void Destroy_WhenIsDestroyed()
         {
             //Arrange
-            var client = new RedisClient(config, _logMock.Object, _factoryInstantiationsService.Object, API_KEY);
+            var client = new RedisClient(config, _logMock.Object, API_KEY);
             client.Destroy();
 
             //Act
@@ -242,7 +238,6 @@ namespace Splitio_net_frameworks_tests.Integration_Tests
 
             //Assert
             Assert.IsTrue(client.IsDestroyed());
-            _factoryInstantiationsService.Verify(mock => mock.Decrease(It.IsAny<string>()), Times.Once());
         }
 
         private void LoadSplits()

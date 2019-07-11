@@ -20,7 +20,6 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<Splitter> _splitterMock;
         private Mock<CombiningMatcher> _combiningMatcher;
-        private Mock<IFactoryInstantiationsService> _factoryInstantiationsService;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -34,11 +33,10 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
             _impressionListenerMock = new Mock<IListener<KeyImpression>>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
-            _factoryInstantiationsService = new Mock<IFactoryInstantiationsService>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object, _blockUntilReadyService.Object, _factoryInstantiationsService.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object, _blockUntilReadyService.Object);
 
-            _splitClientForTesting.BlockUntilReady();
+            _splitClientForTesting.BlockUntilReady(1000);
         }
 
         #region GetTreatment
@@ -756,7 +754,6 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
 
             // Assert
             Assert.IsTrue(_splitClientForTesting.IsDestroyed());
-            _factoryInstantiationsService.Verify(mock => mock.Decrease(It.IsAny<string>()), Times.Once());
         }
         #endregion
 

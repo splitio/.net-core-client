@@ -73,6 +73,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Destroy()
         {
             //Arrange
+            var _factoryInstantiationsService = FactoryInstantiationsService.Instance(_logMock.Object);
             var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _logMock.Object);
 
             //Act
@@ -91,6 +92,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Destroy_WhenIsDestroyed()
         {
             //Arrange
+            var _factoryInstantiationsService = FactoryInstantiationsService.Instance(_logMock.Object);
             var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _logMock.Object, isDestroyed: true);
 
             //Act

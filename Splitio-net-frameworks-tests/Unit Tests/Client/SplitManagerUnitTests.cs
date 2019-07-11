@@ -423,7 +423,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             //Act
             var result = manager.SplitNames();
@@ -467,7 +467,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             //Act
             var result = manager.Splits();
@@ -515,7 +515,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
                 .Returns(true);
 
             var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             //Act
             var result1 = manager.Split("test1");
@@ -554,7 +554,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
 
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_on");
@@ -594,7 +594,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
 
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_only_wl");
@@ -635,7 +635,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
 
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_with_wl");
@@ -684,7 +684,7 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
 
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
-            manager.BlockUntilReady();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_off_with_config");

@@ -15,9 +15,8 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
             Splitter _splitter,
             IListener<WrappedEvent> _eventListener,
             IListener<KeyImpression> _impressionListener,
-            IBlockUntilReadyService blockUntilReadyService,
-            IFactoryInstantiationsService factoryInstantiationsService)
-            : base(_log, factoryInstantiationsService)
+            IBlockUntilReadyService blockUntilReadyService)
+            : base(_log)
         {
             splitCache = _splitCache;
             splitter = _splitter;
@@ -25,12 +24,13 @@ namespace Splitio_net_frameworks_tests.Unit_Tests.Client
             impressionListener = _impressionListener;
             _blockUntilReadyService = blockUntilReadyService;
             _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);
-            _factoryInstantiationsService = factoryInstantiationsService;
+
+            ApiKey = "SplitClientForTesting";
         }
 
-        public override void BlockUntilReady()
+        public override void BlockUntilReady(int blockMillisecondsUntilReady)
         {
-            _blockUntilReadyService.BlockUntilReady();
+            _blockUntilReadyService.BlockUntilReady(blockMillisecondsUntilReady);
         }
     }
 }
