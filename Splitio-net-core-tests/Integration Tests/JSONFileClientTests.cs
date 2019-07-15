@@ -577,7 +577,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatment_WhenClientIsNotReady_ReturnsTreatment()
+        public void GetTreatment_WithoutBlockUntiltReady_ReturnsOff()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -588,6 +588,7 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.AreEqual("off", result);
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
         #endregion
 
@@ -721,7 +722,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatments_WhenClientIsNotReady_ReturnsEmptyList()
+        public void GetTreatments_WithoutBlockUntiltReady_ReturnsEmptyList()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -732,11 +733,12 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.IsTrue(result.Count == 0);
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
         
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatments_WhenClientIsNotReady_ReturnsControl()
+        public void GetTreatments_WithoutBlockUntiltReady_ReturnsTreatments()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -751,6 +753,8 @@ namespace Splitio_Tests.Integration_Tests
             
             var treatment2 = result.FirstOrDefault(r => r.Key.Equals("in_ten_keys"));
             Assert.AreEqual("on", treatment2.Value);
+
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -849,7 +853,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsTreatment()
+        public void GetTreatmentWithConfig_WithoutBlockUntiltReady_ReturnsOff()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -861,6 +865,7 @@ namespace Splitio_Tests.Integration_Tests
             // Assert.
             Assert.AreEqual("off", result.Treatment);
             Assert.IsNull(result.Config);
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
         #endregion
 
@@ -893,7 +898,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsEmptyList()
+        public void GetTreatmentsWithConfig_WithoutBlockUntiltReady_ReturnsEmptyList()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -904,11 +909,12 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.IsTrue(result.Count == 0);
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsTreatments()
+        public void GetTreatmentsWithConfig_WithoutBlockUntiltReady_ReturnsTreatments()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
@@ -925,6 +931,8 @@ namespace Splitio_Tests.Integration_Tests
             var treatment2 = result.FirstOrDefault(r => r.Key.Equals("whitelisting_elements"));
             Assert.AreEqual("off", treatment2.Value.Treatment);
             Assert.IsNull(treatment2.Value.Config);
+
+            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
