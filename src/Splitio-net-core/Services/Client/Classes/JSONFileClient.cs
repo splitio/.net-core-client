@@ -3,6 +3,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -24,7 +26,8 @@ namespace Splitio.Services.Client.Classes
             ISplitCache splitCacheInstance = null, 
             IListener<KeyImpression> treatmentLogInstance = null,
             bool isLabelsEnabled = true,
-            IListener<WrappedEvent> _eventListener = null) : base(log)
+            IListener<WrappedEvent> _eventListener = null,
+            ITrafficTypeValidator trafficTypeValidator = null) : base(log)
         {
             segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);
@@ -46,6 +49,7 @@ namespace Splitio.Services.Client.Classes
             LabelsEnabled = isLabelsEnabled;
 
             eventListener = _eventListener;
+            _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new BlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService, log);

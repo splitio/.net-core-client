@@ -150,9 +150,9 @@ namespace Splitio_Tests.Integration_Tests
             {
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
-
-                _logMock.Verify(mock => mock.Error($"GetTreatmentsWithConfig: the SDK is not ready, the operation cannot be executed."), Times.Once);
             }
+
+            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [TestMethod]
@@ -167,8 +167,6 @@ namespace Splitio_Tests.Integration_Tests
             // Assert.
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-
-            _logMock.Verify(mock => mock.Error($"GetTreatmentWithConfig: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
 
         [TestMethod]
@@ -182,8 +180,7 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.AreEqual("control", result);
-
-            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Once);
+            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [TestMethod]
@@ -201,7 +198,7 @@ namespace Splitio_Tests.Integration_Tests
                 Assert.AreEqual("control", res.Value);
             }
 
-            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Once);
+            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [TestMethod]
@@ -215,6 +212,7 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.IsTrue(result);
+            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Never);
         }
 
         [TestMethod]

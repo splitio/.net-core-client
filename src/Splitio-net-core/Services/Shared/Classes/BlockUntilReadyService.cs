@@ -4,16 +4,11 @@ namespace Splitio.Services.Shared.Classes
 {
     public class BlockUntilReadyService : IBlockUntilReadyService
     {
-        public bool Ready { get; set; }
-
-        public void BlockUntilReady(int blockMilisecondsUntilReady)
-        {
-            Ready = true;
-        }
+        public void BlockUntilReady(int blockMilisecondsUntilReady) { }
 
         public bool IsSdkReady()
         {
-            return Ready;
+            return true;
         }
     }
 }

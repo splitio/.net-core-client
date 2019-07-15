@@ -5,6 +5,7 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -576,19 +577,17 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatment_WhenClientIsNotReady_ReturnsControl()
+        public void GetTreatment_WhenClientIsNotReady_ReturnsTreatment()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
-            var result = client.GetTreatment("key", string.Empty);
+            var result = client.GetTreatment("key", "anding");
 
             // Assert.
-            Assert.AreEqual("control", result);
-
-            _logMock.Verify(mock => mock.Error($"GetTreatment: the SDK is not ready, the operation cannot be executed."), Times.Once);
+            Assert.AreEqual("off", result);
         }
         #endregion
 
@@ -733,7 +732,6 @@ namespace Splitio_Tests.Integration_Tests
 
             // Assert.
             Assert.IsTrue(result.Count == 0);
-            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
         
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -745,16 +743,14 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
-            var result = client.GetTreatments("key", new List<string> { "treatment_1", "treatment_2" });
+            var result = client.GetTreatments("key", new List<string> { "anding", "in_ten_keys" });
 
             // Assert.
-            var treatment1 = result.FirstOrDefault(r => r.Key.Equals("treatment_1"));
-            Assert.AreEqual("control", treatment1.Value);
+            var treatment1 = result.FirstOrDefault(r => r.Key.Equals("anding"));
+            Assert.AreEqual("off", treatment1.Value);
             
-            var treatment2 = result.FirstOrDefault(r => r.Key.Equals("treatment_2"));
-            Assert.AreEqual("control", treatment2.Value);
-            
-            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Once);
+            var treatment2 = result.FirstOrDefault(r => r.Key.Equals("in_ten_keys"));
+            Assert.AreEqual("on", treatment2.Value);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
@@ -814,7 +810,12 @@ namespace Splitio_Tests.Integration_Tests
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var eventListenerMock = new Mock<IListener<WrappedEvent>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, _eventListener: eventListenerMock.Object);
+            var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
+            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, _eventListener: eventListenerMock.Object, trafficTypeValidator: trafficTypeValidator.Object);
+
+            trafficTypeValidator
+                .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new ValidatorResult { Success = true }); ;
 
             // Act.
             var result = client.Track("key", "traffic_type", "event_type");
@@ -848,20 +849,18 @@ namespace Splitio_Tests.Integration_Tests
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsControl()
+        public void GetTreatmentWithConfig_WhenClientIsNotReady_ReturnsTreatment()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
-            var result = client.GetTreatmentWithConfig("key", string.Empty);
+            var result = client.GetTreatmentWithConfig("key", "anding");
 
             // Assert.
-            Assert.AreEqual("control", result.Treatment);
+            Assert.AreEqual("off", result.Treatment);
             Assert.IsNull(result.Config);
-
-            _logMock.Verify(mock => mock.Error($"GetTreatmentWithConfig: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
         #endregion
 
@@ -901,34 +900,31 @@ namespace Splitio_Tests.Integration_Tests
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
-            var result = client.GetTreatmentsWithConfig("key", new List<string>());
+            var result = client.GetTreatmentsWithConfig("anding", new List<string>());
 
             // Assert.
             Assert.IsTrue(result.Count == 0);
-            _logMock.Verify(mock => mock.Error($"GetTreatmentsWithConfig: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
         [TestMethod]
-        public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsControl()
+        public void GetTreatmentsWithConfig_WhenClientIsNotReady_ReturnsTreatments()
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
-            var result = client.GetTreatmentsWithConfig("key", new List<string> { "treatment_1", "treatment_2" });
+            var result = client.GetTreatmentsWithConfig("key", new List<string> { "anding", "whitelisting_elements" });
 
             // Assert.
-            var treatment1 = result.FirstOrDefault(r => r.Key.Equals("treatment_1"));
-            Assert.AreEqual("control", treatment1.Value.Treatment);
+            var treatment1 = result.FirstOrDefault(r => r.Key.Equals("anding"));
+            Assert.AreEqual("off", treatment1.Value.Treatment);
             Assert.IsNull(treatment1.Value.Config);
 
-            var treatment2 = result.FirstOrDefault(r => r.Key.Equals("treatment_2"));
-            Assert.AreEqual("control", treatment2.Value.Treatment);
+            var treatment2 = result.FirstOrDefault(r => r.Key.Equals("whitelisting_elements"));
+            Assert.AreEqual("off", treatment2.Value.Treatment);
             Assert.IsNull(treatment2.Value.Config);
-            
-            _logMock.Verify(mock => mock.Error($"GetTreatmentsWithConfig: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
 
         [DeploymentItem(@"Resources\splits_staging_3.json")]
