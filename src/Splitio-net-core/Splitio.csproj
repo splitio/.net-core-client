@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net40;netcoreapp2.2</TargetFrameworks>
     <AssemblyName>Splitio</AssemblyName>
     <PackageId>Splitio</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
@@ -10,6 +10,10 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Version>4.0.0</Version>
     <RootNamespace>Splitio</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
+    <DefineConstants>NETSTANDARD</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
@@ -26,6 +30,15 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
+    <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />
+    <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+    <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
     <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />
     <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
