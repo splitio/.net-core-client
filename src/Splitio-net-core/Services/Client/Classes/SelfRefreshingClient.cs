@@ -85,7 +85,10 @@ namespace Splitio.Services.Client.Classes
             BuildEventLog(config);
             BuildSplitter();
             BuildBlockUntilReadyService();
-            BuildManager();            
+            BuildManager();
+
+            Start();
+            LaunchTaskSchedulerOnReady();
         }
 
         #region Public Methods
@@ -119,7 +122,7 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
         #endregion
-        
+
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {

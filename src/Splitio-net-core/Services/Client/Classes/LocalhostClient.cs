@@ -53,7 +53,7 @@ namespace Splitio.Services.Client.Classes
             splitCache = new InMemorySplitCache(splits);
             BuildSplitter(splitter);
 
-            _blockUntilReadyService = new BlockUntilReadyService();
+            _blockUntilReadyService = new NoopBlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
