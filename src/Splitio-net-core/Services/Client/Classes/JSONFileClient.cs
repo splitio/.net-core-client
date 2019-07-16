@@ -51,7 +51,7 @@ namespace Splitio.Services.Client.Classes
             eventListener = _eventListener;
             _trafficTypeValidator = trafficTypeValidator;
             
-            _blockUntilReadyService = new BlockUntilReadyService();
+            _blockUntilReadyService = new NoopBlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService, log);
 
             ApiKey = "localhost";

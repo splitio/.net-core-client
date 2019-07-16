@@ -2,7 +2,7 @@
 
 namespace Splitio.Services.Shared.Classes
 {
-    public class BlockUntilReadyService : IBlockUntilReadyService
+    public class NoopBlockUntilReadyService : IBlockUntilReadyService
     {
         public void BlockUntilReady(int blockMilisecondsUntilReady) { }
 
