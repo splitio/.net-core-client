@@ -15,7 +15,6 @@ before_build:
  - redis-server --service-install
  - redis-server --service-start
  - dotnet restore -s https://www.nuget.org/api/v2/
- - nuget restore
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
 build: off
