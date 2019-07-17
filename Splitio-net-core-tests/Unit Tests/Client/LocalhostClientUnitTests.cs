@@ -18,6 +18,9 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             _logMock = new Mock<ILog>();
 
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif

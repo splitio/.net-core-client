@@ -15,6 +15,9 @@ namespace Splitio_tests.Unit_Tests.Matchers
 
         public MatchesStringMatcherTests()
         {
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif

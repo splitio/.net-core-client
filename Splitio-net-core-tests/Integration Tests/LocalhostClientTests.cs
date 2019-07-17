@@ -23,6 +23,9 @@ namespace Splitio_Tests.Integration_Tests
             _logMock = new Mock<ILog>();
             _factoryInstantiationsServiceMock = new Mock<IFactoryInstantiationsService>();
 
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif

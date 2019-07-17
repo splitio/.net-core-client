@@ -18,6 +18,9 @@ namespace Splitio_Tests.Integration_Tests
 
         public SelfRefreshingSplitFetcherTests()
         {
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif

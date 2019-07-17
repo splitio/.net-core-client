@@ -22,7 +22,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -31,7 +30,6 @@ namespace Splitio.Services.Client.Classes
         private static string BaseUrl;
         private static int SplitsRefreshRate;
         private static int SegmentRefreshRate;
-        private static string HttpEncoding;
         private static long HttpConnectionTimeout;
         private static long HttpReadTimeout;
         private static string SdkVersion;
@@ -130,7 +128,6 @@ namespace Splitio.Services.Client.Classes
             EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? "https://events.split.io" : config.EventsEndpoint;
             SplitsRefreshRate = config.FeaturesRefreshRate ?? 5;
             SegmentRefreshRate = config.SegmentsRefreshRate ?? 60;
-            HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
 

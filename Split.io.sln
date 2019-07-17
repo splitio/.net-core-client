@@ -12,8 +12,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core.TestSuppor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splitio-net-core-tests", "Splitio-net-core-tests\Splitio-net-core-tests.csproj", "{87059146-5A35-41E5-89F3-F5FDC68059E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splitio-net-frameworks-tests", "Splitio-net-frameworks-tests\Splitio-net-frameworks-tests.csproj", "{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,10 +34,6 @@ Global
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87059146-5A35-41E5-89F3-F5FDC68059E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78A31211-F38D-4AB8-BFEF-9CE6ACD7DE64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

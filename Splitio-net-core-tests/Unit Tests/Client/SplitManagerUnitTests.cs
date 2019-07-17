@@ -21,6 +21,9 @@ namespace Splitio_Tests.Unit_Tests.Client
         {
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
 
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif

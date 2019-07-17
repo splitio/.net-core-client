@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Splitio.Services.SegmentFetcher.Classes;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
+using System;
 using System.Threading.Tasks;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
@@ -11,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
     public class ApiSegmentChangeFetcherUnitTests
     {
         [TestMethod]
-        public async void FetchSegmentChangesSuccessfull()
+        public async Task FetchSegmentChangesSuccessfull()
         {
             //Arrange
             var apiClient = new Mock<ISegmentSdkApiClient>();
@@ -43,7 +43,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         }
 
         [TestMethod]
-        public async void FetchSegmentChangesWithExcepionSouldReturnNull()
+        public async Task FetchSegmentChangesWithExcepionSouldReturnNull()
         {
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
