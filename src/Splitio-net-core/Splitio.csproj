@@ -20,6 +20,10 @@
     <DefineConstants>NETFRAMEWORK</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BclBuildImported>Ignore</BclBuildImported>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
     <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
