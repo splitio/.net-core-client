@@ -111,10 +111,8 @@ namespace Splitio.Redis.Services.Client.Classes
 #if NETSTANDARD
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
 #else
-            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+            SdkVersion = ".NET-" + Version.SplitSpecVersion;
 #endif
-
-            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 
             try
             {
