@@ -4,9 +4,12 @@
     <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
     <AssemblyName>Splitio</AssemblyName>
     <PackageId>Splitio</PackageId>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Version>5.5.0</Version>
     <RootNamespace>Splitio</RootNamespace>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
@@ -19,12 +22,7 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <BclBuildImported>Ignore</BclBuildImported>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
-    <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
-  </ItemGroup>
+  </PropertyGroup> 
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="Common.Logging" Version="3.4.0-Beta2" />
@@ -40,12 +38,17 @@
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <PackageReference Include="Microsoft.Bcl" version="1.1.10" />
     <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
-    <PackageReference Include="Microsoft.Bcl.Build" version="1.0.21" />
+    <PackageReference Include="Microsoft.Bcl.Build" version="1.0.14" />
     <PackageReference Include="Microsoft.Net.Http" version="2.2.29" />
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
     <PackageReference Include="YamlDotNet" version="6.0.0" />
     <PackageReference Include="YamlDotNet.Signed" version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
+    <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
   </ItemGroup>
 
 </Project>
