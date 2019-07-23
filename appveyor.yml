@@ -14,7 +14,6 @@ before_build:
  - choco install redis-64
  - redis-server --service-install
  - redis-server --service-start
- - dotnet clean
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
