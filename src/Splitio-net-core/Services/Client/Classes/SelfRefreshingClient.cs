@@ -22,6 +22,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -266,6 +267,26 @@ namespace Splitio.Services.Client.Classes
         private void BuildBlockUntilReadyService()
         {
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(gates, splitFetcher, selfRefreshingSegmentFetcher, treatmentLog, eventLog, _log);
+        }
+
+        private void LaunchTaskSchedulerOnReady()
+        {
+            Task workerTask = Task.Factory.StartNew(
+                () => {
+                    while (true)
+                    {
+                        if (gates.IsSDKReady(0))
+                        {
+                            selfRefreshingSegmentFetcher.StartScheduler();
+                            break;
+                        }
+#if NETSTANDARD
+                        Task.Delay(500).Wait();
+#else
+                        ThreadUtils.Delay(500).Wait();
+#endif
+                    }
+                });
         }
 #endregion
     }
