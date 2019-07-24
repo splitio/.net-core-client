@@ -35,20 +35,23 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <PackageReference Include="Common.Logging" version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" version="3.3.1" />
-    <PackageReference Include="Microsoft.Bcl" version="1.1.10" />
-    <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
-    <PackageReference Include="Microsoft.Bcl.Build" version="1.0.14" />
+    <PackageReference Include="Common.Logging.Core" version="3.3.1" />    
     <PackageReference Include="Microsoft.Net.Http" version="2.2.29" />
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
     <PackageReference Include="YamlDotNet" version="6.0.0" />
     <PackageReference Include="YamlDotNet.Signed" version="6.0.0" />
+    <PackageReference Include="Microsoft.Bcl" version="1.1.10" />
+    <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Services\Events\Classes\AsynchronousEventListener.cs" />
     <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />    
   </ItemGroup>
 
 </Project>
