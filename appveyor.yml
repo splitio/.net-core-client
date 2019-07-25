@@ -32,7 +32,7 @@ test: off
 
 artifacts:
  - path: '**\Splitio.*.nupkg'
-   name: splitio-nuget
+   name: splitio-net-core-nuget
 
 deploy:
  - provider: Environment
