@@ -110,16 +110,11 @@ namespace Splitio.Redis.Services.Client.Classes
         {
 #if NETSTANDARD
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
+            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 #else
             SdkVersion = ".NET-" + Version.SplitSdkVersion;
-#endif
-
-#if NETSTANDARD
-            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
-#else
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 #endif
-
             try
             {
                 SdkMachineName = config.SdkMachineName ?? Environment.MachineName;

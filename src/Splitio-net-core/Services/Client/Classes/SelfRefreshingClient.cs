@@ -134,16 +134,11 @@ namespace Splitio.Services.Client.Classes
 
 #if NETSTANDARD
             SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
-#else
-            SdkVersion = ".NET-" + Version.SplitSdkVersion;            
-#endif
-
-#if NETSTANDARD
             SdkSpecVersion = ".NET_CORE-" + Version.SplitSpecVersion;
 #else
+            SdkVersion = ".NET-" + Version.SplitSdkVersion;            
             SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
-#endif            
-
+#endif
             try
             {
                 SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
