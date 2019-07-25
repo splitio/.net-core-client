@@ -22,7 +22,7 @@ build_script:
  
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
@@ -31,8 +31,8 @@ after_build:
 test: off
 
 artifacts:
- - path: '**\Splitio-net-core.*.nupkg'
-   name: splitio-net-core-nuget
+ - path: '**\Splitio.*.nupkg'
+   name: splitio-nuget
 
 deploy:
  - provider: Environment
