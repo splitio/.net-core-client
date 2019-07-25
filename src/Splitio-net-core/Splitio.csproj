@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
-    <AssemblyName>Splitio</AssemblyName>
-    <PackageId>Splitio</PackageId>
+    <AssemblyName>Splitio-net-core</AssemblyName>
+    <PackageId>Splitio-net-core</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Version>5.5.0</Version>
-    <RootNamespace>Splitio</RootNamespace>
+    <RootNamespace>Splitio-net-core</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
