@@ -19,9 +19,6 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -132,39 +129,11 @@ namespace Splitio.Services.Client.Classes
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
 
-#if NETSTANDARD
-            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
-            SdkSpecVersion = ".NET_CORE-" + Version.SplitSpecVersion;
-#else
-            SdkVersion = ".NET-" + Version.SplitSdkVersion;            
-            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
-#endif
-            try
-            {
-                SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
-            }
-            catch (Exception e)
-            {
-                SdkMachineName = "unknown";
-                _log.Warn("Exception retrieving machine name.", e);
-            }
-
-            try
-            {
-#if NETSTANDARD
-                var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                hostAddressesTask.Wait();
-                SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
-#else
-                SdkMachineIP = config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
-#endif
-
-            }
-            catch (Exception e)
-            {
-                SdkMachineIP = "unknown";
-                _log.Warn("Exception retrieving machine IP.", e);
-            }
+            var data = _wrapperAdapter.ReadConfig(config, _log);
+            SdkVersion = data.SdkVersion;
+            SdkSpecVersion = data.SdkSpecVersion;
+            SdkMachineName = data.SdkMachineName;
+            SdkMachineIP = data.SdkMachineIP;
 
             RandomizeRefreshRates = config.RandomizeRefreshRates;
             BlockMilisecondsUntilReady = config.Ready ?? 0;
@@ -275,11 +244,8 @@ namespace Splitio.Services.Client.Classes
                             selfRefreshingSegmentFetcher.StartScheduler();
                             break;
                         }
-#if NETSTANDARD
-                        Task.Delay(500).Wait();
-#else
-                        ThreadUtils.Delay(500).Wait();
-#endif
+
+                        _wrapperAdapter.TaskDelay(500).Wait();
                     }
                 });
         }
