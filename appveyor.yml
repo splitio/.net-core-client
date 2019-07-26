@@ -31,7 +31,7 @@ after_build:
 test: off
 
 artifacts:
- - path: '**\Splitio-net-core.*.nupkg'
+ - path: '**\Splitio.*.nupkg'
    name: splitio-nuget
 
 deploy:
