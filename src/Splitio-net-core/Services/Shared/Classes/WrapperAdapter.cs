@@ -29,18 +29,18 @@ namespace Splitio.Services.Shared.Classes
                 log.Warn("Exception retrieving machine name.", e);
             }
 
+            data.SdkSpecVersion = ".NET-" + SplitSpecVersion();
+
             try
             {
 #if NETSTANDARD
-                data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
-                data.SdkSpecVersion = ".NET_CORE-" + SplitSpecVersion();
+                data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();                
 
                 var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
                 hostAddressesTask.Wait();
                 data.SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #else
                 data.SdkVersion = ".NET-" + SplitSdkVersion();
-                data.SdkSpecVersion = ".NET-" + SplitSpecVersion();
 
                 data.SdkMachineIP = config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
 #endif

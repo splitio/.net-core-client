@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
-    <AssemblyName>Splitio.Redis</AssemblyName>
-    <PackageId>Splitio.Redis</PackageId>
+    <AssemblyName>Splitio-net-core.Redis</AssemblyName>
+    <PackageId>Splitio-net-core.Redis</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
