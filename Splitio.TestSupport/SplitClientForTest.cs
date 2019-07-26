@@ -1,7 +1,6 @@
 ﻿using Common.Logging;
 using Splitio.Domain;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -53,6 +52,11 @@ namespace Splitio.Services.Client.Classes
         public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes)
         {
             return _tests.ContainsKey(feature) ? _tests[feature] : "control";
+        }
+
+        public override void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
     }
 }

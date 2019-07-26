@@ -12,7 +12,7 @@ namespace Splitio.Services.EngineEvaluator
     {
         private const string Control = "control";
 
-        public string GetTreatment(string key, int seed, List<PartitionDefinition> partitions, AlgorithmEnum algorithm)
+        public virtual string GetTreatment(string key, int seed, List<PartitionDefinition> partitions, AlgorithmEnum algorithm)
         {
             if (String.IsNullOrEmpty(key))
             {

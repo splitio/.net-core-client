@@ -3,8 +3,11 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
@@ -18,11 +21,13 @@ namespace Splitio.Services.Client.Classes
 
         public JSONFileClient(string splitsFilePath, 
             string segmentsFilePath, 
-            ILog log, 
+            ILog log,
             ISegmentCache segmentCacheInstance = null, 
             ISplitCache splitCacheInstance = null, 
             IListener<KeyImpression> treatmentLogInstance = null,
-            bool isLabelsEnabled = true) : base(log)
+            bool isLabelsEnabled = true,
+            IListener<WrappedEvent> _eventListener = null,
+            ITrafficTypeValidator trafficTypeValidator = null) : base(log)
         {
             segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);
@@ -42,7 +47,14 @@ namespace Splitio.Services.Client.Classes
             impressionListener = treatmentLogInstance;
             splitter = new Splitter();
             LabelsEnabled = isLabelsEnabled;
-            manager = new SplitManager(splitCache);
+
+            eventListener = _eventListener;
+            _trafficTypeValidator = trafficTypeValidator;
+            
+            _blockUntilReadyService = new NoopBlockUntilReadyService();
+            manager = new SplitManager(splitCache, _blockUntilReadyService, log);
+
+            ApiKey = "localhost";
         }
 
         public void RemoveSplitFromCache(string splitName)
@@ -57,9 +69,17 @@ namespace Splitio.Services.Client.Classes
 
         public override void Destroy()
         {
-            splitCache.Clear();
-            segmentCache.Clear();
-            Destroyed = true;
+            if (!Destroyed)
+            {
+                splitCache.Clear();
+                segmentCache.Clear();
+                base.Destroy();
+            }
+        }
+
+        public override void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
     }
 }

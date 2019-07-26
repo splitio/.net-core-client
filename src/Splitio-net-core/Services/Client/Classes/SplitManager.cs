@@ -4,6 +4,7 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,24 +12,29 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        protected static readonly ILog Log = LogManager.GetLogger(typeof(SplitManager));
-        private readonly ISplitCache splitCache;
+        private readonly ILog _log;
+        private readonly ISplitCache _splitCache;
         private readonly ISplitNameValidator _splitNameValidator;
+        private readonly IBlockUntilReadyService _blockUntilReadyService;
 
-        public SplitManager(ISplitCache splitCache)
+        public SplitManager(ISplitCache splitCache,
+            IBlockUntilReadyService blockUntilReadyService,
+            ILog log = null)
         {
-            this.splitCache = splitCache;
-            _splitNameValidator = new SplitNameValidator(Log);
+            _splitCache = splitCache;
+            _log = log ?? LogManager.GetLogger(typeof(SplitManager));
+            _splitNameValidator = new SplitNameValidator(_log);
+            _blockUntilReadyService = blockUntilReadyService;
         }
 
         public List<SplitView> Splits()
         {
-            if (splitCache == null)
+            if (!IsSdkReady(nameof(Splits)) || _splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
 
             var lightSplits = currentSplits.Select(x =>
                 new SplitView()
@@ -46,19 +52,26 @@ namespace Splitio.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
+            if (!IsSdkReady(nameof(Split)) || _splitCache == null)
+            {
+                return null;
+            }
+
             var result = _splitNameValidator.SplitNameIsValid(featureName, nameof(Split));
 
-            if (splitCache == null || !result.Success)
+            if (!result.Success)
             {
                 return null;
             }
 
             featureName = result.Value;
 
-            var split = (ParsedSplit)splitCache.GetSplit(featureName);
+            var split = (ParsedSplit)_splitCache.GetSplit(featureName);
 
             if (split == null)
             {
+                _log.Warn($"split: you passed {featureName} that does not exist in this environment, please double check what Splits exist in the web console.");
+
                 return null;
             }
 
@@ -81,14 +94,30 @@ namespace Splitio.Services.Client.Classes
         
         public List<string> SplitNames()
         {
-            if (splitCache == null)
+            if (!IsSdkReady(nameof(SplitNames)) || _splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
 
             return currentSplits.Select(x => x.name).ToList();
+        }
+
+        private bool IsSdkReady(string methodName)
+        {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
     }
 }

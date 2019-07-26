@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,7 @@ namespace Splitio_Tests.Integration_Tests
     public class LocalhostClientTests
     {
         private Mock<ILog> _logMock = new Mock<ILog>();
+        private Mock<IFactoryInstantiationsService> _factoryInstantiationsServiceMock = new Mock<IFactoryInstantiationsService>();
 
         [DeploymentItem(@"Resources\test.splits")]
         [TestMethod]
@@ -20,6 +22,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\test.splits", _logMock.Object);
+
+            client.BlockUntilReady(1000);
 
             //Act
             var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
@@ -41,6 +45,9 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\test.splits", _logMock.Object);
+
+            client.BlockUntilReady(1000);
+
             File.AppendAllText(@"Resources\test.splits", Environment.NewLine +"other_test_feature2     off" + Environment.NewLine);
             Thread.Sleep(50);
 
@@ -68,6 +75,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new LocalhostClient(@"Resources\test.splits", _logMock.Object);
 
+            client.BlockUntilReady(1000);
 
             //Act
             var result1 = client.GetTreatment("id", "double_writes_to_cassandra");
@@ -100,6 +108,8 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yaml", _logMock.Object);
 
+            client.BlockUntilReady(1000);
+
             //Act
             var result = client.GetTreatment("id", "testing_split_on");
             Assert.AreEqual("on", result);
@@ -129,6 +139,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yaml", _logMock.Object);
+
+            client.BlockUntilReady(1000);
 
             //Act
             var result = client.GetTreatmentWithConfig("id", "testing_split_on");
@@ -167,6 +179,8 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yml", _logMock.Object);
 
+            client.BlockUntilReady(1000);
+
             //Act
             var result = client.GetTreatment("id", "testing_split_on");
             Assert.AreEqual("on", result);
@@ -196,6 +210,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yml", _logMock.Object);
+
+            client.BlockUntilReady(1000);
 
             //Act
             var result = client.GetTreatmentWithConfig("id", "testing_split_on");
@@ -234,6 +250,8 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yaml", _logMock.Object);
 
+            client.BlockUntilReady(1000);
+
             //Act
             var results = client.GetTreatments("id", new List<string>
             {
@@ -268,6 +286,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yaml", _logMock.Object);
+
+            client.BlockUntilReady(1000);
 
             //Act
             var results = client.GetTreatmentsWithConfig("id", new List<string>
@@ -318,6 +338,8 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yml", _logMock.Object);
 
+            client.BlockUntilReady(1000);
+
             //Act
             var results = client.GetTreatments("id", new List<string>
             {
@@ -352,6 +374,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var client = new LocalhostClient(@"Resources\split.yml", _logMock.Object);
+
+            client.BlockUntilReady(1000);
 
             //Act
             var results = client.GetTreatmentsWithConfig("id", new List<string>

@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,13 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitManagerUnitTests
     {
+        private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
+
+        public SplitManagerUnitTests()
+        {
+            _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
+        }
+
         [TestMethod]
         public void SplitsReturnSuccessfully()
         {
@@ -43,7 +52,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Splits();
@@ -85,7 +98,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Splits();
@@ -124,7 +141,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Split("test1");
@@ -176,7 +197,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Split("test1");
@@ -214,7 +239,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Split("test1");
@@ -231,7 +260,11 @@ namespace Splitio_Tests.Unit_Tests.Client
             //Arrange
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Split("test1");
@@ -244,8 +277,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitReturnsNullWhenCacheIsNull()
         {
             //Arrange
-            var manager = new SplitManager(null);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
+            var manager = new SplitManager(null, _blockUntilReadyService.Object);
+            
             //Act
             var result = manager.Split("test1");
 
@@ -257,8 +294,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitsWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache);
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Splits();
@@ -272,7 +313,11 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitsWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
-            var manager = new SplitManager(null);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(null, _blockUntilReadyService.Object);
 
             //Act
             var result = manager.Splits();
@@ -285,8 +330,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
-            var manager = new SplitManager(null);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
+            var manager = new SplitManager(null, _blockUntilReadyService.Object);
+            
             //Act
             var result = manager.Split("name");
 
@@ -298,9 +347,13 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitWithNullNameShouldReturnNull()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            
             //Act
             var result = manager.Split(null);
 
@@ -312,9 +365,13 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitNamessWhenCacheIsEmptyShouldReturnEmptyList()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
+            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            
             //Act
             var result = manager.SplitNames();
 
@@ -327,8 +384,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitNamessWhenCacheIsNotInstancedShouldReturnNull()
         {
             //Arrange
-            var manager = new SplitManager(null);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
 
+            var manager = new SplitManager(null, _blockUntilReadyService.Object);
+            
             //Act
             var result = manager.SplitNames();
 
@@ -357,7 +418,12 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            manager.BlockUntilReady(1000);
 
             //Act
             var result = manager.SplitNames();
@@ -396,7 +462,12 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            manager.BlockUntilReady(1000);
 
             //Act
             var result = manager.Splits();
@@ -439,7 +510,12 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
             splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
-            var manager = new SplitManager(splitCache);
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
+            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            manager.BlockUntilReady(1000);
 
             //Act
             var result1 = manager.Split("test1");
@@ -472,9 +548,14 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Ready = 500
             };
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
-            
+            manager.BlockUntilReady(1000);
+
             // Act.
             var splitViewResult = manager.Split("testing_split_on");
 
@@ -507,8 +588,13 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Ready = 500
             };
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_only_wl");
@@ -543,8 +629,13 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Ready = 500
             };
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_with_wl");
@@ -587,8 +678,13 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Ready = 500
             };
 
+            _blockUntilReadyService
+                .Setup(mock => mock.IsSdkReady())
+                .Returns(true);
+
             var factory = new SplitFactory("localhost", configurationOptions);
             var manager = factory.Manager();
+            manager.BlockUntilReady(1000);
 
             // Act.
             var splitViewResult = manager.Split("testing_split_off_with_config");

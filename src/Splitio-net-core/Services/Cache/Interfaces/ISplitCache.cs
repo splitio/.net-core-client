@@ -9,6 +9,8 @@ namespace Splitio.Services.Cache.Interfaces
 
         bool RemoveSplit(string splitName);
 
+        bool AddOrUpdate(string splitName, SplitBase split);
+
         void SetChangeNumber(long changeNumber);
 
         long GetChangeNumber();
@@ -18,5 +20,7 @@ namespace Splitio.Services.Cache.Interfaces
         List<SplitBase> GetAllSplits();
 
         void Clear();
+
+        bool TrafficTypeExists(string trafficType);
     }
 }

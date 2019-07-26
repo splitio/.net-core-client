@@ -1,6 +1,10 @@
-﻿using Splitio.Domain;
+﻿using Common.Logging;
+using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
+using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,21 +12,29 @@ namespace Splitio.Redis.Services.Client.Classes
 {
     public class RedisSplitManager : ISplitManager
     {
-        ISplitCache splitCache;
+        private readonly ISplitCache _splitCache;
+        private readonly IBlockUntilReadyService _blockUntilReadyService;
+        private readonly ILog _log;
+        private readonly ISplitNameValidator _splitNameValidator;
 
-        public RedisSplitManager(ISplitCache splitCache)
+        public RedisSplitManager(ISplitCache splitCache,
+            IBlockUntilReadyService blockUntilReadyService,
+            ILog log = null)
         {
-            this.splitCache = splitCache;
+            _splitCache = splitCache;
+            _blockUntilReadyService = blockUntilReadyService;
+            _log = log ?? LogManager.GetLogger(typeof(RedisSplitManager));
+            _splitNameValidator = new SplitNameValidator(_log);
         }
 
         public List<SplitView> Splits()
         {
-            if (splitCache == null)
+            if (!IsSdkReady(nameof(Splits)) || _splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<Split>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<Split>();
 
             var lightSplits = currentSplits.Select(x =>
                 new SplitView()
@@ -41,12 +53,21 @@ namespace Splitio.Redis.Services.Client.Classes
 
         public SplitView Split(string featureName)
         {
-            if (splitCache == null)
+            if (!IsSdkReady(nameof(Split)) || _splitCache == null)
             {
                 return null;
             }
 
-            var split = (Split)splitCache.GetSplit(featureName);
+            var result = _splitNameValidator.SplitNameIsValid(featureName, nameof(Split));
+
+            if (!result.Success)
+            {
+                return null;
+            }
+
+            featureName = result.Value;
+
+            var split = (Split)_splitCache.GetSplit(featureName);
 
             if (split == null)
             {
@@ -73,14 +94,30 @@ namespace Splitio.Redis.Services.Client.Classes
 
         public List<string> SplitNames()
         {
-            if (splitCache == null)
+            if (!IsSdkReady(nameof(SplitNames)) || _splitCache == null)
             {
                 return null;
             }
 
-            var currentSplits = splitCache.GetAllSplits().Cast<Split>();
+            var currentSplits = _splitCache.GetAllSplits().Cast<Split>();
 
             return currentSplits.Select(x => x.name).ToList();
+        }
+
+        private bool IsSdkReady(string methodName)
+        {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
     }
 }

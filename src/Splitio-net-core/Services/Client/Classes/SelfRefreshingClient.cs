@@ -8,6 +8,7 @@ using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
@@ -27,7 +28,6 @@ namespace Splitio.Services.Client.Classes
 {
     public class SelfRefreshingClient : SplitClient
     {
-        private static string ApiKey;
         private static string BaseUrl;
         private static int SplitsRefreshRate;
         private static int SegmentRefreshRate;
@@ -59,7 +59,6 @@ namespace Splitio.Services.Client.Classes
         /// </summary>
         private const int InitialCapacity = 31;
 
-
         private IReadinessGatesCache gates;
         private SelfRefreshingSplitFetcher splitFetcher;
         private ISplitSdkApiClient splitSdkApiClient;
@@ -71,7 +70,9 @@ namespace Splitio.Services.Client.Classes
         private IListener<KeyImpression> treatmentLog;
         private IListener<WrappedEvent> eventLog;
 
-        public SelfRefreshingClient(string apiKey, ConfigurationOptions config, ILog log) : base(log)
+        public SelfRefreshingClient(string apiKey, 
+            ConfigurationOptions config, 
+            ILog log) : base(log)
         {
             Destroyed = false;
 
@@ -83,15 +84,46 @@ namespace Splitio.Services.Client.Classes
             BuildTreatmentLog(config);
             BuildEventLog(config);
             BuildSplitter();
+            BuildBlockUntilReadyService();
             BuildManager();
+
             Start();
-            if (BlockMilisecondsUntilReady > 0)
-            {
-                BlockUntilReady(BlockMilisecondsUntilReady);
-            }
             LaunchTaskSchedulerOnReady();
         }
 
+        #region Public Methods
+        public void Start()
+        {
+            ((SelfUpdatingTreatmentLog)treatmentLog).Start();
+            ((SelfUpdatingEventLog)eventLog).Start();
+            splitFetcher.Start();
+        }
+
+        public void Stop()
+        {
+            splitFetcher.Stop(); // Stop + Clear
+            selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
+            ((SelfUpdatingTreatmentLog)treatmentLog).Stop(); //Stop + SendBulk + Clear
+            ((SelfUpdatingEventLog)eventLog).Stop(); //Stop + SendBulk + Clear
+            metricsLog.Clear(); //Clear
+        }
+
+        public override void Destroy()
+        {
+            if (!Destroyed)
+            {
+                Stop();
+                base.Destroy();
+            }
+        }
+
+        public override void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
+        }
+        #endregion
+
+        #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {
             BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? "https://sdk.split.io" : config.Endpoint;
@@ -108,7 +140,7 @@ namespace Splitio.Services.Client.Classes
             {
                 SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 SdkMachineName = "unknown";
                 _log.Warn("Exception retrieving machine name.", e);
@@ -120,7 +152,7 @@ namespace Splitio.Services.Client.Classes
                 hostAddressesTask.Wait();
                 SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 SdkMachineIP = "unknown";
                 _log.Warn("Exception retrieving machine IP.", e);
@@ -140,21 +172,6 @@ namespace Splitio.Services.Client.Classes
             LabelsEnabled = config.LabelsEnabled ?? true;
         }
 
-        private void BlockUntilReady(int BlockMilisecondsUntilReady)
-        {
-            if (!gates.IsSDKReady(BlockMilisecondsUntilReady))
-            {
-                throw new TimeoutException(string.Format("SDK was not ready in {0} miliseconds", BlockMilisecondsUntilReady));
-            }
-        }
-
-        public void Start()
-        {
-            ((SelfUpdatingTreatmentLog)treatmentLog).Start();
-            ((SelfUpdatingEventLog)eventLog).Start();
-            ((SelfRefreshingSplitFetcher)splitFetcher).Start();
-        }
-
         private void LaunchTaskSchedulerOnReady()
         {
             Task workerTask = Task.Factory.StartNew(
@@ -162,7 +179,7 @@ namespace Splitio.Services.Client.Classes
                     while (true)
                     {
                         if (gates.IsSDKReady(0))
-                        {                           
+                        {
                             selfRefreshingSegmentFetcher.StartScheduler();
                             break;
                         }
@@ -171,16 +188,6 @@ namespace Splitio.Services.Client.Classes
                     }
                 });
         }
-
-        public void Stop()
-        {
-            ((SelfRefreshingSplitFetcher)splitFetcher).Stop(); // Stop + Clear
-            ((SelfRefreshingSegmentFetcher)selfRefreshingSegmentFetcher).Stop(); // Stop + Clear
-            ((SelfUpdatingTreatmentLog)treatmentLog).Stop(); //Stop + SendBulk + Clear
-            ((SelfUpdatingEventLog)eventLog).Stop(); //Stop + SendBulk + Clear
-            metricsLog.Clear(); //Clear
-        }
-
 
         private void BuildSplitter()
         {
@@ -204,6 +211,8 @@ namespace Splitio.Services.Client.Classes
             var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
             splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, splitCache);
+
+            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
@@ -235,7 +244,7 @@ namespace Splitio.Services.Client.Classes
         private int Random(int refreshRate)
         {
             Random random = new Random();
-            return Math.Max(5, random.Next(refreshRate/2, refreshRate));
+            return Math.Max(5, random.Next(refreshRate / 2, refreshRate));
         }
 
         private void BuildSdkApiClients()
@@ -256,13 +265,13 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildManager()
         {
-            manager = new SplitManager(splitCache);
+            manager = new SplitManager(splitCache, _blockUntilReadyService);
         }
 
-        public override void Destroy()
+        private void BuildBlockUntilReadyService()
         {
-            Stop();
-            Destroyed = true;
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(gates, splitFetcher, selfRefreshingSegmentFetcher, treatmentLog, eventLog, _log);
         }
+        #endregion
     }
 }

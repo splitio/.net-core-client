@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -13,17 +14,20 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
+
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
-        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
-
+        
         private ILocalhostFileService _localhostFileService;
 
         private readonly FileSystemWatcher _watcher;
         private readonly string FullPath;
 
-        public LocalhostClient(string filePath, ILog log, Splitter splitter = null) : base(log)
+        public LocalhostClient(string filePath, 
+            ILog log,
+            Splitter splitter = null) : base(log)
         {
             FullPath = LookupFilePath(filePath);
 
@@ -48,16 +52,40 @@ namespace Splitio.Services.Client.Classes
             var splits = ParseSplitFile(FullPath);
             splitCache = new InMemorySplitCache(splits);
             BuildSplitter(splitter);
-            manager = new SplitManager(splitCache);
+
+            _blockUntilReadyService = new NoopBlockUntilReadyService();
+            manager = new SplitManager(splitCache, _blockUntilReadyService);
+
+            ApiKey = "localhost";
 
             Destroyed = false;
+
+            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
 
+        #region Public Methods
         public override bool Track(string key, string trafficType, string eventType, double? value = default(double?), Dictionary<string, object> properties = null)
         {
             return true;
         }
 
+        public override void Destroy()
+        {
+            if (!Destroyed)
+            {
+                _watcher.Dispose();
+                splitCache.Clear();
+                base.Destroy();
+            }
+        }
+
+        public override void BlockUntilReady(int blockMilisecondsUntilReady)
+        {
+            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
+        }
+        #endregion
+
+        #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             var splits = ParseSplitFile(FullPath);
@@ -66,6 +94,8 @@ namespace Splitio.Services.Client.Classes
 
         private string LookupFilePath(string filePath)
         {
+            filePath = filePath ?? DefaultSplitFileName;
+
             var filePathLowerCase = filePath.ToLower();
 
             if (filePathLowerCase.Equals(DefaultSplitFileName))
@@ -94,12 +124,6 @@ namespace Splitio.Services.Client.Classes
         {
             this.splitter = splitter ?? new Splitter();
         }
-
-        public override void Destroy()
-        {
-            _watcher.Dispose();
-            splitCache.Clear();
-            Destroyed = true;
-        }
+        #endregion
     }
 }
