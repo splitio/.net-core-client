@@ -75,7 +75,7 @@ namespace Splitio.Services.Shared.Classes
         private string SplitSdkVersion()
         {
 #if NETSTANDARD
-            return typeof(Version).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 #endif
