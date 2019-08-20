@@ -19,9 +19,6 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -31,7 +28,6 @@ namespace Splitio.Services.Client.Classes
         private static string BaseUrl;
         private static int SplitsRefreshRate;
         private static int SegmentRefreshRate;
-        private static string HttpEncoding;
         private static long HttpConnectionTimeout;
         private static long HttpReadTimeout;
         private static string SdkVersion;
@@ -130,33 +126,14 @@ namespace Splitio.Services.Client.Classes
             EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? "https://events.split.io" : config.EventsEndpoint;
             SplitsRefreshRate = config.FeaturesRefreshRate ?? 5;
             SegmentRefreshRate = config.SegmentsRefreshRate ?? 60;
-            HttpEncoding = "gzip";
             HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
             HttpReadTimeout = config.ReadTimeout ?? 15000;
-            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
-            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
 
-            try
-            {
-                SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
-            }
-            catch (Exception e)
-            {
-                SdkMachineName = "unknown";
-                _log.Warn("Exception retrieving machine name.", e);
-            }
-
-            try
-            {
-                var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                hostAddressesTask.Wait();
-                SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
-            }
-            catch (Exception e)
-            {
-                SdkMachineIP = "unknown";
-                _log.Warn("Exception retrieving machine IP.", e);
-            }
+            var data = _wrapperAdapter.ReadConfig(config, _log);
+            SdkVersion = data.SdkVersion;
+            SdkSpecVersion = data.SdkSpecVersion;
+            SdkMachineName = data.SdkMachineName;
+            SdkMachineIP = data.SdkMachineIP;
 
             RandomizeRefreshRates = config.RandomizeRefreshRates;
             BlockMilisecondsUntilReady = config.Ready ?? 0;
@@ -170,23 +147,6 @@ namespace Splitio.Services.Client.Classes
             MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
             LabelsEnabled = config.LabelsEnabled ?? true;
-        }
-
-        private void LaunchTaskSchedulerOnReady()
-        {
-            Task workerTask = Task.Factory.StartNew(
-                () => {
-                    while (true)
-                    {
-                        if (gates.IsSDKReady(0))
-                        {
-                            selfRefreshingSegmentFetcher.StartScheduler();
-                            break;
-                        }
-
-                        Task.Delay(500).Wait();
-                    }
-                });
         }
 
         private void BuildSplitter()
@@ -272,6 +232,23 @@ namespace Splitio.Services.Client.Classes
         {
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(gates, splitFetcher, selfRefreshingSegmentFetcher, treatmentLog, eventLog, _log);
         }
-        #endregion
+
+        private void LaunchTaskSchedulerOnReady()
+        {
+            Task workerTask = Task.Factory.StartNew(
+                () => {
+                    while (true)
+                    {
+                        if (gates.IsSDKReady(0))
+                        {
+                            selfRefreshingSegmentFetcher.StartScheduler();
+                            break;
+                        }
+
+                        _wrapperAdapter.TaskDelay(500).Wait();
+                    }
+                });
+        }
+#endregion
     }
 }

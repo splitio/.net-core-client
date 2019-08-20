@@ -12,6 +12,18 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class SelfRefreshingSegmentFetcherTests
     {
+        private readonly string rootFilePath;
+
+        public SelfRefreshingSegmentFetcherTests()
+        {
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
+
         [TestMethod]
         [DeploymentItem(@"Resources\segment_payed.json")]
         public void ExecuteGetSuccessfulWithResultsFromJSONFile()
@@ -19,7 +31,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
-            var segmentFetcher = new JSONFileSegmentFetcher(@"Resources\segment_payed.json", segmentCache);
+            var segmentFetcher = new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache);
 
             //Act
             segmentFetcher.InitializeSegment("payed");

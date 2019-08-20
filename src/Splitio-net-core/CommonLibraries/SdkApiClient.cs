@@ -17,6 +17,9 @@ namespace Splitio.CommonLibraries
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)
         {
+#if NETFRAMEWORK
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+#endif
             var handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate

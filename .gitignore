@@ -19,5 +19,11 @@ Splitio-net-core.Redis/bin/
 .vs/Split.io-net-core/v15/Server/sqlite3/storage.ide-shm
 .vs/Split.io-net-core/v15/Server/sqlite3/storage.ide
 .vs/Split.io-net-core/v15/Server/sqlite3/db.lock
+/Splitio-net-core-tests/TestResults
+/Splitio-net-frameworks-tests/bin/Debug
+/Splitio-net-frameworks-tests/obj/Debug
+/Splitio-net-frameworks-tests/Splitio-net-frameworks-tests.csproj.user
 /.vs
 *.user
+Splitio-net-frameworks-tests/bin/
+Splitio-net-frameworks-tests/obj/

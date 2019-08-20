@@ -2,6 +2,8 @@
 using Splitio.CommonLibraries;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +20,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private readonly IReadinessGatesCache gates;
         private readonly int interval;
         private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private readonly IWrapperAdapter _wrappedAdapter;
 
         public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates, int interval, ISegmentCache segmentsCache, int numberOfParallelSegments) : base(segmentsCache)
         {
@@ -26,6 +29,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
             worker = new SegmentTaskWorker(numberOfParallelSegments);
             this.interval = interval;
             this.gates = gates;
+            _wrappedAdapter = new WrapperAdapter();
+
             StartWorker();
         }
 
@@ -47,7 +52,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
         public void StartScheduler()
         {
             //Delay first execution until expected time has passed
-            Task.Delay(interval * 1000).Wait();
+            _wrappedAdapter.TaskDelay(interval * 1000).Wait();
+
             Task schedulerTask = PeriodicTaskFactory.Start(
                     () => AddSegmentsToQueue(),
                     intervalInMilliseconds: interval * 1000,

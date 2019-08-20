@@ -7,15 +7,12 @@ namespace Splitio.Services.Parsing.Classes
 {
     public class MatchesStringMatcher : BaseMatcher, IMatcher
     {
-        string value;
         Regex regex;
-
 
         public MatchesStringMatcher(string pattern)
         {
             regex = new Regex(pattern);
         }
-
 
         public override bool Match(string key, Dictionary<string, object> attributes = null, Client.Interfaces.ISplitClient splitClient = null)
         {

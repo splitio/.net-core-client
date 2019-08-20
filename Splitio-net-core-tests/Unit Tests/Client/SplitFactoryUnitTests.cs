@@ -10,6 +10,18 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitFactoryUnitTests
     {
+        private readonly string rootFilePath;
+
+        public SplitFactoryUnitTests()
+        {
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
+
         [TestMethod]
         [ExpectedException(typeof(TimeoutException), "SDK was not ready in 1 miliseconds")]
         public void BuildSplitClientShouldReturnClientDestroyed()
@@ -39,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientWithLocalhostApiKeyShouldReturnLocalhostClient()
         {
             //Arrange
-            var options = new ConfigurationOptions() { LocalhostFilePath = @"Resources\test.splits" };
+            var options = new ConfigurationOptions() { LocalhostFilePath = $"{rootFilePath}test.splits" };
             var factory = new SplitFactory("localhost", options);
 
             //Act         
@@ -142,7 +154,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yaml",
+                LocalhostFilePath = $"{rootFilePath}split.yaml",
                 Ready = 500
             };
 
@@ -181,7 +193,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yml",
+                LocalhostFilePath = $"{rootFilePath}split.yml",
                 Ready = 500
             };
 

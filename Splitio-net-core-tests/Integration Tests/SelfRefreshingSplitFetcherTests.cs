@@ -14,6 +14,18 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class SelfRefreshingSplitFetcherTests
     {
+        private readonly string rootFilePath;
+
+        public SelfRefreshingSplitFetcherTests()
+        {
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
+
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
@@ -22,8 +34,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher(@"Resources\segment_payed.json", segmentCache), segmentCache);
-            var splitChangeFetcher = new JSONFileSplitChangeFetcher(@"Resources\splits_staging.json");
+            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
+            var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging.json");
             var splitChangesResult = splitChangeFetcher.Fetch(-1);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();
@@ -47,8 +59,8 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher(@"Resources\segment_payed.json", segmentCache), segmentCache);
-            var splitChangeFetcher = new JSONFileSplitChangeFetcher(@"Resources\splits_staging_4.json");
+            var splitParser = new InMemorySplitParser(new JSONFileSegmentFetcher($"{rootFilePath}segment_payed.json", segmentCache), segmentCache);
+            var splitChangeFetcher = new JSONFileSplitChangeFetcher($"{rootFilePath}splits_staging_4.json");
             var splitChangesResult = splitChangeFetcher.Fetch(-1);
             var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
             var gates = new InMemoryReadinessGatesCache();

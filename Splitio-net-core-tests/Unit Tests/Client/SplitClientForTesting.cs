@@ -21,10 +21,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             splitCache = _splitCache;
             splitter = _splitter;
             eventListener = _eventListener;
-            _blockUntilReadyService = blockUntilReadyService;
-
-            _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);
             impressionListener = _impressionListener;
+            _blockUntilReadyService = blockUntilReadyService;
+            _trafficTypeValidator = new TrafficTypeValidator(_log, _splitCache);            
 
             ApiKey = "SplitClientForTesting";
         }

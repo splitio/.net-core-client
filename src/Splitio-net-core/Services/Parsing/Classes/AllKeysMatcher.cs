@@ -20,7 +20,7 @@ namespace Splitio.Services.Parsing
 
         public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
         {
-            return key != null;
+            return true;
         }
 
         public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)

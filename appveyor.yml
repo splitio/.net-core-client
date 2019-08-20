@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 5.0.0
+version: 5.0.1-rc{build}
 
 dotnet_csproj:
   patch: true
@@ -17,13 +17,12 @@ before_build:
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
-build: off
-
 build_script:
  - dotnet build --configuration Release
  
 after_build:
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
@@ -33,7 +32,7 @@ test: off
 
 artifacts:
  - path: '**\Splitio-net-core.*.nupkg'
-   name: splitio-net-core-nuget
+   name: splitio-nuget
 
 deploy:
  - provider: Environment

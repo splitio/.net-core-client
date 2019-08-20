@@ -13,8 +13,6 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -24,7 +22,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private RedisAdapter redisAdapter;
         private IListener<IList<KeyImpression>> impressionListenerRedis;
         private ISimpleCache<IList<KeyImpression>> impressionsCacheRedis;
-
+        
         private static string SdkVersion;
         private static string SdkSpecVersion;
         private static string SdkMachineName;
@@ -108,30 +106,11 @@ namespace Splitio.Redis.Services.Client.Classes
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {
-            SdkVersion = ".NET_CORE-" + Version.SplitSdkVersion;
-            SdkSpecVersion = ".NET-" + Version.SplitSpecVersion;
-
-            try
-            {
-                SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
-            }
-            catch (Exception e)
-            {
-                SdkMachineName = "unknown";
-                _log.Warn("Exception retrieving machine name.", e);
-            }
-
-            try
-            {
-                var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                hostAddressesTask.Wait();
-                SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
-            }
-            catch (Exception e)
-            {
-                SdkMachineIP = "unknown";
-                _log.Warn("Exception retrieving machine IP.", e);
-            }
+            var data = _wrapperAdapter.ReadConfig(config, _log);
+            SdkVersion = data.SdkVersion;
+            SdkSpecVersion = data.SdkSpecVersion;
+            SdkMachineName = data.SdkMachineName;
+            SdkMachineIP = data.SdkMachineIP;
 
             RedisHost = config.CacheAdapterConfig.Host;
             RedisPort = config.CacheAdapterConfig.Port;

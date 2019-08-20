@@ -7,13 +7,14 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Events.Classes
 {
     public class SelfUpdatingEventLog : IListener<WrappedEvent>
     {
         public static long MAX_SIZE_BYTES = 5 * 1024 * 1024L;
+
+        private readonly IWrapperAdapter _wrapperAdapter;
 
         private long AcumulateSize;
         private int interval;
@@ -30,14 +31,18 @@ namespace Splitio.Services.Events.Classes
             this.apiClient = apiClient;
             this.interval = interval;
             this.firstPushWindow = firstPushWindow;
+
+            _wrapperAdapter = new WrapperAdapter();
         }
 
         public void Start()
         {
-            Task.Delay(firstPushWindow * 1000).ContinueWith((t) => {
-                SendBulkEvents();
-                PeriodicTaskFactory.Start(() => { SendBulkEvents(); }, interval * 1000, cancellationTokenSource.Token);
-            });
+            _wrapperAdapter
+                .TaskDelay(firstPushWindow * 1000)
+                .ContinueWith((t) => {
+                    SendBulkEvents();
+                    PeriodicTaskFactory.Start(() => { SendBulkEvents(); }, interval * 1000, cancellationTokenSource.Token);
+                });
         }
 
         public void Stop()
@@ -45,7 +50,6 @@ namespace Splitio.Services.Events.Classes
             cancellationTokenSource.Cancel();
             SendBulkEvents();
         }
-
 
         private void SendBulkEvents()
         {

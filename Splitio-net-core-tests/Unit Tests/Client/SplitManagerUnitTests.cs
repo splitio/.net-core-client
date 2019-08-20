@@ -15,9 +15,18 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
 
+        private readonly string rootFilePath;
+
         public SplitManagerUnitTests()
         {
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
+
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
         }
 
         [TestMethod]
@@ -544,7 +553,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yaml",
+                LocalhostFilePath = $"{rootFilePath}split.yaml",
                 Ready = 500
             };
 
@@ -584,7 +593,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yaml",
+                LocalhostFilePath = $"{rootFilePath}split.yaml",
                 Ready = 500
             };
 
@@ -625,7 +634,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yaml",
+                LocalhostFilePath = $"{rootFilePath}split.yaml",
                 Ready = 500
             };
 
@@ -674,7 +683,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = @"Resources\split.yaml",
+                LocalhostFilePath = $"{rootFilePath}split.yaml",
                 Ready = 500
             };
 
