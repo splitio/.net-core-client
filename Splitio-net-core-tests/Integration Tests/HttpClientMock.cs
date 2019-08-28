@@ -1,4 +1,6 @@
 ﻿#if !NET45
+using Splitio_Tests.Resources;
+using System.IO;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
@@ -7,34 +9,106 @@ namespace Splitio_Tests.Integration_Tests
 {
     public class HttpClientMock
     {
-        private readonly FluentMockServer _server;
+        private readonly FluentMockServer _mockServer;
 
-        public HttpClientMock()
+        public HttpClientMock(int port)
         {
-            _server = FluentMockServer.Start(50286);
+            _mockServer = FluentMockServer.Start(port);
         }
 
-        public void SplitChangesEndpointMock(int statusCodeExpected)
+        #region SplitChanges
+        public void SplitChangesOk(string fileName, string since)
         {
-            var body = statusCodeExpected == 200
-                ? @"{ msg: ""Hello world!""}"
-                : "";
+            string json = File.ReadAllText($"Resources\\{fileName}");
 
-            _server
+            _mockServer
                 .Given(
                     Request.Create()
-                    .WithPath("/api/splitChanges?since=-1")
+                    .WithPath("/api/splitChanges")
+                    .WithParam("since", since)
                     .UsingGet()
                 )
                 .RespondWith(
                     Response.Create()
-                    .WithStatusCode(statusCodeExpected)
+                    .WithStatusCode(200)
+                    .WithBody(json));
+        }
+
+        public void SplitChangesError(StatusCodeEnum statusCode)
+        {
+            var body = string.Empty;
+
+            switch (statusCode)
+            {
+                case StatusCodeEnum.BadRequest:
+                    body = "Bad Request";
+                    break;
+                case StatusCodeEnum.InternalServerError:
+                    body = "Internal Server Error";
+                    break;
+            }
+
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath("/api/splitChanges*")
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode((int)statusCode)
                     .WithBody(body));
         }
+        #endregion
+
+        #region SegmentChanges
+        public void SegmentChangesOk(string since, string segmentName)
+        {
+            string json = File.ReadAllText($"Resources\\split_{segmentName}.json");
+
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath($"/api/segmentChanges/{segmentName}")
+                    .WithParam("since", since)
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(200)
+                    .WithBody(json));
+        }
+
+        public void SegmentChangesError(StatusCodeEnum statusCode)
+        {
+            var body = string.Empty;
+
+            switch (statusCode)
+            {
+                case StatusCodeEnum.BadRequest:
+                    body = "Bad Request";
+                    break;
+                case StatusCodeEnum.InternalServerError:
+                    body = "Internal Server Error";
+                    break;
+            }
+
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .WithPath($"/api/segmentChanges*")
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode((int)statusCode)
+                    .WithBody(body));
+        }
+        #endregion
 
         public void ShutdownServer()
         {
-            _server.Stop();
+            _mockServer.Stop();
         }
     }
 }
