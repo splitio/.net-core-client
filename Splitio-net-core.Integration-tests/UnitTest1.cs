@@ -1,8 +1,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
+using Splitio_net_core.Integration_tests.Resources;
 
 namespace Splitio_net_core.Integration_tests
 {
+    //This class is just to test the 'http client mock' implementation.
     [TestClass]
     public class UnitTest1
     {
@@ -12,7 +14,7 @@ namespace Splitio_net_core.Integration_tests
         [DeploymentItem(@"Resources\split_segment1.json")]
         [DeploymentItem(@"Resources\split_segment2.json")]
         [DeploymentItem(@"Resources\split_segment3.json")]
-        public void Test1()
+        public void Test_WhenSdkIsReady()
         {
             // Arrange. 
             var httpClientMock = new HttpClientMock();
@@ -47,6 +49,88 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
+            client.BlockUntilReady(10000);            
+
+            var manager = client.GetSplitManager();
+
+            //Act
+            var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
+            var splits = manager.SplitNames();
+
+            Assert.AreEqual("off", treatment);
+            Assert.AreEqual(29, splits.Count);
+
+            httpClientMock.ShutdownServer();
+        }
+
+        [TestMethod]
+        public void Test_WhenSdkIsnotReady_SplitChangesReturn400()
+        {
+            // Arrange. 
+            var httpClientMock = new HttpClientMock();
+
+            httpClientMock.SplitChangesError(StatusCodeEnum.BadRequest);
+            
+            var apikey = "chirimbolito";
+
+            var port = httpClientMock.GetPort();
+
+            var configurations = new ConfigurationOptions
+            {
+                FeaturesRefreshRate = 30,
+                SegmentsRefreshRate = 30,
+                Endpoint = $"http://localhost:{port}",
+                EventsEndpoint = $"http://localhost:{port}",
+                ReadTimeout = 20000,
+                ConnectionTimeout = 20000,
+                ImpressionsRefreshRate = 15
+            };
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            try
+            {
+                client.BlockUntilReady(10000);
+            } catch { }
+
+            var manager = client.GetSplitManager();
+
+            //Act
+            var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
+            var splits = manager.SplitNames();
+
+            Assert.AreEqual("control", treatment);
+
+            httpClientMock.ShutdownServer();
+        }
+
+        [TestMethod]
+        public void Test_WhenSdkIsnotReady_SegmentChangesReturn500()
+        {
+            // Arrange. 
+            var httpClientMock = new HttpClientMock();
+
+            httpClientMock.SegmentChangesError(StatusCodeEnum.InternalServerError);
+
+            var apikey = "chirimbolito";
+
+            var port = httpClientMock.GetPort();
+
+            var configurations = new ConfigurationOptions
+            {
+                FeaturesRefreshRate = 30,
+                SegmentsRefreshRate = 30,
+                Endpoint = $"http://localhost:{port}",
+                EventsEndpoint = $"http://localhost:{port}",
+                ReadTimeout = 20000,
+                ConnectionTimeout = 20000,
+                ImpressionsRefreshRate = 15
+            };
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
             try
             {
                 client.BlockUntilReady(10000);
@@ -59,8 +143,7 @@ namespace Splitio_net_core.Integration_tests
             var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
             var splits = manager.SplitNames();
 
-            Assert.AreEqual("off", treatment);
-            Assert.AreEqual(29, splits.Count);
+            Assert.AreEqual("control", treatment);
 
             httpClientMock.ShutdownServer();
         }

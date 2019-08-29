@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net472;net471;net47;net462;net461;net46;net452;net451;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0</TargetFrameworks>
     <RootNamespace>Splitio_net_core.Integration_tests</RootNamespace>
 
     <IsPackable>false</IsPackable>
@@ -14,7 +14,7 @@
     <PackageReference Include="WireMock.Net" Version="1.0.29" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) ">
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Splitio-net-core.Redis\Splitio.Redis.csproj" />
     <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
   </ItemGroup>
 

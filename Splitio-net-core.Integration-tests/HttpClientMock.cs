@@ -1,4 +1,4 @@
-﻿using Splitio_Tests.Resources;
+﻿using Splitio_net_core.Integration_tests.Resources;
 using System.IO;
 using System.Linq;
 using WireMock.RequestBuilders;

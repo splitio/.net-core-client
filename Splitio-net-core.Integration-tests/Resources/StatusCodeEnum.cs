@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Splitio_Tests.Resources
+﻿namespace Splitio_net_core.Integration_tests.Resources
 {
     public enum StatusCodeEnum
     {
