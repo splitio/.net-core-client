@@ -4,38 +4,22 @@ using Splitio.Services.Client.Classes;
 
 namespace Splitio_Tests.Integration_Tests
 {
+    // This class is only for test the http client implementation. 
     [TestClass]
     public class IntegrationsTests
     {
-        private readonly SplitFactory _splitFactory;
-
-        public IntegrationsTests()
-        {
-            var apikey = "chirimbolito";
-            //var apikey = "mhfvtl3ilt6aeds8i1amn8qjssbdarlr76ju";
-
-            var configurations = new ConfigurationOptions
-            {
-                FeaturesRefreshRate = 30,
-                SegmentsRefreshRate = 30,
-                Endpoint = "http://localhost:50286",
-                EventsEndpoint = "http://localhost:50286",
-                //Endpoint = "https://sdk.split-stage.io",
-                //EventsEndpoint = "https://events.split-stage.io",
-                ReadTimeout = 20000,
-                ConnectionTimeout = 20000,
-                ImpressionsRefreshRate = 15
-            };
-
-            _splitFactory = new SplitFactory(apikey, configurations);
-        }
-
         [TestMethod]
+        [DeploymentItem(@"Resources\split_changes.json")]
+        [DeploymentItem(@"Resources\split_changes_1.json")]
+        [DeploymentItem(@"Resources\split_segment1.json")]
+        [DeploymentItem(@"Resources\split_segment2.json")]
+        [DeploymentItem(@"Resources\split_segment3.json")]
         public void Test1()
         {
-            var httpClientMock = new HttpClientMock(50286);
+            // Arrange. 
+            var httpClientMock = new HttpClientMock();
 
-            httpClientMock.SplitChangesOk("split_changes.json","-1");
+            httpClientMock.SplitChangesOk("split_changes.json", "-1");
             httpClientMock.SplitChangesOk("split_changes_1.json", "1506703262916");
 
             httpClientMock.SegmentChangesOk("-1", "segment1");
@@ -47,8 +31,44 @@ namespace Splitio_Tests.Integration_Tests
             httpClientMock.SegmentChangesOk("-1", "segment3");
             httpClientMock.SegmentChangesOk("1470947453879", "segment3");
 
-            var client = _splitFactory.Client();
-            client.BlockUntilReady(100000);
+            var prueba = string.Empty;
+
+#if NETFRAMEWORK
+            prueba = "NETFRAMEWORK";
+#endif
+
+            var apikey = "chirimbolito";
+
+            var port = httpClientMock.GetPort();
+
+            var configurations = new ConfigurationOptions
+            {
+                FeaturesRefreshRate = 30,
+                SegmentsRefreshRate = 30,
+                Endpoint = $"http://localhost:{port}",
+                EventsEndpoint = $"http://localhost:{port}",
+                ReadTimeout = 20000,
+                ConnectionTimeout = 20000,
+                ImpressionsRefreshRate = 15
+            };
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            try
+            {
+                client.BlockUntilReady(10000);
+            }
+            catch { }
+
+            var manager = client.GetSplitManager();
+
+            //Act
+            var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
+            var splits = manager.SplitNames();
+
+            Assert.AreEqual("off", treatment);
+            Assert.AreEqual(29, splits.Count);
 
             httpClientMock.ShutdownServer();
         }

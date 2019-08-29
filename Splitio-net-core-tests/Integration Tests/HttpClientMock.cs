@@ -1,6 +1,7 @@
 ﻿#if !NET45
 using Splitio_Tests.Resources;
 using System.IO;
+using System.Linq;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
@@ -10,16 +11,22 @@ namespace Splitio_Tests.Integration_Tests
     public class HttpClientMock
     {
         private readonly FluentMockServer _mockServer;
+        private readonly string rootFilePath;
 
-        public HttpClientMock(int port)
+        public HttpClientMock()
         {
-            _mockServer = FluentMockServer.Start(port);
+            rootFilePath = string.Empty;
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+
+            _mockServer = FluentMockServer.Start();
         }
 
-        #region SplitChanges
+        #region SplitChanges        
         public void SplitChangesOk(string fileName, string since)
         {
-            string json = File.ReadAllText($"Resources\\{fileName}");
+            string jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
 
             _mockServer
                 .Given(
@@ -31,7 +38,7 @@ namespace Splitio_Tests.Integration_Tests
                 .RespondWith(
                     Response.Create()
                     .WithStatusCode(200)
-                    .WithBody(json));
+                    .WithBody(jsonBody));
         }
 
         public void SplitChangesError(StatusCodeEnum statusCode)
@@ -61,10 +68,10 @@ namespace Splitio_Tests.Integration_Tests
         }
         #endregion
 
-        #region SegmentChanges
+        #region SegmentChanges        
         public void SegmentChangesOk(string since, string segmentName)
         {
-            string json = File.ReadAllText($"Resources\\split_{segmentName}.json");
+            string json = File.ReadAllText($"{rootFilePath}split_{segmentName}.json");
 
             _mockServer
                 .Given(
@@ -109,6 +116,11 @@ namespace Splitio_Tests.Integration_Tests
         public void ShutdownServer()
         {
             _mockServer.Stop();
+        }
+
+        public int GetPort()
+        {
+            return _mockServer.Ports.First();
         }
     }
 }

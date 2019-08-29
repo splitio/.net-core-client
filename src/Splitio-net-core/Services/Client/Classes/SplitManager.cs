@@ -101,7 +101,7 @@ namespace Splitio.Services.Client.Classes
 
             var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
 
-            return currentSplits.Select(x => x.name).ToList();
+            return currentSplits.Select(x => x?.name).ToList();
         }
 
         private bool IsSdkReady(string methodName)
