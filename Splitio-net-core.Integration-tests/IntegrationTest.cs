@@ -53,10 +53,11 @@ namespace Splitio_net_core.Integration_tests
 
             var manager = client.GetSplitManager();
 
-            //Act
+            // Act.
             var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
             var splits = manager.SplitNames();
 
+            // Assert.
             Assert.AreEqual("off", treatment);
             Assert.AreEqual(29, splits.Count);
 
@@ -96,10 +97,11 @@ namespace Splitio_net_core.Integration_tests
 
             var manager = client.GetSplitManager();
 
-            //Act
+            // Act.
             var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
             var splits = manager.SplitNames();
 
+            // Assert.
             Assert.AreEqual("control", treatment);
 
             httpClientMock.ShutdownServer();
@@ -139,10 +141,11 @@ namespace Splitio_net_core.Integration_tests
 
             var manager = client.GetSplitManager();
 
-            //Act
+            // Act.
             var treatment = client.GetTreatment("mauro", "FACUNDO_TEST");
             var splits = manager.SplitNames();
 
+            // Assert.
             Assert.AreEqual("control", treatment);
 
             httpClientMock.ShutdownServer();
