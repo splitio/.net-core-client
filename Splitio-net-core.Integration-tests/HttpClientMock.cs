@@ -1,12 +1,11 @@
-﻿#if !NET45
-using Splitio_Tests.Resources;
+﻿using Splitio_Tests.Resources;
 using System.IO;
 using System.Linq;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
-namespace Splitio_Tests.Integration_Tests
+namespace Splitio_net_core.Integration_tests
 {
     public class HttpClientMock
     {
@@ -16,6 +15,7 @@ namespace Splitio_Tests.Integration_Tests
         public HttpClientMock()
         {
             rootFilePath = string.Empty;
+
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif
@@ -124,4 +124,3 @@ namespace Splitio_Tests.Integration_Tests
         }
     }
 }
-#endif

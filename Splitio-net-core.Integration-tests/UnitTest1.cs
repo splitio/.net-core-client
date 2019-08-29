@@ -1,12 +1,10 @@
-﻿#if !NET45
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.Client.Classes;
 
-namespace Splitio_Tests.Integration_Tests
+namespace Splitio_net_core.Integration_tests
 {
-    // This class is only for test the http client implementation. 
     [TestClass]
-    public class IntegrationsTests
+    public class UnitTest1
     {
         [TestMethod]
         [DeploymentItem(@"Resources\split_changes.json")]
@@ -30,12 +28,6 @@ namespace Splitio_Tests.Integration_Tests
 
             httpClientMock.SegmentChangesOk("-1", "segment3");
             httpClientMock.SegmentChangesOk("1470947453879", "segment3");
-
-            var prueba = string.Empty;
-
-#if NETFRAMEWORK
-            prueba = "NETFRAMEWORK";
-#endif
 
             var apikey = "chirimbolito";
 
@@ -74,4 +66,3 @@ namespace Splitio_Tests.Integration_Tests
         }
     }
 }
-#endif
