@@ -62,6 +62,7 @@ after_build:
  - redis-server --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
+ - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
  - dotnet pack .\Splitio.TestSupport --configuration Release
