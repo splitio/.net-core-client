@@ -6,7 +6,7 @@ namespace Splitio_net_core.Integration_tests
 {
     //This class is just to test the 'http client mock' implementation.
     [TestClass]
-    public class UnitTest1
+    public class IntegrationTest
     {
         [TestMethod]
         [DeploymentItem(@"Resources\split_changes.json")]
