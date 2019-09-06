@@ -45,7 +45,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                     if (response.added.Count() > 0 || response.removed.Count() > 0)
                     {
-
                         segmentCache.AddToSegment(name, response.added);
                         segmentCache.RemoveFromSegment(name, response.removed);
 

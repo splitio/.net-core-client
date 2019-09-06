@@ -27,3 +27,5 @@ Splitio-net-core.Redis/bin/
 *.user
 Splitio-net-frameworks-tests/bin/
 Splitio-net-frameworks-tests/obj/
+/Splitio-net-core.Integration-tests/bin
+/Splitio-net-core.Integration-tests/obj
