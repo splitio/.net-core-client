@@ -31,7 +31,7 @@ namespace Splitio_net_core.Integration_tests
             httpClientMock.SegmentChangesOk("-1", "segment3");
             httpClientMock.SegmentChangesOk("1470947453879", "segment3");
 
-            var apikey = "chirimbolito";
+            var apikey = "apikey1";
 
             var port = httpClientMock.GetPort();
 
@@ -72,7 +72,7 @@ namespace Splitio_net_core.Integration_tests
 
             httpClientMock.SplitChangesError(StatusCodeEnum.BadRequest);
             
-            var apikey = "chirimbolito";
+            var apikey = "apikey2";
 
             var port = httpClientMock.GetPort();
 
@@ -115,7 +115,7 @@ namespace Splitio_net_core.Integration_tests
 
             httpClientMock.SegmentChangesError(StatusCodeEnum.InternalServerError);
 
-            var apikey = "chirimbolito";
+            var apikey = "apikey3";
 
             var port = httpClientMock.GetPort();
 
