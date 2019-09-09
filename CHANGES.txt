@@ -1,5 +1,9 @@
 CHANGES
 
+5.0.1
+- Added HttpClientMock for improved Integration Tests.
+- Merged NET and NET Core repositories to improved our productivity and code.
+
 5.0.0
 - BREAKING CHANGE: Moving block until ready out of the factory into the split client and manager client.
 - Added validation for traffic type name when calling track.
