@@ -5,6 +5,7 @@ using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Client.Classes;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Shared.Classes;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 

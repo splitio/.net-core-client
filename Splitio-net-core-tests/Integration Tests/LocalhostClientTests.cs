@@ -113,7 +113,6 @@ namespace Splitio_Tests.Integration_Tests
             Assert.AreEqual(resultDestroy2.Count, 0);
             Assert.AreEqual(resultDestroy3.Count, 0);
             Assert.IsTrue(resultDestroy4 == null);
-
         }
 
         [DeploymentItem(@"Resources\split.yaml")]

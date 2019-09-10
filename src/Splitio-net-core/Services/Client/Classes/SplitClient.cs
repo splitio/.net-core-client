@@ -23,6 +23,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
+        protected readonly ITrafficTypeValidator _trafficTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
         protected const string Control = "control";
@@ -63,6 +64,7 @@ namespace Splitio.Services.Client.Classes
             _keyValidator = new KeyValidator(_log);
             _splitNameValidator = new SplitNameValidator(_log);
             _eventTypeValidator = new EventTypeValidator(_log);
+            _trafficTypeValidator = new TrafficTypeValidator(_log);
             _eventPropertiesValidator = new EventPropertiesValidator(_log);
             _factoryInstantiationsService = FactoryInstantiationsService.Instance(log);
             _wrapperAdapter = new WrapperAdapter();

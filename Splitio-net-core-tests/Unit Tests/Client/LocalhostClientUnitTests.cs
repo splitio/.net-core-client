@@ -86,8 +86,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Assert
             Assert.IsTrue(splitClient.IsDestroyed());
-            Assert.IsFalse(result.IsEmpty);
-            
+            Assert.IsFalse(result.IsEmpty);            
         }
 
         [TestMethod]
