@@ -1,4 +1,4 @@
-﻿using Common.Logging;
+using Common.Logging;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
