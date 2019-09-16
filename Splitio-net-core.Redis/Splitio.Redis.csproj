@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net40</TargetFrameworks>
@@ -28,10 +28,7 @@
     <PackageReference Include="StackExchange.Redis.StrongName" version="1.2.1" />
     <PackageReference Include="Microsoft.Bcl" version="1.1.10" />
     <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />    
+    <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />
   </ItemGroup>
 
   <ItemGroup>
