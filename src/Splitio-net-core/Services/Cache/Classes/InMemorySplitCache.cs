@@ -88,16 +88,16 @@ namespace Splitio.Services.Cache.Classes
             return _changeNumber;
         }
 
-        public SplitBase GetSplit(string splitName)
+        public ParsedSplit GetSplit(string splitName)
         {
             _splits.TryGetValue(splitName, out ParsedSplit value);
 
             return value;
         }
 
-        public List<SplitBase> GetAllSplits()
+        public List<ParsedSplit> GetAllSplits()
         {            
-            return _splits.Values.ToList<SplitBase>();            
+            return _splits.Values.ToList();
         }
 
         public void Clear()

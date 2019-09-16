@@ -2,7 +2,7 @@
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Parsing;
+using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,13 +17,16 @@ namespace Splitio.Services.SplitFetcher.Classes
         protected ISplitCache splitCache;
         private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher));
         private readonly ISplitChangeFetcher splitChangeFetcher;
-        private readonly SplitParser splitParser;
+        private readonly ISplitParser splitParser;
         private readonly int interval;
         private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         private readonly IReadinessGatesCache gates;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
-            SplitParser splitParser, IReadinessGatesCache gates, int interval, ISplitCache splitCache = null)
+            ISplitParser splitParser, 
+            IReadinessGatesCache gates, 
+            int interval, 
+            ISplitCache splitCache = null)
         {
             this.splitChangeFetcher = splitChangeFetcher;
             this.splitParser = splitParser;

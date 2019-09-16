@@ -1,4 +1,4 @@
-﻿using Splitio.Services.Client.Interfaces;
+﻿using Splitio.Services.Evaluator;
 using Splitio.Services.Parsing;
 using System.Collections.Generic;
 
@@ -10,11 +10,11 @@ namespace Splitio.Domain
         public IMatcher matcher { get; set; }
         public bool negate { get; set; }
 
-        public virtual bool Match(Key key, Dictionary<string, object> attributes, ISplitClient splitClient = null)
+        public virtual bool Match(Key key, Dictionary<string, object> attributes, IEvaluator evaluator = null)
         {
             if (attribute == null)
             {
-                return (negate ^ matcher.Match(key, attributes, splitClient));
+                return (negate ^ matcher.Match(key, attributes, evaluator));
             }
 
             if (attributes == null)
@@ -22,15 +22,14 @@ namespace Splitio.Domain
                 return false;
             }
 
-            object value;
-            attributes.TryGetValue(attribute, out value);
+            attributes.TryGetValue(attribute, out object value);
 
             if (value == null)
             {
                 return false;
             }
 
-            return (negate ^ matcher.Match(value, attributes, splitClient));
+            return (negate ^ matcher.Match(value, attributes, evaluator));
         }
     }
 }

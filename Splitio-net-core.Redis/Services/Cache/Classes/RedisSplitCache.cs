@@ -2,6 +2,7 @@
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,9 +13,15 @@ namespace Splitio.Redis.Services.Cache.Classes
         private const string splitKeyPrefix = "split.";
         private const string splitsKeyPrefix = "splits.";
 
-        public RedisSplitCache(IRedisAdapter redisAdapter, string userPrefix = null) 
+        private readonly ISplitParser _splitParser;
+
+        public RedisSplitCache(IRedisAdapter redisAdapter,
+            ISplitParser splitParser,
+            string userPrefix = null) 
             : base(redisAdapter, userPrefix)
-        { }
+        {
+            _splitParser = splitParser;
+        }
 
         public long GetChangeNumber()
         {
@@ -25,28 +32,35 @@ namespace Splitio.Redis.Services.Cache.Classes
             return result ? changeNumberParsed : -1;
         }
 
-        public SplitBase GetSplit(string splitName)
+        public ParsedSplit GetSplit(string splitName)
         {
             var key = redisKeyPrefix + splitKeyPrefix + splitName;
             var splitJson = redisAdapter.Get(key);
 
-            return !string.IsNullOrEmpty(splitJson) ? JsonConvert.DeserializeObject<Split>(splitJson) : null;
+            if (string.IsNullOrEmpty(splitJson))
+                return null;
+
+            var split = JsonConvert.DeserializeObject<Split>(splitJson);
+
+            return _splitParser.Parse(split);
         }
 
-        public List<SplitBase> GetAllSplits()
+        public List<ParsedSplit> GetAllSplits()
         {
             var pattern = redisKeyPrefix + splitKeyPrefix + "*";
             var splitKeys = redisAdapter.Keys(pattern);
             var splitValues = redisAdapter.Get(splitKeys);
 
-            if (splitValues != null && splitValues.Count()>0)
+            if (splitValues != null && splitValues.Any())
             {
-                var splits = splitValues.Where(x=>!x.IsNull).Select(x => JsonConvert.DeserializeObject<Split>(x));
+                var splits = splitValues
+                    .Where(x=>!x.IsNull)
+                    .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
 
-                return splits.Cast<SplitBase>().ToList();
+                return splits.ToList();
             }
             
-            return new List<SplitBase>();          
+            return new List<ParsedSplit>();
         }
 
         public List<string> GetKeys()
