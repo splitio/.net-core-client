@@ -17,7 +17,20 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class JSONFileClientTests
     {
-        private Mock<ILog> _logMock = new Mock<ILog>();
+        private readonly Mock<ILog> _logMock;
+        private readonly string rootFilePath;
+
+        public JSONFileClientTests()
+        {
+            _logMock = new Mock<ILog>();
+
+            // This line is to clean the warnings.
+            rootFilePath = string.Empty;
+
+#if NETCORE
+            rootFilePath = @"Resources\";
+#endif
+        }
 
         #region GetTreatment
         [TestMethod]
@@ -25,7 +38,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "fail", null);
@@ -40,7 +53,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnFailedParsingSplitShouldNotAffectOtherSplits()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -57,7 +70,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnDeletedSplitShouldReturnControl()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -81,7 +94,7 @@ namespace Splitio_Tests.Integration_Tests
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("test", "asd", null);
@@ -97,7 +110,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnRemovedUserFromSegmentShouldReturnOff()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", @"Resources\segment_payed.json", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", $"{rootFilePath}segment_payed.json", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -119,7 +132,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithOnOffOnPartition()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -143,7 +156,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocation()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -167,7 +180,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIsDifferentThan100()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -191,7 +204,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsRolloutTreatment()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_7.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -207,7 +220,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithTrafficAllocationWhenAllocationIs1ReturnsDefaultTreatment()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_7.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_7.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -223,7 +236,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentOnSplitWithSegmentNotInitialized()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -243,7 +256,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -260,7 +273,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -278,7 +291,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             //Act           
             client.RemoveSplitFromCache("asd");
@@ -303,7 +316,7 @@ namespace Splitio_Tests.Integration_Tests
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
             splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -320,7 +333,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -337,7 +350,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -354,7 +367,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             //Act           
             var result = client.GetTreatment("xs", "Unknown_Matcher", null);
@@ -369,7 +382,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, isLabelsEnabled: false);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, isLabelsEnabled: false);
 
             client.BlockUntilReady(1000);
 
@@ -386,7 +399,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -404,7 +417,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithBooleanAttribute()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_4.json", "", _logMock.Object, null, null);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_4.json", "", _logMock.Object, null, null);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("boolean_attribute", true);
@@ -424,7 +437,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithSetMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _logMock.Object);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("permissions", new List<string>() { "create" });
@@ -444,7 +457,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithSetMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _logMock.Object);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("permissions", new List<string>() { "execute" });
@@ -464,7 +477,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithStringMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _logMock.Object);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("st", "permission");
@@ -484,7 +497,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithStringMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _logMock.Object);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("st", "allow");
@@ -504,7 +517,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithDependencyMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -521,7 +534,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentWithDependencyMatcherReturnsOff()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -540,7 +553,7 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var queue = new BlockingQueue<KeyImpression>(10);
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(queue);
-            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", _logMock.Object, null, null, new SelfUpdatingTreatmentLog(null, 1000, impressionsCache));
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _logMock.Object, null, null, new SelfUpdatingTreatmentLog(null, 1000, impressionsCache));
 
             client.BlockUntilReady(1000);
 
@@ -561,7 +574,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             var splitName = "not_exist";
 
             client.BlockUntilReady(1000);
@@ -581,7 +594,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatment("key", "anding");
@@ -598,7 +611,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatments()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
             List<string> features = new List<string>();
             features.Add("fail");
             features.Add("asd");
@@ -625,7 +638,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithBucketing()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object);
             List<string> features = new List<string>();
             features.Add("fail");
             features.Add("asd");
@@ -653,7 +666,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithDependencyMatcherReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -674,7 +687,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ExecuteGetTreatmentsWithDependencyMatcherWithAttributesReturnsOn()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_6.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_6.json", "", _logMock.Object);
 
             client.BlockUntilReady(1000);
 
@@ -698,7 +711,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 
             client.BlockUntilReady(1000);
@@ -726,7 +739,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatments("key", new List<string>());
@@ -742,7 +755,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatments("key", new List<string> { "anding", "in_ten_keys" });
@@ -763,7 +776,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             client.BlockUntilReady(100);
 
             // Act.
@@ -780,7 +793,7 @@ namespace Splitio_Tests.Integration_Tests
         public void DestroySucessfully()
         {
             //Arrange
-            var client = new JSONFileClient(@"Resources\splits_staging_5.json", "", _logMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_5.json", "", _logMock.Object);
 
             var attributes = new Dictionary<string, object>();
             attributes.Add("permissions", new List<string>() { "execute" });
@@ -813,9 +826,10 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var eventListenerMock = new Mock<IListener<WrappedEvent>>();
+            var eventListenerMock = new Mock<IListener<WrappedEvent>>();            
             var trafficTypeValidator = new Mock<ITrafficTypeValidator>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, _eventListener: eventListenerMock.Object, trafficTypeValidator: trafficTypeValidator.Object);
+
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object, _eventListener: eventListenerMock.Object, trafficTypeValidator: trafficTypeValidator.Object);
 
             trafficTypeValidator
                 .Setup(mock => mock.IsValid(It.IsAny<string>(), It.IsAny<string>()))
@@ -836,7 +850,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             var splitName = "not_exist";
 
             client.BlockUntilReady(1000);
@@ -857,7 +871,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatmentWithConfig("key", "anding");
@@ -876,7 +890,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             var splitNames = new List<string> { "not_exist", "not_exist_1" };
 
             client.BlockUntilReady(1000);
@@ -902,7 +916,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("anding", new List<string>());
@@ -918,7 +932,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("key", new List<string> { "anding", "whitelisting_elements" });
@@ -941,7 +955,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             client.BlockUntilReady(100);
 
             // Act.
@@ -959,7 +973,7 @@ namespace Splitio_Tests.Integration_Tests
         {
             // Arrange.
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
-            var client = new JSONFileClient(@"Resources\splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
+            var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, null, treatmentLogMock.Object);
             var manager = client.GetSplitManager();
             var splitName = "not_exist";
 

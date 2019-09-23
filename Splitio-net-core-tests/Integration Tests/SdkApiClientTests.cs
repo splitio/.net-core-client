@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.CommonLibraries;
 using System.Net;
-
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -10,7 +10,7 @@ namespace Splitio_Tests.Integration_Tests
     {
         [TestMethod]
         [Ignore]
-        public async void ExecuteGetSuccessful()
+        public async Task ExecuteGetSuccessful()
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
@@ -32,10 +32,9 @@ namespace Splitio_Tests.Integration_Tests
             Assert.IsTrue(result.content.Contains("Hello World"));
         }
 
-
         [TestMethod]
         [Ignore]
-        public async void ExecuteGetShouldReturnErrorNotAuthorized()
+        public async Task ExecuteGetShouldReturnErrorNotAuthorized()
         {
             //Arrange
             var baseUrl = "http://demo7064886.mockable.io";
@@ -57,7 +56,7 @@ namespace Splitio_Tests.Integration_Tests
 
         [TestMethod]
         [Ignore]
-        public async void ExecuteGetShouldReturnNotFoundOnInvalidRequest()
+        public async Task ExecuteGetShouldReturnNotFoundOnInvalidRequest()
         {
             //Arrange
             var baseUrl = "http://demo706abcd.mockable.io";
@@ -79,7 +78,7 @@ namespace Splitio_Tests.Integration_Tests
         }
 
         [TestMethod]
-        public async void ExecuteGetShouldReturnEmptyResponseOnInvalidURL()
+        public async Task ExecuteGetShouldReturnEmptyResponseOnInvalidURL()
         {
             //Arrange
             var baseUrl = "http://demo70e.iio";

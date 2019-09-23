@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.CommonLibraries;
 using Splitio.Services.SplitFetcher.Classes;
-
+using System;
+using System.Threading.Tasks;
 
 namespace Splitio_Tests.Integration_Tests
 {
@@ -11,7 +11,7 @@ namespace Splitio_Tests.Integration_Tests
     {
         [TestMethod]
         [Ignore]
-        public async void ExecuteFetchSplitChangesSuccessful()
+        public async Task ExecuteFetchSplitChangesSuccessful()
         {
             //Arrange
             var baseUrl = "http://sdk-aws-staging.split.io/api/";
@@ -29,13 +29,11 @@ namespace Splitio_Tests.Integration_Tests
             var result = await SplitSdkApiClient.FetchSplitChanges(-1);
   
             //Assert
-            Assert.IsTrue(result.Contains("splits"));
-            
+            Assert.IsTrue(result.Contains("splits"));            
         }
 
-
         [TestMethod]
-        public async void ExecuteGetShouldReturnEmptyIfNotAuthorized()
+        public async Task ExecuteGetShouldReturnEmptyIfNotAuthorized()
         {
             //Arrange
             var baseUrl = "https://sdk.aws.staging.split.io/api";

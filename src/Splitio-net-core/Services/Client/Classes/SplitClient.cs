@@ -24,6 +24,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
+        protected readonly IWrapperAdapter _wrapperAdapter;
         protected const string Control = "control";
         protected const string SdkGetTreatment = "sdk.getTreatment";
         protected const string SdkGetTreatments = "sdk.getTreatments";
@@ -49,8 +50,8 @@ namespace Splitio.Services.Client.Classes
         protected ISimpleCache<KeyImpression> impressionsCache;
         protected ISimpleCache<WrappedEvent> eventsCache;
         protected ISplitCache splitCache;
-        protected ISegmentCache segmentCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
+        protected ISegmentCache segmentCache;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
 
@@ -64,6 +65,7 @@ namespace Splitio.Services.Client.Classes
             _eventTypeValidator = new EventTypeValidator(_log);
             _eventPropertiesValidator = new EventPropertiesValidator(_log);
             _factoryInstantiationsService = FactoryInstantiationsService.Instance(log);
+            _wrapperAdapter = new WrapperAdapter();
         }
 
         public ISplitManager GetSplitManager()

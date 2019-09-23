@@ -46,7 +46,7 @@ namespace Splitio.Services.Cache.Classes
 
             _splits.AddOrUpdate(splitName, parsedSplit, (key, oldValue) => parsedSplit);
             
-            IncreaseTrafficTypeCount(parsedSplit.trafficTypeName);
+            IncreaseTrafficTypeCount(parsedSplit?.trafficTypeName);
 
             return exists;
         }
