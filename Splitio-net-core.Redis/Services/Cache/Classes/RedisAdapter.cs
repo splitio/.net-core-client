@@ -266,5 +266,18 @@ namespace Splitio.Redis.Services.Cache.Classes
                 return 0;
             }
         }
+
+        public RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1)
+        {
+            try
+            {
+                return database.ListRange(key, start, stop);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception calling Redis Adapter ListRange", e);
+                return new RedisValue[0];
+            }
+        }
     }
 }
