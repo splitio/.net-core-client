@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net40;net45;net46;net47;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net40;net45</TargetFrameworks>
     <AssemblyName>Splitio-net-core</AssemblyName>
     <PackageId>Splitio-net-core</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>5.5.2</Version>
+    <Version>5.5.4</Version>
     <RootNamespace>Splitio</RootNamespace>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
     <DefineConstants>NET40</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net46' Or '$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net472'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
     <DefineConstants>NET45</DefineConstants>
   </PropertyGroup>
 
@@ -33,24 +33,21 @@
     <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net46' Or '$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net472'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45'">
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
-    <PackageReference Include="Microsoft.Net.Http" version="2.2.29" />
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
     <PackageReference Include="YamlDotNet" version="6.0.0" />
     <PackageReference Include="YamlDotNet.Signed" version="6.0.0" />
+  </ItemGroup>  
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
-    <PackageReference Include="Common.Logging" version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <PackageReference Include="Microsoft.Net.Http" version="2.2.29" />
-    <PackageReference Include="murmurhash-signed" version="1.0.2" />
-    <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
-    <PackageReference Include="YamlDotNet" version="6.0.0" />
-    <PackageReference Include="YamlDotNet.Signed" version="6.0.0" />
     <PackageReference Include="Microsoft.Bcl" version="1.1.10" />
     <PackageReference Include="Microsoft.Bcl.Async" version="1.0.168" />
     <PackageReference Include="Microsoft.Bcl.Build" Version="1.0.14" />
