@@ -56,7 +56,7 @@ namespace Splitio.Services.Shared.Classes
 
         public Task TaskDelay(int millisecondsDelay)
         {
-#if NETSTANDARD
+#if NETSTANDARD || NET45
             return Task.Delay(millisecondsDelay);
 #else
             return TaskEx.Delay(millisecondsDelay);
@@ -65,7 +65,7 @@ namespace Splitio.Services.Shared.Classes
 
         public async Task<T> TaskFromResult<T>(T result)
         {
-#if NETSTANDARD
+#if NETSTANDARD || NET45
             return await Task.FromResult(result);
 #else
             return await TaskEx.FromResult(result);
