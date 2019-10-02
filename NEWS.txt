@@ -1,5 +1,8 @@
 NEWS
 
+5.0.3
+- Refactor Evaluator.
+
 5.0.2
 - Avoid unnecessary dependencies for .Net Framework 4.5+
 

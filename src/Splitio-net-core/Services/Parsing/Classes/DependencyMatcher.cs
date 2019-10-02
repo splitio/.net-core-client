@@ -1,55 +1,55 @@
 ﻿using Splitio.Domain;
-using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing.Classes
 {
-    public class DependencyMatcher : BaseMatcher, IMatcher
+    public class DependencyMatcher : BaseMatcher
     {
-        string split { get; set; }
-        List<string> treatments { get; set; }
+        private readonly string Split;
+        private readonly List<string> Treatments;
 
         public DependencyMatcher(string split, List<string> treatments)
         {
-            this.split = split;
-            this.treatments = treatments;
+            Split = split;
+            Treatments = treatments;
         }
 
-        public override bool Match(Key key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(Key key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
-            if (splitClient == null)
+            if (evaluator == null)
             {
                 return false;
             }
 
-            string treatment = splitClient.GetTreatment(key, split, attributes, false, false);
+            var result = evaluator.EvaluateFeature(key, Split, attributes);
 
-            return treatments.Contains(treatment);
+            return Treatments.Contains(result.Treatment);
         }
 
-        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return false;
         }
 
-        public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return false;
 
         }
 
-        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(List<string> key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return false;
         }
 
-        public override bool Match(string key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(string key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return false;
         }
 
-        public override bool Match(bool key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(bool key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return false;
         }

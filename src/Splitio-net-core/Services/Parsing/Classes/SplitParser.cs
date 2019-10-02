@@ -2,13 +2,14 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Classes;
+using Splitio.Services.Parsing.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Splitio.Services.Parsing
 {
-    public abstract class SplitParser
+    public abstract class SplitParser : ISplitParser
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SplitParser));
         protected ISegmentCache segmentsCache;
@@ -17,14 +18,14 @@ namespace Splitio.Services.Parsing
         {
             try
             {
-                StatusEnum result;
-                var isValidStatus = Enum.TryParse(split.status, out result);
+                var isValidStatus = Enum.TryParse(split.status, out StatusEnum result);
+
                 if (!isValidStatus || result != StatusEnum.ACTIVE)
                 {
                     return null;
                 }
 
-                ParsedSplit parsedSplit = new ParsedSplit()
+                var parsedSplit = new ParsedSplit
                 {
                     name = split.name,
                     killed = split.killed,
@@ -38,8 +39,8 @@ namespace Splitio.Services.Parsing
                     trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0,
                     configurations = split.configurations
                 };
-                parsedSplit = ParseConditions(split, parsedSplit);
-                return parsedSplit;
+
+                return ParseConditions(split, parsedSplit);
             }
             catch (Exception e)
             {
@@ -47,6 +48,8 @@ namespace Splitio.Services.Parsing
                 return null;
             }
         }
+
+        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
 
         private ParsedSplit ParseConditions(Split split, ParsedSplit parsedSplit)
         {
@@ -244,9 +247,7 @@ namespace Splitio.Services.Parsing
             var matcherData = matcherDefinition.whitelistMatcherData;
             return new ContainsAllOfSetMatcher(matcherData.whitelist);
         }
-
-        protected abstract IMatcher GetInSegmentMatcher(MatcherDefinition matcherDefinition, ParsedSplit parsedSplit);
-
+        
         private IMatcher GetAllKeysMatcher()
         {
             return new AllKeysMatcher();

@@ -3,7 +3,6 @@ using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
@@ -79,7 +78,7 @@ namespace Splitio.Services.Client.Classes
             BuildSplitFetcher();
             BuildTreatmentLog(config);
             BuildEventLog(config);
-            BuildSplitter();
+            BuildEvaluator();
             BuildBlockUntilReadyService();
             BuildManager();
 
@@ -111,11 +110,6 @@ namespace Splitio.Services.Client.Classes
                 Stop();
                 base.Destroy();
             }
-        }
-
-        public override void BlockUntilReady(int blockMilisecondsUntilReady)
-        {
-            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
         #endregion
 
@@ -149,11 +143,6 @@ namespace Splitio.Services.Client.Classes
             LabelsEnabled = config.LabelsEnabled ?? true;
         }
 
-        private void BuildSplitter()
-        {
-            splitter = new Splitter();
-        }
-
         private void BuildSdkReadinessGates()
         {
             gates = new InMemoryReadinessGatesCache();
@@ -168,9 +157,9 @@ namespace Splitio.Services.Client.Classes
             var segmentChangeFetcher = new ApiSegmentChangeFetcher(segmentSdkApiClient);
             selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, gates, segmentRefreshRate, segmentCache, NumberOfParalellSegmentTasks);
             var splitChangeFetcher = new ApiSplitChangeFetcher(splitSdkApiClient);
-            var splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
+            _splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
             splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
-            splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, splitParser, gates, splitsRefreshRate, splitCache);
+            splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, gates, splitsRefreshRate, splitCache);
 
             _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
         }
@@ -194,7 +183,7 @@ namespace Splitio.Services.Client.Classes
             eventListener = new AsynchronousListener<WrappedEvent>(LogManager.GetLogger("AsynchronousEventListener"));
             ((IAsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
         }
-
+        
         private void BuildMetricsLog()
         {
             metricsCache = new InMemoryMetricsCache(new ConcurrentDictionary<string, Counter>(), new ConcurrentDictionary<string, ILatencyTracker>(), new ConcurrentDictionary<string, long>());

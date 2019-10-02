@@ -2,7 +2,9 @@
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,12 +16,17 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitManagerUnitTests
     {
         private readonly Mock<IBlockUntilReadyService> _blockUntilReadyService;
-
+        private readonly Mock<ISplitCache> _splitCache;
         private readonly string rootFilePath;
+
+        private ISplitManager _splitManager;
 
         public SplitManagerUnitTests()
         {
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
+            _splitCache = new Mock<ISplitCache>();
+
+            _splitManager = new SplitManager(_splitCache.Object, _blockUntilReadyService.Object);
 
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
@@ -32,8 +39,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitsReturnSuccessfully()
         {
-            //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
+            //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
                 conditionType = ConditionType.WHITELIST,
@@ -42,45 +48,58 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "off"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
+            
             var conditionWithLogic2 = new ConditionWithLogic()
             {
                 conditionType = ConditionType.ROLLOUT,
                 partitions = new List<PartitionDefinition>()
                 {
-                    new PartitionDefinition(){size = 90, treatment = "on"},
-                    new PartitionDefinition(){size = 10, treatment = "off"}
+                    new PartitionDefinition {size = 90, treatment = "on"},
+                    new PartitionDefinition {size = 10, treatment = "off"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic2);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic,
+                conditionWithLogic2
+            };
+
+            var splits = new List<ParsedSplit>
+            {
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+            };
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetAllSplits())
+                .Returns(splits);
 
             //Act
-            var result = manager.Splits();
+            var result = _splitManager.Splits();
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(6, result.Count);
+
             var firstResult = result.Find(x => x.name == "test1");
             Assert.AreEqual(firstResult.name, "test1");
             Assert.AreEqual(firstResult.changeNumber, 10000);
             Assert.AreEqual(firstResult.killed, false);
             Assert.AreEqual(firstResult.trafficType, "user");
             Assert.AreEqual(firstResult.treatments.Count, 2);
+
             var firstTreatment = firstResult.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
+
             var secondTreatment = firstResult.treatments[1];
             Assert.AreEqual(secondTreatment, "off");
         }
@@ -88,8 +107,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitsReturnWithNoRolloutConditionSuccessfully()
         {
-            //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
+            //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
                 conditionType = ConditionType.WHITELIST,
@@ -98,27 +116,37 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
+
+            var splits = new List<ParsedSplit>
+            {
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+            };
+            
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetAllSplits())
+                .Returns(splits);
 
             //Act
-            var result = manager.Splits();
+            var result = _splitManager.Splits();
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(6, result.Count);
+
             var firstResult = result.Find(x => x.name == "test1");
             Assert.AreEqual(firstResult.name, "test1");
             Assert.AreEqual(firstResult.changeNumber, 10000);
@@ -130,8 +158,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestMethod]
         public void SplitReturnSuccessfully()
         {
-            //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
+            //Arrange            
             var conditionWithLogic = new ConditionWithLogic()
             {
                 conditionType = ConditionType.ROLLOUT,
@@ -141,23 +168,22 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 10, treatment = "off"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetSplit("test1"))
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = manager.Split("test1");
+            var result = _splitManager.Split("test1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -166,8 +192,10 @@ namespace Splitio_Tests.Unit_Tests.Client
             Assert.AreEqual(result.killed, false);
             Assert.AreEqual(result.trafficType, "user");
             Assert.AreEqual(result.treatments.Count, 2);
+
             var firstTreatment = result.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
+
             var secondTreatment = result.treatments[1];
             Assert.AreEqual(secondTreatment, "off");
         }
@@ -176,7 +204,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitReturnRolloutConditionTreatmentsSuccessfully()
         {
             //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
             var conditionWithLogic = new ConditionWithLogic()
             {
                 conditionType = ConditionType.WHITELIST,
@@ -185,7 +212,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"},
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
 
             var conditionWithLogic2 = new ConditionWithLogic()
             {
@@ -196,31 +222,32 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 10, treatment = "off"},
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic2);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic,
+                conditionWithLogic2
+            };
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetSplit("test1"))
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = manager.Split("test1");
+            var result = _splitManager.Split("test1");
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(result.name, "test1");
             Assert.AreEqual(result.treatments.Count, 2);
+
             var firstTreatment = result.treatments[0];
             Assert.AreEqual(firstTreatment, "on");
+
             var secondTreatment = result.treatments[1];
             Assert.AreEqual(secondTreatment, "off");
         }
@@ -229,7 +256,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitReturnDefaultTreatmentsWhenNoRolloutCondition()
         {
             //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
             var conditionWithLogic = new ConditionWithLogic()
             {
                 conditionType = ConditionType.WHITELIST,
@@ -238,24 +264,22 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"},
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
-
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
+            
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetSplit("test1"))
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
 
             //Act
-            var result = manager.Split("test1");
+            var result = _splitManager.Split("test1");
 
             //Assert
             Assert.IsNotNull(result);
@@ -267,16 +291,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitReturnsNullWhenInexistent()
         {
             //Arrange
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
-
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-
+            
             //Act
-            var result = manager.Split("test1");
+            var result = _splitManager.Split("test1");
 
             //Assert
             Assert.IsNull(result);
@@ -307,11 +327,12 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
+            _splitCache
+                .Setup(mock => mock.GetAllSplits())
+                .Returns(new List<ParsedSplit>());
 
             //Act
-            var result = manager.Splits();
+            var result = _splitManager.Splits();
 
             //Assert
             Assert.IsNotNull(result);
@@ -360,33 +381,11 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            
             //Act
-            var result = manager.Split(null);
+            var result = _splitManager.Split(null);
 
             //Assert
             Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void SplitNamessWhenCacheIsEmptyShouldReturnEmptyList()
-        {
-            //Arrange
-            _blockUntilReadyService
-                .Setup(mock => mock.IsSdkReady())
-                .Returns(true);
-
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            
-            //Act
-            var result = manager.SplitNames();
-
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
@@ -410,7 +409,6 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void SplitNamesReturnSuccessfully()
         {
             //Arrange
-            var conditionsWithLogic = new List<ConditionWithLogic>();
             var conditionWithLogic = new ConditionWithLogic()
             {
                 partitions = new List<PartitionDefinition>()
@@ -418,28 +416,39 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
 
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
+
+            var splits = new List<ParsedSplit>
+            {
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test2", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+            };
+            
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady(1000);
+            _splitCache
+                .Setup(mock => mock.GetAllSplits())
+                .Returns(splits);
+            
+            _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result = manager.SplitNames();
+            var result = _splitManager.SplitNames();
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(6, result.Count);
+
             var firstResult = result.Find(x => x == "test1");
             Assert.AreEqual(firstResult, "test1");
         }
@@ -452,8 +461,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 { "On", "\"Name = \"Test Config\"" }
             };
-
-            var conditionsWithLogic = new List<ConditionWithLogic>();
+            
             var conditionWithLogic = new ConditionWithLogic()
             {
                 partitions = new List<PartitionDefinition>()
@@ -461,25 +469,34 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
 
+            var splits = new List<ParsedSplit>
+            {
+                new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations },
+                new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations },
+                new ParsedSplit { name = "test3", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test4", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test5", conditions = conditionsWithLogic },
+                new ParsedSplit { name = "test6", conditions = conditionsWithLogic }
+            };
+            
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady(1000);
+            _splitCache
+                .Setup(mock => mock.GetAllSplits())
+                .Returns(splits);
+            
+            _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result = manager.Splits();
+            var result = _splitManager.Splits();
 
             //Assert
             Assert.IsNotNull(result);
@@ -500,8 +517,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 { "On", "\"Name = \"Test Config\"" }
             };
-
-            var conditionsWithLogic = new List<ConditionWithLogic>();
+            
             var conditionWithLogic = new ConditionWithLogic()
             {
                 partitions = new List<PartitionDefinition>()
@@ -509,27 +525,34 @@ namespace Splitio_Tests.Unit_Tests.Client
                     new PartitionDefinition(){size = 100, treatment = "on"}
                 }
             };
-            conditionsWithLogic.Add(conditionWithLogic);
 
-            var splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>());
-            splitCache.AddSplit("test1", new ParsedSplit() { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
-            splitCache.AddSplit("test2", new ParsedSplit() { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
-            splitCache.AddSplit("test3", new ParsedSplit() { name = "test3", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test4", new ParsedSplit() { name = "test4", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test5", new ParsedSplit() { name = "test5", conditions = conditionsWithLogic });
-            splitCache.AddSplit("test6", new ParsedSplit() { name = "test6", conditions = conditionsWithLogic });
-
+            var conditionsWithLogic = new List<ConditionWithLogic>
+            {
+                conditionWithLogic
+            };
+            
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
-            var manager = new SplitManager(splitCache, _blockUntilReadyService.Object);
-            manager.BlockUntilReady(1000);
+            _splitCache
+                .Setup(mock => mock.GetSplit("test1"))
+                .Returns(new ParsedSplit { name = "test1", changeNumber = 10000, killed = false, trafficTypeName = "user", seed = -1, conditions = conditionsWithLogic, configurations = configurations });
+
+            _splitCache
+                .Setup(mock => mock.GetSplit("test2"))
+                .Returns(new ParsedSplit { name = "test2", conditions = conditionsWithLogic, configurations = configurations });
+
+            _splitCache
+                .Setup(mock => mock.GetSplit("test3"))
+                .Returns(new ParsedSplit { name = "test3", conditions = conditionsWithLogic });
+
+            _splitManager.BlockUntilReady(1000);
 
             //Act
-            var result1 = manager.Split("test1");
-            var result2 = manager.Split("test2");
-            var result3 = manager.Split("test3");
+            var result1 = _splitManager.Split("test1");
+            var result2 = _splitManager.Split("test2");
+            var result3 = _splitManager.Split("test3");
 
             //Assert
             Assert.IsNotNull(result1);

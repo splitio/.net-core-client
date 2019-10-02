@@ -36,7 +36,6 @@ namespace Splitio.Services.Impressions.Classes
             SendBulkImpressions();
         }
 
-
         private void SendBulkImpressions()
         {
             if (impressionsCache.HasReachedMaxSize())

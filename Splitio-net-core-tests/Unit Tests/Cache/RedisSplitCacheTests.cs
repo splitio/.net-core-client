@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string trafficTypeKeyPrefix = "SPLITIO.trafficType.";
 
         private readonly Mock<IRedisAdapter> _redisAdapterMock;
+        private readonly Mock<ISplitParser> _splitParserMock;
         private readonly RedisSplitCache _redisSplitCache;
 
         public RedisSplitCacheTests()
         {
             _redisAdapterMock = new Mock<IRedisAdapter>();
+            _splitParserMock = new Mock<ISplitParser>();
 
-            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object);
+            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object);
         }
 
         [TestMethod]
