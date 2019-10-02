@@ -25,7 +25,6 @@ namespace Splitio.Services.Client.Classes
 {
     public class SelfRefreshingClient : SplitClient
     {
-        private static string ApiKey;
         private static string BaseUrl;
         private static int SplitsRefreshRate;
         private static int SegmentRefreshRate;

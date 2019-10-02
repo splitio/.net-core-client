@@ -1,5 +1,8 @@
 CHANGES
 
+5.0.2
+- Avoid unnecessary dependencies for .Net Framework 4.5+
+
 5.0.1
 - Added HttpClientMock for improved Integration Tests.
 - Merged NET and NET Core repositories to improved our productivity and code.

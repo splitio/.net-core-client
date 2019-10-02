@@ -17,7 +17,7 @@ namespace Splitio.CommonLibraries
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)
         {
-#if NETFRAMEWORK
+#if NET40 || NET45
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
 #endif
             var handler = new HttpClientHandler()
