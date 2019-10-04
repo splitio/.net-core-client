@@ -18,7 +18,7 @@ Split SDK is an open source project and we welcome feedback and contribution. Th
 10. Keep an eye out for any feedback or comments from Split's SDK team.
    
 ### Running tests  
-You can execute the following commands in root project folder to run the tests:
+You can execute the following commands in .net-core-client folder to run the tests:
  - dotnet test .\Splitio-net-core-tests\
  - dotnet test .\Splitio-net-core.Integration-tests\
   
