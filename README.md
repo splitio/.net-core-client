@@ -10,7 +10,6 @@ This SDK is designed to work with Split, the platform for controlled rollouts, w
 ## Compatibility
 This SDK is compatible with NET Framework 4.0 and above and NET Core 1.x, 2.x and 3.0.
 
-
 ## Getting started
 Below is a simple example that describes the instantiation and most basic usage of our SDK:
 
@@ -42,6 +41,8 @@ else if (treatment == "off")
     // insert your control treatment code here
 }
 ```
+
+Please refer to [our official docs](https://help.split.io/hc/en-us/articles/360020240172--NET-SDK) to learn about all the functionality provided by our SDK and the configuration options available for tailoring it to your current application setup.
 
 ## Submitting issues
  
