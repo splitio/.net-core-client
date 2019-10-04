@@ -1,4 +1,4 @@
-# Split .NET SDK
+# Split SDK for .NET
 
 ![CI Status](https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=master&svg=true&passingText=master%20-%20ok&pendingText=master%20-%20running&failingText=master%20-%20failing)
 
@@ -15,7 +15,7 @@ Below is a simple example that describes the instantiation and most basic usage 
 
 ```c#
 var config = new ConfigurationOptions();
-var factory = new SplitFactory("API_KEY", config);
+var factory = new SplitFactory("SDK_API_KEY", config);
 var sdk = factory.Client();
 
 try
@@ -36,7 +36,8 @@ if (treatment == "on")
 else if (treatment == "off") 
 {
     // insert code here to show off treatment 
-} else 
+} 
+else 
 {
     // insert your control treatment code here
 }
