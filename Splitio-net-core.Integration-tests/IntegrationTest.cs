@@ -59,7 +59,7 @@ namespace Splitio_net_core.Integration_tests
 
             // Assert.
             Assert.AreEqual("off", treatment);
-            Assert.AreEqual(29, splits.Count);
+            Assert.AreEqual(28, splits.Count);
 
             httpClientMock.ShutdownServer();
         }

@@ -98,7 +98,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var split = BuildSplit(splitName);
             var split2 = BuildSplit(splitName2);
             var splitJson = JsonConvert.SerializeObject(split);
-            var splitJson2 = JsonConvert.SerializeObject(split);
+            var splitJson2 = JsonConvert.SerializeObject(split2);
 
             _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
@@ -107,6 +107,10 @@ namespace Splitio_Tests.Unit_Tests.Cache
             _redisAdapterMock
                 .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
                 .Returns(new RedisValue[] { splitJson, splitJson2 });
+
+            _splitParserMock
+                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Returns(new ParsedSplit());                
 
             //Act
             var result = _redisSplitCache.GetAllSplits();

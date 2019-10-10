@@ -54,10 +54,12 @@ namespace Splitio.Redis.Services.Cache.Classes
             if (splitValues != null && splitValues.Any())
             {
                 var splits = splitValues
-                    .Where(x=>!x.IsNull)
+                    .Where(x => !x.IsNull)
                     .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
 
-                return splits.ToList();
+                return splits
+                    .Where(s => s != null)
+                    .ToList();
             }
             
             return new List<ParsedSplit>();

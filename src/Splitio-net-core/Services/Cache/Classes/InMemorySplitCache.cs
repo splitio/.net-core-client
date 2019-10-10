@@ -35,6 +35,8 @@ namespace Splitio.Services.Cache.Classes
 
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
+            if (split == null) return false;
+
             var parsedSplit = (ParsedSplit)split;
 
             var exists = _splits.TryGetValue(splitName, out ParsedSplit oldSplit);
@@ -97,7 +99,10 @@ namespace Splitio.Services.Cache.Classes
 
         public List<ParsedSplit> GetAllSplits()
         {            
-            return _splits.Values.ToList();
+            return _splits
+                .Values
+                .Where(s => s != null)
+                .ToList();
         }
 
         public void Clear()
