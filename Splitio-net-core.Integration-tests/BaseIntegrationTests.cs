@@ -869,7 +869,7 @@ namespace Splitio_net_core.Integration_tests
 
             Assert.IsNotNull(managerResult);
             Assert.AreEqual("MAURO_TEST", managerResult.name);
-            // TODO : Redis destroy doesn't work. Refactor this and descomment assert
+            // TODO : Redis destroy doesn't work. Refactor this and uncomment assert
             //Assert.IsNull(managerDestroyResult);
 
             ShutdownServer(httpClientMock);
