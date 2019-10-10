@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Diagnostics;
@@ -11,14 +12,14 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SplitSdkApiClient : SdkApiClient, ISplitSdkApiClient
     {
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SplitSdkApiClient));
+
         private const string SplitChangesUrlTemplate = "/api/splitChanges";
         private const string UrlParameterSince = "?since=";
         private const string SplitFetcherTime = "splitChangeFetcher.time";
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
         private const string SplitFetcherException = "splitChangeFetcher.exception";
-
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitSdkApiClient));
-
+        
         public SplitSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
         public async Task<string> FetchSplitChanges(long since)

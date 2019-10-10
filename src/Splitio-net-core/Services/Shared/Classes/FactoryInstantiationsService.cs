@@ -1,4 +1,4 @@
-﻿using Common.Logging;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Concurrent;
 
@@ -10,10 +10,10 @@ namespace Splitio.Services.Shared.Classes
         private static object _instanceLock = new object();
         private static object _lock = new object();
 
-        private ILog _log;
+        private ISplitLogger _log;
         private ConcurrentDictionary<string, int> _factoryInstantiations;
 
-        public static IFactoryInstantiationsService Instance(ILog log)
+        public static IFactoryInstantiationsService Instance(ISplitLogger log = null)
         {
             if (_instance == null)
             {
@@ -29,9 +29,9 @@ namespace Splitio.Services.Shared.Classes
             return _instance;
         }
 
-        private FactoryInstantiationsService(ILog log)
+        private FactoryInstantiationsService(ISplitLogger log = null)
         {
-            _log = log;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(FactoryInstantiationsService));
             _factoryInstantiations = new ConcurrentDictionary<string, int>();
         }
 

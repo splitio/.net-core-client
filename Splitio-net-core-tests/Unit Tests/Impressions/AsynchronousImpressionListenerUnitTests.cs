@@ -1,7 +1,7 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -12,14 +12,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
     [TestClass]
     public class AsynchronousImpressionListenerUnitTests
     {
-        private Mock<ILog> _logger;
+        private Mock<ISplitLogger> _logger;
         private AsynchronousListener<KeyImpression> _asyncListener;
         private Mock<IListener<KeyImpression>> _listenerMock;
 
         [TestInitialize]
         public void Initialize()
         {
-            _logger = new Mock<ILog>();
+            _logger = new Mock<ISplitLogger>();
             _asyncListener = new AsynchronousListener<KeyImpression>(_logger.Object);
             _listenerMock = new Mock<IListener<KeyImpression>>();
         }

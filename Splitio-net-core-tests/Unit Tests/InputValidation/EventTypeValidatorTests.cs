@@ -1,20 +1,20 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
 {
     [TestClass]
     public class EventTypeValidatorTests
     {
-        private Mock<ILog> _log;
+        private Mock<ISplitLogger> _log;
         private EventTypeValidator eventTypeValidator;
 
         [TestInitialize]
         public void Initialize()
         {
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
 
             eventTypeValidator = new EventTypeValidator(_log.Object);
         }

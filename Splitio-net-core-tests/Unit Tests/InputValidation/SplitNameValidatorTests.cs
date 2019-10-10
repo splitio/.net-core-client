@@ -1,7 +1,7 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,13 +10,13 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     [TestClass]
     public class SplitNameValidatorTests
     {
-        private Mock<ILog> _log;
+        private Mock<ISplitLogger> _log;
         private SplitNameValidator splitNameValidator;
 
         [TestInitialize]
         public void Initialize()
         {
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
 
             splitNameValidator = new SplitNameValidator(_log.Object);
         }

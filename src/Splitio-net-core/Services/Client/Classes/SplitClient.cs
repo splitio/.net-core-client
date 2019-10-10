@@ -1,11 +1,11 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Evaluator;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
 using Splitio.Services.Shared.Classes;
@@ -18,7 +18,7 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
-        protected readonly ILog _log;
+        protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
@@ -50,14 +50,14 @@ namespace Splitio.Services.Client.Classes
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
 
-        public SplitClient(ILog log)
+        public SplitClient(ISplitLogger log)
         {
             _log = log;
-            _keyValidator = new KeyValidator(_log);
-            _splitNameValidator = new SplitNameValidator(_log);
-            _eventTypeValidator = new EventTypeValidator(_log);
-            _eventPropertiesValidator = new EventPropertiesValidator(_log);
-            _factoryInstantiationsService = FactoryInstantiationsService.Instance(log);
+            _keyValidator = new KeyValidator();
+            _splitNameValidator = new SplitNameValidator();
+            _eventTypeValidator = new EventTypeValidator();
+            _eventPropertiesValidator = new EventPropertiesValidator();
+            _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _wrapperAdapter = new WrapperAdapter();
         }
 
@@ -216,7 +216,7 @@ namespace Splitio.Services.Client.Classes
             return true;
         }
 
-        protected void BuildEvaluator(ILog log = null)
+        protected void BuildEvaluator(ISplitLogger log = null)
         {
             _evaluator = new Evaluator.Evaluator(splitCache, _splitParser, log: log);
         }

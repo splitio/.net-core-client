@@ -1,6 +1,6 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -12,7 +12,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegmentFetcher : SegmentFetcher
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSegmentFetcher));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
         private readonly ISegmentChangeFetcher segmentChangeFetcher;
         private readonly ConcurrentDictionary<string, SelfRefreshingSegment> segments;
@@ -69,7 +69,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 segment = new SelfRefreshingSegment(name, segmentChangeFetcher, gates, segmentCache);
                 segments.TryAdd(name, segment);
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                if (Log.IsDebugEnabled)
+                if (Log.IsDebugEnabled())
                 {
                     Log.Debug(string.Format("Segment queued: {0}", segment.name));
                 }
@@ -81,7 +81,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             foreach (SelfRefreshingSegment segment in segments.Values)
             {
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                if (Log.IsDebugEnabled)
+                if (Log.IsDebugEnabled())
                 {
                     Log.Debug(string.Format("Segment queued: {0}", segment.name));
                 }

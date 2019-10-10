@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSegment));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
 
         public readonly string name;
         private readonly IReadinessGatesCache gates;
@@ -50,14 +51,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                         if (response.added.Count() > 0)
                         {
-                            if (Log.IsDebugEnabled)
+                            if (Log.IsDebugEnabled())
                             {
                                 Log.Debug(string.Format("Segment {0} - Added : {1}", name, string.Join(" - ", response.added)));
                             }
                         }
                         if (response.removed.Count() > 0)
                         {
-                            if (Log.IsDebugEnabled)
+                            if (Log.IsDebugEnabled())
                             {
                                 Log.Debug(string.Format("Segment {0} - Removed : {1}", name, string.Join(" - ", response.removed)));
                             }
@@ -72,7 +73,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                 }
                 finally
                 {
-                    if (Log.IsDebugEnabled)
+                    if (Log.IsDebugEnabled())
                     {
                         Log.Debug(string.Format("segment {0} fetch before: {1}, after: {2}", name, changeNumber, segmentCache.GetChangeNumber(name)));
                     }

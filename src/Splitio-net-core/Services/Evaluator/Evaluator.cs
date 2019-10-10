@@ -1,8 +1,9 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
+using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,19 +15,19 @@ namespace Splitio.Services.Evaluator
         protected const string Control = "control";
 
         private readonly ISplitter _splitter;
-        private readonly ILog _log;        
+        private readonly ISplitLogger _log;        
         private readonly ISplitParser _splitParser;
         private readonly ISplitCache _splitCache;
 
         public Evaluator(ISplitCache splitCache,
             ISplitParser splitParser,
             ISplitter splitter = null,
-            ILog log = null)
+            ISplitLogger log = null)
         {
             _splitCache = splitCache;
             _splitParser = splitParser;
             _splitter = splitter ?? new Splitter();
-            _log = log ?? LogManager.GetLogger(typeof(Evaluator));
+            _log = log ?? WrapperAdapter.GetLogger(typeof(Evaluator));
         }
 
         #region Public Method

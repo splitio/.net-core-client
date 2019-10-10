@@ -1,11 +1,11 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -17,12 +17,12 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class JSONFileClientTests
     {
-        private readonly Mock<ILog> _logMock;
+        private readonly Mock<ISplitLogger> _logMock;
         private readonly string rootFilePath;
 
         public JSONFileClientTests()
         {
-            _logMock = new Mock<ILog>();
+            _logMock = new Mock<ISplitLogger>();
 
             // This line is to clean the warnings.
             rootFilePath = string.Empty;

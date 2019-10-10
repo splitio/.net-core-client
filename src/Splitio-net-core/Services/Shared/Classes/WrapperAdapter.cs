@@ -1,7 +1,6 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ namespace Splitio.Services.Shared.Classes
 {
     public class WrapperAdapter : IWrapperAdapter
     {
-        public ReadConfigData ReadConfig(ConfigurationOptions config, ILog log)
+        public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
         {
             var data = new ReadConfigData();
 
@@ -78,6 +77,24 @@ namespace Splitio.Services.Shared.Classes
             return typeof(Split).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 #else
             return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+#endif
+        }
+
+        public static ISplitLogger GetLogger(Type type)
+        {
+#if NETSTANDARD
+            return new MicrosoftExtensionsLogging(type);
+#else
+            return new CommonLogging(type);
+#endif
+        }
+
+        public static ISplitLogger GetLogger(string type)
+        {
+#if NETSTANDARD
+            return new MicrosoftExtensionsLogging(type);
+#else
+            return new CommonLogging(type);
 #endif
         }
 

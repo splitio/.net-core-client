@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Diagnostics;
@@ -17,7 +18,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
         private const string SegmentFetcherStatus = "segmentChangeFetcher.status.{0}";
         private const string SegmentFetcherException = "segmentChangeFetcher.exception";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentSdkApiClient));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SegmentSdkApiClient));
 
         public SegmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
 
@@ -38,7 +39,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         metricsLog.Count(string.Format(SegmentFetcherStatus, response.statusCode), 1);
                     }
 
-                    if (Log.IsDebugEnabled)
+                    if (Log.IsDebugEnabled())
                     {
                         Log.Debug($"FetchSegmentChanges with name '{name}' took {clock.ElapsedMilliseconds} milliseconds using uri '{requestUri}'");
                     }

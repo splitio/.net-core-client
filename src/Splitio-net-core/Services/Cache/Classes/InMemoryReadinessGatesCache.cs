@@ -1,15 +1,17 @@
-﻿using System;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
-using Common.Logging;
-using Splitio.Services.Cache.Interfaces;
+using System.Threading;
 
 namespace Splitio.Services.Client.Classes
 {
     public class InMemoryReadinessGatesCache : IReadinessGatesCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemoryReadinessGatesCache));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemoryReadinessGatesCache));
+
         private readonly CountdownEvent splitsAreReady = new CountdownEvent(1);
         private readonly Dictionary<string, CountdownEvent> segmentsAreReady = new Dictionary<string, CountdownEvent>();
         private readonly Stopwatch _splitsReadyTimer = new Stopwatch();
@@ -45,7 +47,7 @@ namespace Splitio.Services.Client.Classes
                 if (splitsAreReady.IsSet)
                 {
                     _splitsReadyTimer.Stop();
-                    if (Log.IsDebugEnabled)
+                    if (Log.IsDebugEnabled())
                     {
                         Log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                     }
@@ -67,7 +69,7 @@ namespace Splitio.Services.Client.Classes
 
             if (countDown.IsSet)
             {
-                if (Log.IsDebugEnabled)
+                if (Log.IsDebugEnabled())
                 {
                     Log.Debug(segmentName + " segment is ready");
                 }
@@ -89,7 +91,7 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 segmentsAreReady.Add(segmentName, new CountdownEvent(1));
-                if (Log.IsDebugEnabled)
+                if (Log.IsDebugEnabled())
                 {
                     Log.Debug("Registered segment: " + segmentName);
                 }
@@ -131,7 +133,7 @@ namespace Splitio.Services.Client.Classes
             }
 
             _segmentsReadyTimer.Stop();
-            if (Log.IsDebugEnabled)
+            if (Log.IsDebugEnabled())
             {
                 Log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
             }

@@ -1,8 +1,9 @@
-﻿using Common.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Net;
 
@@ -12,7 +13,7 @@ namespace Splitio.Services.Events.Classes
     {
         private const string EventsUrlTemplate = "/api/events/bulk";
         
-        private static readonly ILog Log = LogManager.GetLogger(typeof(EventSdkApiClient));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(EventSdkApiClient));
 
         public EventSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
             : base(header, baseUrl, connectionTimeOut, readTimeout)

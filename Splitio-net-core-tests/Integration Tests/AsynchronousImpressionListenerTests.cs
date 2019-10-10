@@ -1,7 +1,7 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
@@ -40,7 +40,7 @@ namespace Splitio_Tests.Integration_Tests
         public void AddTwoListenersAndPerformLogSuccessfully()
         {
             //Arrange
-            var logger = new Mock<ILog>();
+            var logger = new Mock<ISplitLogger>();
             var asyncListener = new AsynchronousListener<KeyImpression>(logger.Object);
             var listener1 = new TestListener();
             var listenerMock2 = new Mock<IListener<KeyImpression>>();
@@ -49,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
 
 
             //Act
-            asyncListener.Log(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            asyncListener.Log(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             Thread.Sleep(1000);
 
             //Assert
@@ -61,7 +61,7 @@ namespace Splitio_Tests.Integration_Tests
         public void AddTwoListenersAndPerformLogSuccessfullyWithOneLongRunningTask()
         {
             //Arrange
-            var logger = new Mock<ILog>();
+            var logger = new Mock<ISplitLogger>();
             var asyncListener = new AsynchronousListener<KeyImpression>(logger.Object);
             var listener1 = new TestListener2();
             var listener2 = new TestListener();

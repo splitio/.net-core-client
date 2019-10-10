@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
@@ -15,17 +15,15 @@ namespace Splitio.Services.Client.Classes
 {
     public class JSONFileClient : SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(JSONFileClient));
-
         public JSONFileClient(string splitsFilePath,
             string segmentsFilePath,
-            ILog log,
+            ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
             IListener<KeyImpression> treatmentLogInstance = null,
             bool isLabelsEnabled = true,
             IListener<WrappedEvent> _eventListener = null,
-            ITrafficTypeValidator trafficTypeValidator = null) : base(log)
+            ITrafficTypeValidator trafficTypeValidator = null) : base(GetLogger(log))
         {
             segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
             var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);            
@@ -77,6 +75,13 @@ namespace Splitio.Services.Client.Classes
                 segmentCache.Clear();
                 base.Destroy();
             }
+        }
+        #endregion
+
+        #region Private Methods
+        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
+        {
+            return splitLogger ?? WrapperAdapter.GetLogger(typeof(JSONFileClient));
         }
         #endregion
     }

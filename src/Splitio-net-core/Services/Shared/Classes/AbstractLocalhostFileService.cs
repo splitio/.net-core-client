@@ -1,5 +1,5 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Parsing;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Concurrent;
@@ -11,7 +11,7 @@ namespace Splitio.Services.Shared.Classes
     {
         protected const string Control = "control";
 
-        protected ILog _log;
+        protected ISplitLogger _log;
 
         public abstract ConcurrentDictionary<string, ParsedSplit> ParseSplitFile(string filePath);
 
