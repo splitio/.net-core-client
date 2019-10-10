@@ -135,7 +135,7 @@ namespace Splitio.Services.Client.Classes
 
             var trafficTypeResult = _blockUntilReadyService.IsSdkReady()
                 ? _trafficTypeValidator.IsValid(trafficType, nameof(trafficType))
-                : new ValidatorResult { Success = true };
+                : new ValidatorResult { Success = true, Value = trafficType };
 
             if (!keyResult || !trafficTypeResult.Success || !eventTypeResult || !eventPropertiesResult.Success)
                 return false;
@@ -210,6 +210,7 @@ namespace Splitio.Services.Client.Classes
             if (Destroyed)
             {
                 _log.Error("Client has already been destroyed - No calls possible");
+                return false;
             }
 
             return true;
