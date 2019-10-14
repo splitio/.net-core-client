@@ -2,6 +2,7 @@ CHANGES
 
 5.0.3 (Coming soon)
 - Refactor Evaluator.
+- Added Integration Tests.
 
 5.0.2 (Oct 02, 2019)
 - Avoid unnecessary dependencies for .Net Framework 4.5+
