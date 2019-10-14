@@ -281,7 +281,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter ListRange", e);
+                _log.Error("Exception calling Redis Adapter ListRange", e);
                 return new RedisValue[0];
             }
         }
