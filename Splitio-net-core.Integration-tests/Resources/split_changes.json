@@ -11,6 +11,9 @@
       "defaultTreatment": "off",
       "changeNumber": 1506703262916,
       "algo": 2,
+      "configurations": {
+        "on": "{\"color\":\"green\"}"
+      },
       "conditions": [
         {
           "conditionType": "WHITELIST",
@@ -667,13 +670,16 @@
                   "attribute": null
                 },
                 "matcherType": "IN_SEGMENT",
-                "negate": false,                
+                "negate": false,
                 "whitelistMatcherData": null,
                 "unaryNumericMatcherData": null,
                 "betweenMatcherData": null,
                 "booleanMatcherData": null,
                 "dependencyMatcherData": null,
-                "stringMatcherData": null
+                "stringMatcherData": null,
+                "userDefinedSegmentMatcherData": {
+                  "segmentName": "segment1"
+                }
               },
               {
                 "keySelector": {
@@ -1056,7 +1062,7 @@
             }
           ],
           "label": "whitelisted"
-        }        
+        }
       ]
     },
     {
@@ -1222,7 +1228,7 @@
             }
           ],
           "label": "whitelisted"
-        },        
+        },
         {
           "conditionType": "ROLLOUT",
           "matcherGroup": {
@@ -2356,6 +2362,126 @@
             {
               "treatment": "off",
               "size": 100
+            }
+          ],
+          "label": "in segment all"
+        }
+      ]
+    },
+    {
+      "trafficTypeName": "account",
+      "name": "MAURO_TEST",
+      "trafficAllocation": 59,
+      "trafficAllocationSeed": -2108186082,
+      "seed": -1947050766,
+      "status": "ACTIVE",
+      "killed": false,
+      "defaultTreatment": "off",
+      "changeNumber": 1506703262966,
+      "algo": 2,
+      "configurations": {
+        "off": "{\"version\":\"v1\"}",
+        "on": "{\"version\":\"v2\"}",
+        "control": "{\"version\":\"v3\"}"
+      },
+      "conditions": [
+        {
+          "conditionType": "WHITELIST",
+          "matcherGroup": {
+            "combiner": "AND",
+            "matchers": [
+              {
+                "keySelector": null,
+                "matcherType": "WHITELIST",
+                "negate": false,
+                "userDefinedSegmentMatcherData": null,
+                "whitelistMatcherData": {
+                  "whitelist": [
+                    "mauro",
+                    "othertest"
+                  ]
+                },
+                "unaryNumericMatcherData": null,
+                "betweenMatcherData": null,
+                "booleanMatcherData": null,
+                "dependencyMatcherData": null,
+                "stringMatcherData": null
+              }
+            ]
+          },
+          "partitions": [
+            {
+              "treatment": "on",
+              "size": 100
+            }
+          ],
+          "label": "whitelisted"
+        },
+        {
+          "conditionType": "WHITELIST",
+          "matcherGroup": {
+            "combiner": "AND",
+            "matchers": [
+              {
+                "keySelector": null,
+                "matcherType": "WHITELIST",
+                "negate": false,
+                "userDefinedSegmentMatcherData": null,
+                "whitelistMatcherData": {
+                  "whitelist": [
+                    "bla"
+                  ]
+                },
+                "unaryNumericMatcherData": null,
+                "betweenMatcherData": null,
+                "booleanMatcherData": null,
+                "dependencyMatcherData": null,
+                "stringMatcherData": null
+              }
+            ]
+          },
+          "partitions": [
+            {
+              "treatment": "off",
+              "size": 100
+            }
+          ],
+          "label": "whitelisted"
+        },
+        {
+          "conditionType": "ROLLOUT",
+          "matcherGroup": {
+            "combiner": "AND",
+            "matchers": [
+              {
+                "keySelector": {
+                  "trafficType": "account",
+                  "attribute": null
+                },
+                "matcherType": "ALL_KEYS",
+                "negate": false,
+                "userDefinedSegmentMatcherData": null,
+                "whitelistMatcherData": null,
+                "unaryNumericMatcherData": null,
+                "betweenMatcherData": null,
+                "booleanMatcherData": null,
+                "dependencyMatcherData": null,
+                "stringMatcherData": null
+              }
+            ]
+          },
+          "partitions": [
+            {
+              "treatment": "on",
+              "size": 0
+            },
+            {
+              "treatment": "off",
+              "size": 100
+            },
+            {
+              "treatment": "visa",
+              "size": 0
             }
           ],
           "label": "in segment all"
