@@ -633,6 +633,7 @@ namespace Splitio_net_core.Integration_tests
             var result = manager.Split(splitName);
 
             // Assert.
+            Assert.IsNotNull(result);
             Assert.AreEqual(splitName, result.name);
 
             ShutdownServer(httpClientMock);

@@ -1,7 +1,6 @@
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
-using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -12,7 +11,6 @@ namespace Splitio.Services.Client.Classes
     public class SplitFactory
     {
         private readonly IApiKeyValidator _apiKeyValidator;
-        private readonly ISplitLogger _log;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly string _apiKey;
 
@@ -26,7 +24,6 @@ namespace Splitio.Services.Client.Classes
             _apiKey = apiKey;
             _options = options;
 
-            _log = WrapperAdapter.GetLogger(typeof(SplitClient));
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
         }

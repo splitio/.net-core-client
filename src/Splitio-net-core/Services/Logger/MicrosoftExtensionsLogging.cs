@@ -6,12 +6,12 @@ namespace Splitio.Services.Logger
 {
     public class MicrosoftExtensionsLogging : ISplitLogger
     {
-        private const int DefaultLoggingEvent = 5000;
+        private const int DefaultLoggingEvent = 0;
 
-        private static readonly ILoggerFactory _loggerFactory = new LoggerFactory();
+        private static ILoggerFactory _loggerFactory => Extensions.GetLoggerFactory() ?? new LoggerFactory();
 
         private readonly ILogger _logger;
-
+        
         public MicrosoftExtensionsLogging(Type type)
         {
             _logger = _loggerFactory.CreateLogger(type);
@@ -75,6 +75,23 @@ namespace Splitio.Services.Logger
         public void Warn(string message)
         {
             _logger.LogWarning(message);
+        }
+    }
+
+    public static class Extensions
+    {
+        private static ILoggerFactory _loggerFactory;
+
+        public static ILoggerFactory AddSplitLogs(this ILoggerFactory factory)
+        {
+            _loggerFactory = factory;
+
+            return factory;
+        }
+
+        public static ILoggerFactory GetLoggerFactory()
+        {
+            return _loggerFactory;
         }
     }
 }
