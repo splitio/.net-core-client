@@ -7,11 +7,11 @@ namespace Splitio.Services.Logger
     public class MicrosoftExtensionsLogging : ISplitLogger
     {
         private const int DefaultLoggingEvent = 0;
-
+        
         private static ILoggerFactory _loggerFactory => SplitLoggerFactoryExtensions.GetLoggerFactory() ?? new LoggerFactory();
 
         private readonly ILogger _logger;
-        
+
         public MicrosoftExtensionsLogging(Type type)
         {
             _logger = _loggerFactory.CreateLogger(type);
@@ -51,12 +51,7 @@ namespace Splitio.Services.Logger
         {
             _logger.LogInformation(message);
         }
-
-        public bool IsDebugEnabled()
-        {
-            return _logger.IsEnabled(LogLevel.Debug);
-        }
-
+        
         public void Trace(string message, Exception exception)
         {
             _logger.LogTrace(DefaultLoggingEvent, exception, message);
@@ -76,6 +71,8 @@ namespace Splitio.Services.Logger
         {
             _logger.LogWarning(message);
         }
+
+        public bool IsDebugEnabled => _logger.IsEnabled(LogLevel.Debug);
     }
 }
 #endif

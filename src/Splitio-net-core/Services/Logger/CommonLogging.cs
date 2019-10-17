@@ -47,12 +47,7 @@ namespace Splitio.Services.Logger
         {
             _logger.Info(message);
         }
-
-        public bool IsDebugEnabled()
-        {
-            return _logger.IsDebugEnabled;
-        }
-
+        
         public void Trace(string message, Exception exception)
         {
             _logger.Trace(message, exception);
@@ -72,6 +67,8 @@ namespace Splitio.Services.Logger
         {
             _logger.Warn(message);
         }
+
+        public bool IsDebugEnabled => _logger.IsDebugEnabled;
     }
 }
 #endif

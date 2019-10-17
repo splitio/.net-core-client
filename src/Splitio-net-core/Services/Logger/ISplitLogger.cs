@@ -15,6 +15,6 @@ namespace Splitio.Services.Logger
         void Warn(string message, Exception exception);
         void Warn(string message);
 
-        bool IsDebugEnabled();
+        bool IsDebugEnabled { get; }
     }
 }

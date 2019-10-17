@@ -47,7 +47,7 @@ namespace Splitio.Services.Client.Classes
                 if (splitsAreReady.IsSet)
                 {
                     _splitsReadyTimer.Stop();
-                    if (Log.IsDebugEnabled())
+                    if (Log.IsDebugEnabled)
                     {
                         Log.Debug($"Splits are ready in {_splitsReadyTimer.ElapsedMilliseconds} milliseconds");
                     }
@@ -69,7 +69,7 @@ namespace Splitio.Services.Client.Classes
 
             if (countDown.IsSet)
             {
-                if (Log.IsDebugEnabled())
+                if (Log.IsDebugEnabled)
                 {
                     Log.Debug(segmentName + " segment is ready");
                 }
@@ -91,7 +91,7 @@ namespace Splitio.Services.Client.Classes
             try
             {
                 segmentsAreReady.Add(segmentName, new CountdownEvent(1));
-                if (Log.IsDebugEnabled())
+                if (Log.IsDebugEnabled)
                 {
                     Log.Debug("Registered segment: " + segmentName);
                 }
@@ -133,7 +133,7 @@ namespace Splitio.Services.Client.Classes
             }
 
             _segmentsReadyTimer.Stop();
-            if (Log.IsDebugEnabled())
+            if (Log.IsDebugEnabled)
             {
                 Log.Debug($"Segments are ready in {_segmentsReadyTimer.ElapsedMilliseconds} milliseconds");
             }
