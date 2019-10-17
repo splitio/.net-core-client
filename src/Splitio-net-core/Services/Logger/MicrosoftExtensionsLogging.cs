@@ -8,7 +8,7 @@ namespace Splitio.Services.Logger
     {
         private const int DefaultLoggingEvent = 0;
 
-        private static ILoggerFactory _loggerFactory => Extensions.GetLoggerFactory() ?? new LoggerFactory();
+        private static ILoggerFactory _loggerFactory => SplitLoggerFactoryExtensions.GetLoggerFactory() ?? new LoggerFactory();
 
         private readonly ILogger _logger;
         
@@ -75,23 +75,6 @@ namespace Splitio.Services.Logger
         public void Warn(string message)
         {
             _logger.LogWarning(message);
-        }
-    }
-
-    public static class Extensions
-    {
-        private static ILoggerFactory _loggerFactory;
-
-        public static ILoggerFactory AddSplitLogs(this ILoggerFactory factory)
-        {
-            _loggerFactory = factory;
-
-            return factory;
-        }
-
-        public static ILoggerFactory GetLoggerFactory()
-        {
-            return _loggerFactory;
         }
     }
 }
