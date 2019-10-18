@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 {
     public class SelfRefreshingSegment
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSegment));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegment));
 
         public readonly string name;
         private readonly IReadinessGatesCache gates;

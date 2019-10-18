@@ -1,7 +1,7 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -16,7 +16,7 @@ namespace Splitio.Services.Impressions.Classes
         private ISimpleProducerCache<KeyImpression> impressionsCache;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(SelfUpdatingTreatmentLog));
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(SelfUpdatingTreatmentLog));
 
         public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient, int interval, ISimpleCache<KeyImpression> impressionsCache, int maximumNumberOfKeysToCache = -1)
         {

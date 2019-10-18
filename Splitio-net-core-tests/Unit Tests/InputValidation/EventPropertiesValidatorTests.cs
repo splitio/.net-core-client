@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 using Splitio_Tests.Resources;
 using System.Collections.Generic;
 
@@ -11,13 +11,13 @@ namespace Splitio_Tests.Unit_Tests.InputValidation
     [TestClass]
     public class EventPropertiesValidatorTests
     {
-        private Mock<ILog> _log;
+        private Mock<ISplitLogger> _log;
         private EventPropertiesValidator eventPropertiesValidator;
 
         [TestInitialize]
         public void Initialize()
         {
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
 
             eventPropertiesValidator = new EventPropertiesValidator(_log.Object);
         }

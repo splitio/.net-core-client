@@ -1,6 +1,4 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Domain;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Shared.Classes;
@@ -9,15 +7,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 {
     [TestClass]
     public class LocalhostClientUnitTests
-    {
-        private readonly Mock<ILog> _logMock;
-
+    {        
         private readonly string rootFilePath;
 
         public LocalhostClientUnitTests()
         {
-            _logMock = new Mock<ILog>();
-
             // This line is to clean the warnings.
             rootFilePath = string.Empty;
 
@@ -31,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void GetTreatmentShouldReturnControlIfSplitNotFound()
         {
             //Arrange
-            var splitClient = new LocalhostClient($"{rootFilePath}test.splits", _logMock.Object);
+            var splitClient = new LocalhostClient($"{rootFilePath}test.splits");
 
             //Act
             var result = splitClient.GetTreatment("test", "test");
@@ -44,7 +38,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [DeploymentItem(@"Resources\test.splits")]
         public void GetTreatmentShouldRunAsSingleKeyUsingNullBucketingKey()
         {
-            var splitClient = new LocalhostClient($"{rootFilePath}test.splits", _logMock.Object);
+            var splitClient = new LocalhostClient($"{rootFilePath}test.splits");
             splitClient.BlockUntilReady(1000);
 
             //Act
@@ -60,7 +54,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void TrackShouldNotStoreEvents()
         {
             //Arrange
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _logMock.Object);
+            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits");
             splitClient.BlockUntilReady(1000);
                       
             //Act
@@ -76,8 +70,8 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Destroy()
         {
             //Arrange
-            var _factoryInstantiationsService = FactoryInstantiationsService.Instance(_logMock.Object);
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _logMock.Object);
+            var _factoryInstantiationsService = FactoryInstantiationsService.Instance();
+            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits");
 
             //Act
             splitClient.BlockUntilReady(1000);
@@ -94,8 +88,8 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void Destroy_WhenIsDestroyed()
         {
             //Arrange
-            var _factoryInstantiationsService = FactoryInstantiationsService.Instance(_logMock.Object);
-            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", _logMock.Object, isDestroyed: true);
+            var _factoryInstantiationsService = FactoryInstantiationsService.Instance();
+            var splitClient = new LocalhostClientForTesting($"{rootFilePath}test.splits", isDestroyed: true);
 
             //Act
             splitClient.BlockUntilReady(1000);

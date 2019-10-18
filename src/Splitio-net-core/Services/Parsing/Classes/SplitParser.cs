@@ -1,8 +1,9 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Splitio.Services.Parsing
 {
     public abstract class SplitParser : ISplitParser
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SplitParser));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SplitParser));
         protected ISegmentCache segmentsCache;
 
         public ParsedSplit Parse(Split split)

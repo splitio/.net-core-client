@@ -1,5 +1,4 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
@@ -8,6 +7,7 @@ using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
@@ -67,7 +67,7 @@ namespace Splitio.Services.Client.Classes
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
-            ILog log) : base(log)
+            ISplitLogger log = null) : base(GetLogger(log))
         {
             Destroyed = false;
 
@@ -161,14 +161,14 @@ namespace Splitio.Services.Client.Classes
             splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
             splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, gates, splitsRefreshRate, splitCache);
 
-            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(TreatmentLogSize));
             treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
-            impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            impressionListener = new AsynchronousListener<KeyImpression>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
             ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
             if (config.ImpressionListener != null)
             {
@@ -180,7 +180,7 @@ namespace Splitio.Services.Client.Classes
         {
             eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(EventLogSize));
             eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
-            eventListener = new AsynchronousListener<WrappedEvent>(LogManager.GetLogger("AsynchronousEventListener"));
+            eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
             ((IAsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
         }
         
@@ -237,6 +237,11 @@ namespace Splitio.Services.Client.Classes
                         _wrapperAdapter.TaskDelay(500).Wait();
                     }
                 });
+        }
+
+        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
+        {
+            return splitLogger ?? WrapperAdapter.GetLogger(typeof(SelfRefreshingClient));
         }
         #endregion
     }

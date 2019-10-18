@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : ISplitCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemorySplitCache));
 
         private ConcurrentDictionary<string, ParsedSplit> _splits;
         private ConcurrentDictionary<string, int> _trafficTypes;

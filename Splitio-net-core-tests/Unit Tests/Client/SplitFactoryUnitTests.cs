@@ -78,12 +78,16 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientWithRedisConfigShouldReturnRedisSplitClient()
         {
             //Arrange
-            var configurationOptions = new ConfigurationOptions();
-            configurationOptions.Mode = Mode.Consumer;
-            configurationOptions.CacheAdapterConfig = new CacheAdapterConfigurationOptions();
-            configurationOptions.CacheAdapterConfig.Host = "local";
-            configurationOptions.CacheAdapterConfig.Port = "1234";
-            configurationOptions.CacheAdapterConfig.Password = "test";
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer,
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions
+                {
+                    Host = "local",
+                    Port = "1234",
+                    Password = "test"
+                }
+            };
 
             var factory = new SplitFactory("any", configurationOptions);
 

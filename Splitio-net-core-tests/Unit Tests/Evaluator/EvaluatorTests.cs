@@ -1,10 +1,10 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.EngineEvaluator;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
 using Splitio.Services.Parsing;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.Parsing.Interfaces;
@@ -17,7 +17,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
     public class EvaluatorTests
     {
         private readonly Mock<ISplitter> _splitter;
-        private readonly Mock<ILog> _log;
+        private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitParser> _splitParser;
         private readonly Mock<ISplitCache> _splitCache;
 
@@ -26,7 +26,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
         public EvaluatorTests()
         {
             _splitter = new Mock<ISplitter>();
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
             _splitParser = new Mock<ISplitParser>();
             _splitCache = new Mock<ISplitCache>();
 

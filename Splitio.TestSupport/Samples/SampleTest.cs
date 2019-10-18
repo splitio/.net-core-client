@@ -1,20 +1,19 @@
-﻿using Common.Logging;
-using Moq;
+﻿using Moq;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.Logger;
 using Xunit;
 
 namespace Splitio.TestSupport.Samples
 {
     public class SampleTest
     {
-        private readonly Mock<ILog> _logMock;
+        private readonly Mock<ISplitLogger> _logMock;
         
         private SplitClientForTest splitClient;
 
         public SampleTest()
         {
-            _logMock = new Mock<ILog>();
+            _logMock = new Mock<ISplitLogger>();
 
             splitClient = new SplitClientForTest(_logMock.Object);
         }

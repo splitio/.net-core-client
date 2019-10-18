@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,11 +11,11 @@ namespace Splitio.Services.InputValidation.Classes
     {
         private const string WHITESPACE = " ";
 
-        protected readonly ILog _log;
+        protected readonly ISplitLogger _log;
 
-        public SplitNameValidator(ILog log)
+        public SplitNameValidator(ISplitLogger log = null)
         {
-            _log = log;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(SplitNameValidator));
         }
 
         public List<string> SplitNamesAreValid(List<string> splitNames, string method)

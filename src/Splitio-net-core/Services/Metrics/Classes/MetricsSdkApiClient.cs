@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System.Net;
 
 namespace Splitio.Services.Metrics.Classes
@@ -9,7 +10,7 @@ namespace Splitio.Services.Metrics.Classes
     {
         private const string MetricsUrlTemplate = "/api/metrics/{endpoint}";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(MetricsSdkApiClient));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(MetricsSdkApiClient));
 
         public MetricsSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
             : base(header, baseUrl, connectionTimeOut, readTimeout)

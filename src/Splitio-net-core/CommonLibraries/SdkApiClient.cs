@@ -1,5 +1,6 @@
-﻿using Common.Logging;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -11,8 +12,9 @@ namespace Splitio.CommonLibraries
 {
     public class SdkApiClient : ISdkApiClient
     {
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
+
         private HttpClient httpClient;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SdkApiClient));
         protected IMetricsLog metricsLog;
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)

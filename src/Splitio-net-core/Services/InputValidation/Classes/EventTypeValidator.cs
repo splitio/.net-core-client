@@ -1,5 +1,6 @@
-﻿using Common.Logging;
-using Splitio.Services.InputValidation.Interfaces;
+﻿using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Text.RegularExpressions;
 
 namespace Splitio.Services.InputValidation.Classes
@@ -8,11 +9,11 @@ namespace Splitio.Services.InputValidation.Classes
     {
         private const string REGEX = "^[a-zA-Z0-9][-_.:a-zA-Z0-9]{0,79}$";
 
-        protected readonly ILog _log;
+        protected readonly ISplitLogger _log;
 
-        public EventTypeValidator(ILog log)
+        public EventTypeValidator(ISplitLogger log = null)
         {
-            _log = log;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(EventTypeValidator));
         }
 
         public bool IsValid(string eventType, string method)

@@ -1,9 +1,9 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitClientUnitTests
     {        
-        private Mock<ILog> _logMock;
+        private Mock<ISplitLogger> _logMock;
         private Mock<IListener<WrappedEvent>> _eventListenerMock;
         private Mock<ISplitCache> _splitCacheMock;
         private Mock<IListener<KeyImpression>> _impressionListenerMock;
@@ -25,7 +25,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         [TestInitialize]
         public void TestInitialize()
         {
-            _logMock = new Mock<ILog>();
+            _logMock = new Mock<ISplitLogger>();
             _splitCacheMock = new Mock<ISplitCache>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
@@ -52,7 +52,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -68,7 +67,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -84,7 +82,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -123,7 +120,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -140,7 +136,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -461,8 +456,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
             }
-
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -482,8 +475,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
             }
-
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -614,7 +605,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -630,7 +620,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -646,7 +635,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -689,7 +677,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _logMock.Verify(mock => mock.Warn("Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
             _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties != null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")

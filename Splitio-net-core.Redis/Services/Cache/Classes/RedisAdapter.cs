@@ -1,5 +1,6 @@
-﻿using Common.Logging;
-using Splitio.Redis.Services.Cache.Interfaces;
+﻿using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using StackExchange.Redis;
 using System;
 using System.Linq;
@@ -8,14 +9,19 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisAdapter : IRedisAdapter
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(RedisAdapter));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
 
         private ConnectionMultiplexer redis;
         private IDatabase database;
         private IServer server;
 
-        public RedisAdapter(string host, string port, string password = "", int databaseNumber = 0,
-            int connectTimeout = 0, int connectRetry = 0, int syncTimeout = 0)
+        public RedisAdapter(string host, 
+            string port, 
+            string password = "", 
+            int databaseNumber = 0,
+            int connectTimeout = 0, 
+            int connectRetry = 0, 
+            int syncTimeout = 0)
         {
             try
             {
@@ -26,7 +32,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error(string.Format("Exception caught building Redis Adapter '{0}:{1}': ", host, port), e);
+                _log.Error(string.Format("Exception caught building Redis Adapter '{0}:{1}': ", host, port), e);
             }
         }
 
@@ -67,7 +73,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Set", e);
+                _log.Error("Exception calling Redis Adapter Set", e);
                 return false;
             }
         }
@@ -80,7 +86,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Get", e);
+                _log.Error("Exception calling Redis Adapter Get", e);
                 return string.Empty;
             }
         }
@@ -93,7 +99,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Get", e);
+                _log.Error("Exception calling Redis Adapter Get", e);
                 return new RedisValue[0];
             }
         }
@@ -107,7 +113,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Keys", e);
+                _log.Error("Exception calling Redis Adapter Keys", e);
                 return new RedisKey[0];
             }
         }
@@ -120,7 +126,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Del", e);
+                _log.Error("Exception calling Redis Adapter Del", e);
                 return false;
             }
         }
@@ -133,7 +139,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Del", e);
+                _log.Error("Exception calling Redis Adapter Del", e);
                 return 0;
             }
         }
@@ -146,7 +152,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter SAdd", e);
+                _log.Error("Exception calling Redis Adapter SAdd", e);
                 return false;
             }
         }
@@ -159,7 +165,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter SAdd", e);
+                _log.Error("Exception calling Redis Adapter SAdd", e);
                 return 0;
             }
         }
@@ -172,7 +178,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter SRem", e);
+                _log.Error("Exception calling Redis Adapter SRem", e);
                 return 0;
             }
         }
@@ -185,7 +191,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter SIsMember", e);
+                _log.Error("Exception calling Redis Adapter SIsMember", e);
                 return false;
             }
         }
@@ -198,7 +204,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter SMembers", e);
+                _log.Error("Exception calling Redis Adapter SMembers", e);
                 return new RedisValue[0];
             }
         }
@@ -211,7 +217,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter IcrBy", e);
+                _log.Error("Exception calling Redis Adapter IcrBy", e);
                 return 0;
             }
         }
@@ -224,7 +230,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter ListRightPush", e);
+                _log.Error("Exception calling Redis Adapter ListRightPush", e);
                 return 0;
             }
         }
@@ -237,7 +243,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter Flush", e);
+                _log.Error("Exception calling Redis Adapter Flush", e);
             }
         }
 
@@ -249,7 +255,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter KeyExpire", e);
+                _log.Error("Exception calling Redis Adapter KeyExpire", e);
                 return false;
             }
         }
@@ -262,7 +268,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter ListRightPush", e);
+                _log.Error("Exception calling Redis Adapter ListRightPush", e);
                 return 0;
             }
         }
@@ -275,7 +281,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception calling Redis Adapter ListRange", e);
+                _log.Error("Exception calling Redis Adapter ListRange", e);
                 return new RedisValue[0];
             }
         }

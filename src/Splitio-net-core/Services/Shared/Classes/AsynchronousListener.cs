@@ -1,4 +1,4 @@
-﻿using Common.Logging;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,10 +9,10 @@ namespace Splitio.Services.Shared.Classes
 {
     public class AsynchronousListener<T> : IAsynchronousListener<T>
     {
-        protected readonly ILog _logger;
+        protected readonly ISplitLogger _logger;
         private List<IListener<T>> workers = new List<IListener<T>>();
 
-        public AsynchronousListener(ILog logger)
+        public AsynchronousListener(ISplitLogger logger)
         {
             _logger = logger;
         }

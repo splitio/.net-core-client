@@ -1,5 +1,4 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -13,14 +12,12 @@ namespace Splitio_Tests.Integration_Tests
     [TestClass]
     public class LocalhostClientTests
     {
-        private readonly Mock<ILog> _logMock;
         private readonly Mock<IFactoryInstantiationsService> _factoryInstantiationsServiceMock;
 
         private readonly string rootFilePath;
 
         public LocalhostClientTests()
         {
-            _logMock = new Mock<ILog>();
             _factoryInstantiationsServiceMock = new Mock<IFactoryInstantiationsService>();
 
             // This line is to clean the warnings.
@@ -36,7 +33,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}test.splits", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}test.splits");
 
             client.BlockUntilReady(1000);
 
@@ -59,7 +56,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentSuccessfullyWhenUpdatingSplitsFile()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}test.splits", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}test.splits");
 
             client.BlockUntilReady(1000);
 
@@ -88,7 +85,7 @@ namespace Splitio_Tests.Integration_Tests
         public void ClientDestroySuccessfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}test.splits", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}test.splits");
 
             client.BlockUntilReady(1000);
 
@@ -120,7 +117,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yaml");
 
             client.BlockUntilReady(1000);
 
@@ -152,7 +149,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yaml");
 
             client.BlockUntilReady(1000);
 
@@ -191,7 +188,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatment_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yml");
 
             client.BlockUntilReady(1000);
 
@@ -223,7 +220,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentWithConfig_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yml");
 
             client.BlockUntilReady(1000);
 
@@ -262,7 +259,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yaml");
 
             client.BlockUntilReady(1000);
 
@@ -299,7 +296,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenIsYamlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yaml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yaml");
 
             client.BlockUntilReady(1000);
 
@@ -350,7 +347,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatments_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yml");
 
             client.BlockUntilReady(1000);
 
@@ -387,7 +384,7 @@ namespace Splitio_Tests.Integration_Tests
         public void GetTreatmentsWithConfig_WhenIsYmlFile_Successfully()
         {
             //Arrange
-            var client = new LocalhostClient($"{rootFilePath}split.yml", _logMock.Object);
+            var client = new LocalhostClient($"{rootFilePath}split.yml");
 
             client.BlockUntilReady(1000);
 
