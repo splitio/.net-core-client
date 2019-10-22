@@ -298,6 +298,24 @@ namespace Splitio_Tests.Unit_Tests.Cache
         }
         #endregion
 
+        [TestMethod]
+        public void FetchMany_VerifyMGetCall_Once()
+        {
+            // Arrange.
+            var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
+
+            _redisAdapterMock
+                .Setup(mock => mock.Get(It.IsAny<RedisKey[]>()))
+                .Returns(new RedisValue[3]);
+
+            // Act.
+            var result = _redisSplitCache.FetchMany(splitNames);
+
+            // Assert.
+            _redisAdapterMock.Verify(mock => mock.Get(It.IsAny<RedisKey[]>()), Times.Once);
+            _redisAdapterMock.Verify(mock => mock.Get(It.IsAny<string>()), Times.Never);
+        }
+
         private Split BuildSplit(string splitName)
         {
             return new Split

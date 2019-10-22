@@ -148,5 +148,19 @@ namespace Splitio.Services.Cache.Classes
                 _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
             }
         }
+
+        public List<ParsedSplit> FetchMany(List<string> splitNames)
+        {
+            var splits = new List<ParsedSplit>();
+
+            foreach (var name in splitNames)
+            {
+                splits.Add(GetSplit(name));
+            }
+
+            return splits
+                .Where(s => s != null)
+                .ToList();
+        }
     }
 }

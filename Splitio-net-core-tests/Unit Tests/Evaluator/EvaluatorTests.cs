@@ -47,11 +47,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
-            Assert.AreEqual(Labels.LabelSplitNotFound, result.Label);
+            Assert.AreEqual(Labels.SplitNotFound, result.Label);
             _log.Verify(mock => mock.Warn($"GetTreatment: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
         }
 
@@ -76,12 +76,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelKilled, result.Label);
+            Assert.AreEqual(Labels.Killed, result.Label);
         }
 
         [TestMethod]
@@ -105,12 +105,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelDefaultRule, result.Label);
+            Assert.AreEqual(Labels.DefaultRule, result.Label);
         }
 
         [TestMethod]
@@ -162,12 +162,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelTrafficAllocationFailed, result.Label);
+            Assert.AreEqual(Labels.TrafficAllocationFailed, result.Label);
         }
 
         [TestMethod]
@@ -227,7 +227,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -290,7 +290,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName, attributes);
+            var result = _evaluator.Evaluate(key, splitName, attributes);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -347,11 +347,11 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual("off", result.Treatment);
-            Assert.AreEqual(Labels.LabelDefaultRule, result.Label);
+            Assert.AreEqual(Labels.DefaultRule, result.Label);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
         }
 
@@ -432,7 +432,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.EvaluateFeature(key, splitName);
+            var result = _evaluator.Evaluate(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -553,12 +553,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             _splitCache
-                .Setup(mock => mock.GetSplit(parsedSplitOff.name))
-                .Returns(parsedSplitOff);
-
-            _splitCache
-                .Setup(mock => mock.GetSplit(parsedSplitOn.name))
-                .Returns(parsedSplitOn);
+                .Setup(mock => mock.FetchMany(It.IsAny<List<string>>()))
+                .Returns(new List<ParsedSplit>
+                {
+                    parsedSplitOff,
+                    parsedSplitOn
+                });
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOn.algo))
@@ -569,7 +569,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("off");
 
             // Act.
-            var result = _evaluator.EvaluateFeatures(key, splitNames);
+            var result = _evaluator.EvaluateMany(key, splitNames);
 
             // Assert.
             var resultOn = result.TreatmentResults.FirstOrDefault(tr => tr.Key.Equals("always_on"));

@@ -22,5 +22,7 @@ namespace Splitio.Services.Cache.Interfaces
         void Clear();
 
         bool TrafficTypeExists(string trafficType);
+
+        List<ParsedSplit> FetchMany(List<string> splitNames);
     }
 }

@@ -93,7 +93,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("definition not found", "control", null));
 
             // Act
@@ -165,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", treatmentExpected, null, configExpected));
 
             // Act
@@ -204,7 +204,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             // Act
@@ -234,7 +234,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(parsedSplit);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", treatmentExpected, null));
 
             _blockUntilReadyService
@@ -273,7 +273,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
 
             // Act
@@ -308,7 +308,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
 
             // Act
@@ -367,7 +367,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(parsedSplit);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", treatmentExpected, config: configExpected));
 
             _blockUntilReadyService
@@ -405,7 +405,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
 
             // Act
@@ -425,7 +425,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Setup(mock => mock.Evaluate(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new TreatmentResult("definition not found", "control"));
 
             // Act
@@ -530,7 +530,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(parsedSplitOff);
 
             _evaluatorMock
-                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .SetupSequence(mock => mock.EvaluateMany(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new MultipleEvaluatorResult
                 {
                     TreatmentResults = new Dictionary<string, TreatmentResult>
@@ -568,7 +568,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Returns(true);
 
             _evaluatorMock
-                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .SetupSequence(mock => mock.EvaluateMany(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
                 .Returns(new MultipleEvaluatorResult
                 {
                     TreatmentResults = new Dictionary<string, TreatmentResult>

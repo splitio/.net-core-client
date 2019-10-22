@@ -7,6 +7,7 @@ using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Splitio.Services.Evaluator
 {
@@ -31,7 +32,7 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Method
-        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
+        public TreatmentResult Evaluate(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
             var clock = new Stopwatch();
             clock.Start();
@@ -40,14 +41,72 @@ namespace Splitio.Services.Evaluator
             {
                 var parsedSplit = _splitCache.GetSplit(featureName);
 
+                return EvaluateTreatment(key, parsedSplit, featureName, clock, attributes);
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
+
+                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+            }
+        }
+
+        public MultipleEvaluatorResult EvaluateMany(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        {
+            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
+            var clock = new Stopwatch();
+            clock.Start();
+
+            try
+            {
+                var splits = _splitCache.FetchMany(featureNames);
+
+                foreach (var feature in featureNames)
+                {
+                    var split = splits.FirstOrDefault(s => feature.Equals(s?.name));
+
+                    var result = EvaluateTreatment(key, split, feature, attributes: attributes);
+
+                    treatmentsForFeatures.Add(feature, result);
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Exception caught getting treatments", e);
+
+                foreach (var name in featureNames)
+                {
+                    treatmentsForFeatures.Add(name, new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds));
+                }
+            }
+
+            return new MultipleEvaluatorResult
+            {
+                TreatmentResults = treatmentsForFeatures,
+                ElapsedMilliseconds = clock.ElapsedMilliseconds
+            };
+        }
+        #endregion
+
+        #region Private Methods
+        private TreatmentResult EvaluateTreatment(Key key, ParsedSplit parsedSplit, string featureName, Stopwatch clock = null, Dictionary<string, object> attributes = null)
+        {
+            try
+            {
+                if (clock == null)
+                {
+                    clock = new Stopwatch();
+                    clock.Start();
+                }
+
                 if (parsedSplit == null)
                 {
                     _log.Warn($"GetTreatment: you passed {featureName} that does not exist in this environment, please double check what Splits exist in the web console.");
 
-                    return new TreatmentResult(Labels.LabelSplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+                    return new TreatmentResult(Labels.SplitNotFound, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
                 }
 
-                var treatmentResult = EvalTreatment(key, parsedSplit, attributes);
+                var treatmentResult = GetTreatmentResult(key, parsedSplit, attributes);
 
                 if (parsedSplit.configurations != null && parsedSplit.configurations.ContainsKey(treatmentResult.Treatment))
                 {
@@ -62,37 +121,15 @@ namespace Splitio.Services.Evaluator
             {
                 _log.Error($"Exception caught getting treatment for feature: {featureName}", e);
 
-                return new TreatmentResult(Labels.LabelException, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
+                return new TreatmentResult(Labels.Exception, Control, elapsedMilliseconds: clock.ElapsedMilliseconds);
             }
         }
 
-        public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
-        {
-            var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
-            var clock = new Stopwatch();
-            clock.Start();
-            
-            foreach (var feature in featureNames)
-            {
-                var result = EvaluateFeature(key, feature, attributes);
-
-                treatmentsForFeatures.Add(feature, result);
-            }
-
-            return new MultipleEvaluatorResult
-            {
-                TreatmentResults = treatmentsForFeatures,
-                ElapsedMilliseconds = clock.ElapsedMilliseconds
-            };
-        }
-        #endregion
-
-        #region Private Methods
-        private TreatmentResult EvalTreatment(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
+        private TreatmentResult GetTreatmentResult(Key key, ParsedSplit split, Dictionary<string, object> attributes = null)
         {
             if (split.killed)
             {
-                return new TreatmentResult(Labels.LabelKilled, split.defaultTreatment, split.changeNumber);
+                return new TreatmentResult(Labels.Killed, split.defaultTreatment, split.changeNumber);
             }
 
             var inRollout = false;
@@ -109,7 +146,7 @@ namespace Splitio.Services.Evaluator
 
                         if (bucket > split.trafficAllocation)
                         {
-                            return new TreatmentResult(Labels.LabelTrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
+                            return new TreatmentResult(Labels.TrafficAllocationFailed, split.defaultTreatment, split.changeNumber);
                         }
                     }
 
@@ -126,7 +163,7 @@ namespace Splitio.Services.Evaluator
                 }
             }
 
-            return new TreatmentResult(Labels.LabelDefaultRule, split.defaultTreatment, split.changeNumber);   
+            return new TreatmentResult(Labels.DefaultRule, split.defaultTreatment, split.changeNumber);   
         }
         #endregion
     }
