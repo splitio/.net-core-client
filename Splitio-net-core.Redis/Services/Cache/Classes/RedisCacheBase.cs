@@ -5,39 +5,49 @@ namespace Splitio.Redis.Services.Cache.Classes
     public abstract class RedisCacheBase
     {
         private const string RedisKeyPrefixFormat = "SPLITIO/{sdk-language-version}/{instance-id}/";
-        protected IRedisAdapter redisAdapter;
-        protected string redisKeyPrefix;
 
+        protected IRedisAdapter _redisAdapter;
+
+        protected string RedisKeyPrefix;
         protected string UserPrefix;
         protected string SdkVersion;
         protected string MachineIp;
+        protected string MachineName;
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, string userPrefix = null)
+        public RedisCacheBase(IRedisAdapter redisAdapter, 
+            string userPrefix = null)
         {
+            _redisAdapter = redisAdapter;
+
             UserPrefix = userPrefix;
-            this.redisAdapter = redisAdapter;
-            redisKeyPrefix = "SPLITIO.";
+            RedisKeyPrefix = "SPLITIO.";
 
             if (!string.IsNullOrEmpty(userPrefix))
             {
-                redisKeyPrefix = userPrefix + "." + redisKeyPrefix;
+                RedisKeyPrefix = userPrefix + "." + RedisKeyPrefix;
             }
         }
 
-        public RedisCacheBase(IRedisAdapter redisAdapter, string machineIP, string sdkVersion, string userPrefix = null)
+        public RedisCacheBase(IRedisAdapter redisAdapter, 
+            string machineIP, 
+            string sdkVersion, 
+            string machineName, 
+            string userPrefix = null)
         {
+            _redisAdapter = redisAdapter;
+
             UserPrefix = userPrefix;
             MachineIp = machineIP;
             SdkVersion = sdkVersion;
+            MachineName = machineName;
 
-            this.redisAdapter = redisAdapter;
-            redisKeyPrefix = RedisKeyPrefixFormat
+            RedisKeyPrefix = RedisKeyPrefixFormat
                 .Replace("{sdk-language-version}", sdkVersion)
                 .Replace("{instance-id}", machineIP);
 
             if (!string.IsNullOrEmpty(userPrefix))
             {
-                redisKeyPrefix = userPrefix + "." + redisKeyPrefix;
+                RedisKeyPrefix = userPrefix + "." + RedisKeyPrefix;
             }
         }
     }

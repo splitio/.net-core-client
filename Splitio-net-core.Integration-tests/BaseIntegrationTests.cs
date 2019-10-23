@@ -1083,7 +1083,7 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual(treatment, impression.treatment);
         }
         
-        protected abstract ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null);
+        protected abstract ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null);
 
         protected abstract void ShutdownServer(HttpClientMock httpClientMock = null);
 

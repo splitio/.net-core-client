@@ -17,38 +17,16 @@ namespace Splitio.Services.Shared.Classes
         public ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log)
         {
             var data = new ReadConfigData();
-
-            try
-            {
-                data.SdkMachineName = config.SdkMachineName ?? Environment.MachineName;
-            }
-            catch (Exception e)
-            {
-                data.SdkMachineName = "unknown";
-                log.Warn("Exception retrieving machine name.", e);
-            }
+            var ipAddressesEnabled = config.IPAddressesEnabled ?? true;
 
             data.SdkSpecVersion = ".NET-" + SplitSpecVersion();
-
-            try
-            {
 #if NETSTANDARD
-                data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();                
-
-                var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
-                hostAddressesTask.Wait();
-                data.SdkMachineIP = config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+            data.SdkVersion = ".NET_CORE-" + SplitSdkVersion();
 #else
-                data.SdkVersion = ".NET-" + SplitSdkVersion();
-
-                data.SdkMachineIP = config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+            data.SdkVersion = ".NET-" + SplitSdkVersion();
 #endif
-            }
-            catch (Exception e)
-            {
-                data.SdkMachineIP = "unknown";
-                log.Warn("Exception retrieving machine IP.", e);
-            }
+            data.SdkMachineName = GetSdkMachineName(config, ipAddressesEnabled, log);
+            data.SdkMachineIP = GetSdkMachineIP(config, ipAddressesEnabled, log);
 
             return data;
         }
@@ -98,9 +76,61 @@ namespace Splitio.Services.Shared.Classes
 #endif
         }
 
+        #region Private Methods
         private string SplitSpecVersion()
         {
             return "1.0";
         }
+
+        private string GetSdkMachineName(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        {
+            if (ipAddressesEnabled)
+            {
+                try
+                {
+                    return config.SdkMachineName ?? Environment.MachineName;
+                }
+                catch (Exception e)
+                {
+                    log.Warn("Exception retrieving machine name.", e);
+                    return "unknown";
+                }
+            }
+            else if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            {
+                return "NA";
+            }
+
+            return string.Empty;
+        }
+
+        private string GetSdkMachineIP(ConfigurationOptions config, bool ipAddressesEnabled, ISplitLogger log)
+        {
+            if (ipAddressesEnabled)
+            {
+                try
+                {
+#if NETSTANDARD
+                    var hostAddressesTask = Dns.GetHostAddressesAsync(Environment.MachineName);
+                    hostAddressesTask.Wait();
+                    return config.SdkMachineIP ?? hostAddressesTask.Result.Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#else
+                    return config.SdkMachineIP ?? Dns.GetHostAddresses(Environment.MachineName).Where(x => x.AddressFamily == AddressFamily.InterNetwork && x.IsIPv6LinkLocal == false).Last().ToString();
+#endif
+                }
+                catch (Exception e)
+                {
+                    log.Warn("Exception retrieving machine IP.", e);
+                    return "unknown";
+                }
+            }
+            else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
+            {
+                return "NA";
+            }
+
+            return string.Empty;
+        }
+        #endregion
     }
 }

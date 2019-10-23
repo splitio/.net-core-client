@@ -11,11 +11,12 @@ namespace Splitio.Redis.Services.Cache.Classes
 {
     public class RedisImpressionsCache : RedisCacheBase, ISimpleCache<IList<KeyImpression>>
     {
-        private const string impressionKeyPrefix = "impressions.";
-
-        public RedisImpressionsCache(IRedisAdapter redisAdapter, string machineIP, string sdkVersion, string userPrefix = null)
-            : base(redisAdapter, machineIP, sdkVersion, userPrefix) 
-        {}
+        public RedisImpressionsCache(IRedisAdapter redisAdapter, 
+            string machineIP, 
+            string sdkVersion, 
+            string machineName, 
+            string userPrefix = null) : base(redisAdapter, machineIP, sdkVersion, machineName, userPrefix) 
+        { }
 
         public void AddItem(IList<KeyImpression> items)
         {
@@ -23,15 +24,15 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             var impressions = items.Select(item => JsonConvert.SerializeObject(new
             {
-                m = new { s = SdkVersion, i = MachineIp, n = Environment.MachineName },
+                m = new { s = SdkVersion, i = MachineIp, n = MachineName },
                 i = new { k = item.keyName, b = item.bucketingKey, f = item.feature, t = item.treatment, r = item.label, c = item.changeNumber, m = item.time }
             }));
 
-            var lengthRedis = redisAdapter.ListRightPush(key, impressions.Select(i => (RedisValue)i).ToArray());
+            var lengthRedis = _redisAdapter.ListRightPush(key, impressions.Select(i => (RedisValue)i).ToArray());
 
             if (lengthRedis == items.Count)
             {
-                redisAdapter.KeyExpire(key, new TimeSpan(0, 0, 3600));
+                _redisAdapter.KeyExpire(key, new TimeSpan(0, 0, 3600));
             }
         }
     }

@@ -170,6 +170,7 @@ namespace Splitio.Services.Client.Classes
             treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
             impressionListener = new AsynchronousListener<KeyImpression>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
             ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
+
             if (config.ImpressionListener != null)
             {
                 ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
@@ -198,12 +199,15 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSdkApiClients()
         {
-            var header = new HTTPHeader();
-            header.authorizationApiKey = ApiKey;
-            header.splitSDKVersion = SdkVersion;
-            header.splitSDKSpecVersion = SdkSpecVersion;
-            header.splitSDKMachineName = SdkMachineName;
-            header.splitSDKMachineIP = SdkMachineIP;
+            var header = new HTTPHeader
+            {
+                authorizationApiKey = ApiKey,
+                splitSDKVersion = SdkVersion,
+                splitSDKSpecVersion = SdkSpecVersion,
+                splitSDKMachineName = SdkMachineName,
+                splitSDKMachineIP = SdkMachineIP
+            };
+
             metricsSdkApiClient = new MetricsSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
             BuildMetricsLog();
             splitSdkApiClient = new SplitSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, metricsLog);

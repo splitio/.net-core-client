@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Cache.Classes;
-using Splitio.Services.Metrics.Interfaces;
-using System.Linq;
-using StackExchange.Redis;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Metrics.Interfaces;
+using StackExchange.Redis;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests.Cache
 {
@@ -23,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
             redisAdapterMock.Setup(x => x.IcrBy(metricsCountKeyPrefix + "counter_test", 150)).Returns(150);
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             var result = cache.IncrementCount("counter_test", 150);
@@ -42,7 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.IcrBy(metricsCountKeyPrefix + "counter_test", 150)).Returns(150);
             redisAdapterMock.Setup(x => x.IcrBy(metricsCountKeyPrefix + "counter_test", 10)).Returns(160);
 
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             cache.IncrementCount("counter_test", 150);
@@ -62,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var currentBucketPattern = bucketsPattern.Replace("*", "0");
             redisAdapterMock.Setup(x => x.Keys(bucketsPattern)).Returns(new RedisKey[]{ currentBucketPattern });
             redisAdapterMock.Setup(x => x.Get(currentBucketPattern)).Returns("1");
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             cache.SetLatency("time_test", 1);
@@ -88,7 +86,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.Keys(bucketsPattern)).Returns(new RedisKey[] { currentBucketPattern, currentBucketPattern2 });
             redisAdapterMock.Setup(x => x.Get(currentBucketPattern)).Returns("1");
             redisAdapterMock.Setup(x => x.Get(currentBucketPattern2)).Returns("2");
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             cache.SetLatency("time_test", 1);
@@ -113,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var redisAdapterMock = new Mock<IRedisAdapter>();
             redisAdapterMock.Setup(x => x.Set(metricsGaugeKeyPrefix + "gauge_test", "150"));
             redisAdapterMock.Setup(x => x.Get(metricsGaugeKeyPrefix + "gauge_test")).Returns("150");
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             cache.SetGauge("gauge_test", 150);
@@ -132,7 +130,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.Set(metricsGaugeKeyPrefix + "gauge_test", "1234"));
             redisAdapterMock.Setup(x => x.Set(metricsGaugeKeyPrefix + "gauge_test", "4567"));
             redisAdapterMock.Setup(x => x.Get(metricsGaugeKeyPrefix + "gauge_test")).Returns("4567");
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             cache.SetGauge("gauge_test", 1234);
@@ -155,7 +153,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.Get(metricsCountKeyPrefix + "counter_test")).Returns("150");
             redisAdapterMock.Setup(x => x.Get(metricsCountKeyPrefix + "counter_test_2")).Returns("124");
 
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
             cache.IncrementCount("counter_test", 150);
             cache.IncrementCount("counter_test_2", 123);
             cache.IncrementCount("counter_test_2", 1);
@@ -184,7 +182,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.Get(metricsGaugeKeyPrefix + "gauge_test")).Returns("1234");
             redisAdapterMock.Setup(x => x.Get(metricsGaugeKeyPrefix + "gauge_test_1")).Returns("4567");
 
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
             cache.SetGauge("gauge_test", 1234);
             cache.SetGauge("gauge_test_1", 4567);
 
@@ -219,7 +217,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             redisAdapterMock.Setup(x => x.Get(currentBucketPattern3)).Returns("1");
 
 
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
             cache.SetLatency("time_test", 1);
             cache.SetLatency("time_test", 9);
             cache.SetLatency("time_test", 8);

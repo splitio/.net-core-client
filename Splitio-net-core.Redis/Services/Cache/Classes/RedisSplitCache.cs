@@ -26,8 +26,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public long GetChangeNumber()
         {
-            var key = redisKeyPrefix + splitsKeyPrefix + "till";
-            var changeNumberString = redisAdapter.Get(key);
+            var key = $"{RedisKeyPrefix}{splitsKeyPrefix}till";
+            var changeNumberString = _redisAdapter.Get(key);
             var result = long.TryParse(changeNumberString, out long changeNumberParsed);
             
             return result ? changeNumberParsed : -1;
@@ -35,8 +35,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public ParsedSplit GetSplit(string splitName)
         {
-            var key = redisKeyPrefix + splitKeyPrefix + splitName;
-            var splitJson = redisAdapter.Get(key);
+            var key = $"{RedisKeyPrefix}{splitKeyPrefix}{splitName}";
+            var splitJson = _redisAdapter.Get(key);
 
             if (string.IsNullOrEmpty(splitJson))
                 return null;
@@ -48,9 +48,9 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public List<ParsedSplit> GetAllSplits()
         {
-            var pattern = redisKeyPrefix + splitKeyPrefix + "*";
-            var splitKeys = redisAdapter.Keys(pattern);
-            var splitValues = redisAdapter.MGet(splitKeys);
+            var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
+            var splitKeys = _redisAdapter.Keys(pattern);
+            var splitValues = _redisAdapter.MGet(splitKeys);
 
             if (splitValues != null && splitValues.Any())
             {
@@ -68,8 +68,8 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public List<string> GetKeys()
         {
-            var pattern = redisKeyPrefix + splitKeyPrefix + "*";
-            var splitKeys = redisAdapter.Keys(pattern);
+            var pattern = $"{RedisKeyPrefix}{splitKeyPrefix}*";
+            var splitKeys = _redisAdapter.Keys(pattern);
             var result = splitKeys.Select(x => x.ToString()).ToList();
 
             return result;
@@ -84,7 +84,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             if (string.IsNullOrEmpty(trafficType)) return false;
 
-            var value = redisAdapter.Get(GetTrafficTypeKey(trafficType));
+            var value = _redisAdapter.Get(GetTrafficTypeKey(trafficType));
 
             var quantity = value ?? "0";
 
@@ -95,7 +95,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         private string GetTrafficTypeKey(string type)
         {
-            return $"{redisKeyPrefix}trafficType.{type}";
+            return $"{RedisKeyPrefix}trafficType.{type}";
         }
 
         public void AddSplit(string splitName, SplitBase split)
@@ -136,10 +136,10 @@ namespace Splitio.Redis.Services.Cache.Classes
 
             foreach (var name in splitNames)
             {
-                redisKey.Add($"{redisKeyPrefix}{splitKeyPrefix}{name}");
+                redisKey.Add($"{RedisKeyPrefix}{splitKeyPrefix}{name}");
             }
                         
-            var splitValues = redisAdapter.MGet(redisKey.ToArray());
+            var splitValues = _redisAdapter.MGet(redisKey.ToArray());
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
 
