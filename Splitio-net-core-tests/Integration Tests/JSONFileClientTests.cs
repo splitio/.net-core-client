@@ -93,7 +93,11 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
-            splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
+
+            splitCacheMock
+                .Setup(x => x.GetSplit(It.IsAny<string>()))
+                .Throws<Exception>();
+
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
 
             //Act           
@@ -315,7 +319,11 @@ namespace Splitio_Tests.Integration_Tests
             //Arrange
             var treatmentLogMock = new Mock<IListener<KeyImpression>>();
             var splitCacheMock = new Mock<ISplitCache>();
-            splitCacheMock.Setup(x => x.GetSplit(It.IsAny<string>())).Throws<Exception>();
+
+            splitCacheMock
+                .Setup(x => x.GetSplit(It.IsAny<string>()))
+                .Throws<Exception>();
+
             var client = new JSONFileClient($"{rootFilePath}splits_staging_3.json", "", _logMock.Object, null, splitCacheMock.Object, treatmentLogMock.Object);
 
             client.BlockUntilReady(1000);

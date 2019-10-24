@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Parsing.Interfaces;
+using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,7 +50,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var pattern = redisKeyPrefix + splitKeyPrefix + "*";
             var splitKeys = redisAdapter.Keys(pattern);
-            var splitValues = redisAdapter.Get(splitKeys);
+            var splitValues = redisAdapter.MGet(splitKeys);
 
             if (splitValues != null && splitValues.Any())
             {
@@ -125,6 +126,30 @@ namespace Splitio.Redis.Services.Cache.Classes
         public void Flush()
         {
             throw new System.NotImplementedException();
+        }
+
+        public List<ParsedSplit> FetchMany(List<string> splitNames)
+        {
+            if (!splitNames.Any()) return new List<ParsedSplit>();
+
+            var redisKey = new List<RedisKey>();
+
+            foreach (var name in splitNames)
+            {
+                redisKey.Add($"{redisKeyPrefix}{splitKeyPrefix}{name}");
+            }
+                        
+            var splitValues = redisAdapter.MGet(redisKey.ToArray());
+
+            if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
+
+            var splits = splitValues
+                .Where(s => !s.IsNull)
+                .Select(s => _splitParser.Parse(JsonConvert.DeserializeObject<Split>(s)));
+
+            return splits
+                .Where(s => s != null)
+                .ToList();
         }
     }
 }

@@ -2,11 +2,11 @@
 {
     public class Labels
     {
-        public static string LabelKilled => "killed";
-        public static string LabelDefaultRule => "default rule";
-        public static string LabelSplitNotFound => "definition not found";
-        public static string LabelException => "exception";
-        public static string LabelTrafficAllocationFailed => "not in split";
-        public static string LabelClientNotReady => "not ready";
+        public static string Killed => "killed";
+        public static string DefaultRule => "default rule";
+        public static string SplitNotFound => "definition not found";
+        public static string Exception => "exception";
+        public static string TrafficAllocationFailed => "not in split";
+        public static string ClientNotReady => "not ready";
     }
 }

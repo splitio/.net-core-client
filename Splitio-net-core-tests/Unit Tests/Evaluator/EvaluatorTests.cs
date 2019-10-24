@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
-            Assert.AreEqual(Labels.LabelSplitNotFound, result.Label);
+            Assert.AreEqual(Labels.SplitNotFound, result.Label);
             _log.Verify(mock => mock.Warn($"GetTreatment: you passed {splitName} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
         }
 
@@ -81,7 +81,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelKilled, result.Label);
+            Assert.AreEqual(Labels.Killed, result.Label);
         }
 
         [TestMethod]
@@ -110,7 +110,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelDefaultRule, result.Label);
+            Assert.AreEqual(Labels.DefaultRule, result.Label);
         }
 
         [TestMethod]
@@ -167,7 +167,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
-            Assert.AreEqual(Labels.LabelTrafficAllocationFailed, result.Label);
+            Assert.AreEqual(Labels.TrafficAllocationFailed, result.Label);
         }
 
         [TestMethod]
@@ -351,7 +351,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
 
             // Assert.
             Assert.AreEqual("off", result.Treatment);
-            Assert.AreEqual(Labels.LabelDefaultRule, result.Label);
+            Assert.AreEqual(Labels.DefaultRule, result.Label);
             Assert.AreEqual(parsedSplit.changeNumber, result.ChangeNumber);
         }
 
@@ -553,12 +553,12 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             _splitCache
-                .Setup(mock => mock.GetSplit(parsedSplitOff.name))
-                .Returns(parsedSplitOff);
-
-            _splitCache
-                .Setup(mock => mock.GetSplit(parsedSplitOn.name))
-                .Returns(parsedSplitOn);
+                .Setup(mock => mock.FetchMany(It.IsAny<List<string>>()))
+                .Returns(new List<ParsedSplit>
+                {
+                    parsedSplitOff,
+                    parsedSplitOn
+                });
 
             _splitter
                 .Setup(mock => mock.GetTreatment(key.bucketingKey, parsedSplitOn.seed, It.IsAny<List<PartitionDefinition>>(), parsedSplitOn.algo))

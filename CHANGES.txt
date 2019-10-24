@@ -1,6 +1,10 @@
 CHANGES
 
-5.0.3 (Coming soon)
+6.0.0 (Oct 30, 2019)
+- BREAKING CHANGE: Changed our logging framework implementation for .NET Core sdk. We use Microsoft.Extensions.Logging now.
+- Improved the performance of the getTreatments() and getTreatmentsWithConfig() call, by minimizing the amount of calls to redis when fetching splits.
+
+5.0.3 (Oct 10, 2019)
 - Refactor Evaluator.
 - Added Integration Tests.
 

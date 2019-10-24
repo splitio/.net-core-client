@@ -26,10 +26,6 @@ namespace Splitio.Services.Client.Classes
         protected readonly IWrapperAdapter _wrapperAdapter;
 
         protected const string Control = "control";
-        protected const string SdkGetTreatment = "sdk.getTreatment";
-        protected const string SdkGetTreatments = "sdk.getTreatments";
-        protected const string SdkGetTreatmentWithConfig = "sdk.getTreatmentWithConfig";
-        protected const string SdkGetTreatmentsWithConfig = "sdk.getTreatmentsWithConfig";
 
         protected bool LabelsEnabled;
         protected bool Destroyed;
@@ -74,7 +70,7 @@ namespace Splitio.Services.Client.Classes
 
         public SplitResult GetTreatmentWithConfig(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, SdkGetTreatmentWithConfig, nameof(GetTreatmentWithConfig), attributes);
+            var result = GetTreatmentResult(key, feature, Operations.SdkGetTreatmentWithConfig, nameof(GetTreatmentWithConfig), attributes);
 
             return new SplitResult
             {
@@ -90,7 +86,7 @@ namespace Splitio.Services.Client.Classes
 
         public virtual string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
-            var result = GetTreatmentResult(key, feature, SdkGetTreatment, nameof(GetTreatment), attributes);
+            var result = GetTreatmentResult(key, feature, Operations.SdkGetTreatment, nameof(GetTreatment), attributes);
 
             return result.Treatment;
         }
@@ -102,7 +98,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, SplitResult> GetTreatmentsWithConfig(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, SdkGetTreatmentsWithConfig, nameof(GetTreatmentsWithConfig), attributes);
+            var results = GetTreatmentsResult(key, features, Operations.SdkGetTreatmentsWithConfig, nameof(GetTreatmentsWithConfig), attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => new SplitResult
@@ -119,7 +115,7 @@ namespace Splitio.Services.Client.Classes
 
         public Dictionary<string, string> GetTreatments(Key key, List<string> features, Dictionary<string, object> attributes = null)
         {
-            var results = GetTreatmentsResult(key, features, SdkGetTreatments, nameof(GetTreatments), attributes);
+            var results = GetTreatmentsResult(key, features, Operations.SdkGetTreatments, nameof(GetTreatments), attributes);
 
             return results
                 .ToDictionary(r => r.Key, r => r.Value.Treatment);
@@ -242,7 +238,7 @@ namespace Splitio.Services.Client.Classes
                 metricsLog.Time(operation, result.ElapsedMilliseconds);
             }
 
-            if (!Labels.LabelSplitNotFound.Equals(result.Label))
+            if (!Labels.SplitNotFound.Equals(result.Label))
             {
                 ImpressionLog(new List<KeyImpression>
                 {
@@ -279,7 +275,7 @@ namespace Splitio.Services.Client.Classes
                 {
                     treatmentsForFeatures.Add(treatmentResult.Key, treatmentResult.Value);
 
-                    if (!Labels.LabelSplitNotFound.Equals(treatmentResult.Value.Label))
+                    if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
                     {
                         ImpressionsQueue.Add(BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
                     }
