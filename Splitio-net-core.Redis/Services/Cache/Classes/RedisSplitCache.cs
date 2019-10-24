@@ -50,7 +50,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             var pattern = redisKeyPrefix + splitKeyPrefix + "*";
             var splitKeys = redisAdapter.Keys(pattern);
-            var splitValues = redisAdapter.Get(splitKeys);
+            var splitValues = redisAdapter.MGet(splitKeys);
 
             if (splitValues != null && splitValues.Any())
             {
@@ -139,7 +139,7 @@ namespace Splitio.Redis.Services.Cache.Classes
                 redisKey.Add($"{redisKeyPrefix}{splitKeyPrefix}{name}");
             }
                         
-            var splitValues = redisAdapter.Get(redisKey.ToArray());
+            var splitValues = redisAdapter.MGet(redisKey.ToArray());
 
             if (splitValues == null || !splitValues.Any()) return new List<ParsedSplit>();
 

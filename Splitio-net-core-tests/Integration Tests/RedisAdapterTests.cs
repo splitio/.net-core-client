@@ -68,7 +68,7 @@ namespace Splitio_Tests.Integration_Tests
             var isSet3 = adapter.Set("test_key3", "test_value3");
 
             //Act
-            var result = adapter.Get(new RedisKey[]{"test_key", "test_key2", "test_key3"});
+            var result = adapter.MGet(new RedisKey[]{"test_key", "test_key2", "test_key3"});
 
             //Assert
             Assert.IsNotNull(result);
@@ -86,7 +86,7 @@ namespace Splitio_Tests.Integration_Tests
             var adapter = new RedisAdapter("", "", "");
 
             //Act
-            var result = adapter.Get(new RedisKey[] { "test_key", "test_key2", "test_key3" });
+            var result = adapter.MGet(new RedisKey[] { "test_key", "test_key2", "test_key3" });
 
             //Assert
             Assert.AreEqual(0, result.Count());

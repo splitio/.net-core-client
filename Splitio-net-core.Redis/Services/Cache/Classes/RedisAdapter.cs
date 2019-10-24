@@ -91,7 +91,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             }
         }
 
-        public RedisValue[] Get(RedisKey[] keys)
+        public RedisValue[] MGet(RedisKey[] keys)
         {
             try
             {
