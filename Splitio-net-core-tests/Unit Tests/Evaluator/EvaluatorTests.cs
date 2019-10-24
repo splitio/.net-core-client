@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("control", result.Treatment);
@@ -76,7 +76,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -105,7 +105,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -162,7 +162,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(18);
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual(parsedSplit.defaultTreatment, result.Treatment);
@@ -227,7 +227,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -290,7 +290,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName, attributes);
+            var result = _evaluator.EvaluateFeature(key, splitName, attributes);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -347,7 +347,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns(parsedSplit);
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("off", result.Treatment);
@@ -432,7 +432,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("on");
 
             // Act.
-            var result = _evaluator.Evaluate(key, splitName);
+            var result = _evaluator.EvaluateFeature(key, splitName);
 
             // Assert.
             Assert.AreEqual("on", result.Treatment);
@@ -569,7 +569,7 @@ namespace Splitio_Tests.Unit_Tests.Evaluator
                 .Returns("off");
 
             // Act.
-            var result = _evaluator.EvaluateMany(key, splitNames);
+            var result = _evaluator.EvaluateFeatures(key, splitNames);
 
             // Assert.
             var resultOn = result.TreatmentResults.FirstOrDefault(tr => tr.Key.Equals("always_on"));

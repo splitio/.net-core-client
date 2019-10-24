@@ -32,7 +32,7 @@ namespace Splitio.Services.Evaluator
         }
 
         #region Public Method
-        public TreatmentResult Evaluate(Key key, string featureName, Dictionary<string, object> attributes = null)
+        public TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null)
         {
             var clock = new Stopwatch();
             clock.Start();
@@ -51,7 +51,7 @@ namespace Splitio.Services.Evaluator
             }
         }
 
-        public MultipleEvaluatorResult EvaluateMany(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
+        public MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null)
         {
             var treatmentsForFeatures = new Dictionary<string, TreatmentResult>();
             var clock = new Stopwatch();

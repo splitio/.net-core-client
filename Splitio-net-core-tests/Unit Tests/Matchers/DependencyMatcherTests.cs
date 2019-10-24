@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -41,7 +41,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -76,7 +76,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -96,7 +96,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -137,7 +137,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -157,7 +157,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act
@@ -177,7 +177,7 @@ namespace Splitio_Tests.Unit_Tests
             var evaluatorMock = new Mock<IEvaluator>();
 
             evaluatorMock
-                .Setup(mock => mock.Evaluate(key, "test1", null))
+                .Setup(mock => mock.EvaluateFeature(key, "test1", null))
                 .Returns(new TreatmentResult("label", "on"));
 
             //Act

@@ -23,7 +23,7 @@ namespace Splitio.Services.Parsing.Classes
                 return false;
             }
 
-            var result = evaluator.Evaluate(key, Split, attributes);
+            var result = evaluator.EvaluateFeature(key, Split, attributes);
 
             return Treatments.Contains(result.Treatment);
         }

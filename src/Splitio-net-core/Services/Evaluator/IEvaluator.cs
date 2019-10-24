@@ -5,7 +5,7 @@ namespace Splitio.Services.Evaluator
 {
     public interface IEvaluator
     {
-        TreatmentResult Evaluate(Key key, string featureName, Dictionary<string, object> attributes = null);
-        MultipleEvaluatorResult EvaluateMany(Key key, List<string> featureNames, Dictionary<string, object> attributes = null);        
+        TreatmentResult EvaluateFeature(Key key, string featureName, Dictionary<string, object> attributes = null);
+        MultipleEvaluatorResult EvaluateFeatures(Key key, List<string> featureNames, Dictionary<string, object> attributes = null);        
     }
 }

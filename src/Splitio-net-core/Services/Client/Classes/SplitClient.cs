@@ -231,7 +231,7 @@ namespace Splitio.Services.Client.Classes
 
             feature = splitNameResult.Value;
 
-            var result = _evaluator.Evaluate(key, feature, attributes);
+            var result = _evaluator.EvaluateFeature(key, feature, attributes);
 
             if (metricsLog != null)
             {
@@ -269,7 +269,7 @@ namespace Splitio.Services.Client.Classes
             {
                 features = _splitNameValidator.SplitNamesAreValid(features, method);
                 
-                var results = _evaluator.EvaluateMany(key, features, attributes);
+                var results = _evaluator.EvaluateFeatures(key, features, attributes);
 
                 foreach (var treatmentResult in results.TreatmentResults)
                 {
