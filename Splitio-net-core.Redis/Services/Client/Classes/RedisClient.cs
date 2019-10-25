@@ -97,8 +97,8 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildParser();
             splitCache = new RedisSplitCache(redisAdapter, _splitParser, RedisUserPrefix);
             
-            metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
-            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
+            metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
+            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
             eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
 
             _trafficTypeValidator = new TrafficTypeValidator(splitCache);

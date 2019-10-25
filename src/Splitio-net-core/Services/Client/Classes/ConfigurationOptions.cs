@@ -28,5 +28,6 @@ namespace Splitio.Services.Client.Classes
         public bool? LabelsEnabled { get; set; }
         public IImpressionListener ImpressionListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
+        public bool? IPAddressesEnabled { get; set; }
     }
 }

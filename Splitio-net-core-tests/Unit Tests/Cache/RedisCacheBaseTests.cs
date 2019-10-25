@@ -118,7 +118,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
             redisAdapterMock.Setup(x => x.IcrBy("SPLITIO/net-1.0.2/10.0.0.1/count.counter_test", 150)).Returns(150);
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
 
             //Act
             var result = cache.IncrementCount("counter_test", 150);
@@ -135,7 +135,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
             //Arrange
             var redisAdapterMock = new Mock<IRedisAdapter>();
             redisAdapterMock.Setup(x => x.IcrBy("mycompany.SPLITIO/net-1.0.2/10.0.0.1/count.counter_test", 150)).Returns(150);
-            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "mycompany");
+            var cache = new RedisMetricsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test", "mycompany");
 
             //Act
             var result = cache.IncrementCount("counter_test", 150);

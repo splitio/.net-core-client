@@ -157,8 +157,78 @@ namespace Splitio_net_core.Integration_tests
             ShutdownServer(httpClientMock);
         }
 
+        [TestMethod]
+        public void CheckingHeaders_WithIPAddressesEnabled_ReturnsWithIpAndName()
+        {
+            // Arrange.           
+            var httpClientMock = GetHttpClientMock();
+            var configurations = GetConfigurationOptions(httpClientMock);
+
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+            // Assert.
+            Assert.AreEqual("on", treatmentResult);
+
+            Thread.Sleep(5000);
+
+            var requests = httpClientMock.GetLogs();
+            
+            foreach (var req in requests)
+            {
+                Assert.IsTrue(req
+                    .RequestMessage
+                    .Headers
+                    .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
+            }
+            
+            ShutdownServer(httpClientMock);
+        }
+
+        [TestMethod]
+        public void CheckingHeaders_WithIPAddressesDisabled_ReturnsWithoutIpAndName()
+        {
+            // Arrange.           
+            var httpClientMock = GetHttpClientMock();
+            var configurations = GetConfigurationOptions(httpClientMock, ipAddressesEnabled: false);
+
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var treatmentResult = client.GetTreatment("nico_test", "FACUNDO_TEST");
+
+            // Assert.
+            Assert.AreEqual("on", treatmentResult);
+
+            Thread.Sleep(5000);
+
+            var requests = httpClientMock.GetLogs();
+
+            foreach (var req in requests)
+            {
+                Assert.IsFalse(req
+                    .RequestMessage
+                    .Headers
+                    .Any(h => h.Key.Equals("SplitSDKMachineIP") || h.Key.Equals("SplitSDKMachineName")));
+            }
+
+            ShutdownServer(httpClientMock);
+        }
+
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null)
+        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
         {
             _impressionListener = new IntegrationTestsImpressionListener(50);
 
@@ -174,7 +244,8 @@ namespace Splitio_net_core.Integration_tests
                 ImpressionsRefreshRate = 1,
                 MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
-                EventsQueueSize = eventsQueueSize
+                EventsQueueSize = eventsQueueSize,
+                IPAddressesEnabled = ipAddressesEnabled
             };
         }
 

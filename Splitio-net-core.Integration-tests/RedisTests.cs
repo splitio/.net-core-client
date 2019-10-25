@@ -34,9 +34,131 @@ namespace Splitio_net_core.Integration_tests
             rootFilePath = @"Resources\";
 #endif
         }
-        
+
+        [TestMethod]
+        public void CheckingMachineIpAndMachineName_WithIPAddressesEnabled_ReturnsIpAndName()
+        {
+            // Arrange.
+            GetHttpClientMock();
+            var configurations = GetConfigurationOptions();
+
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            var treatmentResult2 = client.GetTreatment("nico_test", "FACUNDO_TEST");
+            var treatmentResult3 = client.GetTreatment("redo_test", "FACUNDO_TEST");
+            var trackResult1 = client.Track("mauro", "user", "event_type");
+            var trackResult2 = client.Track("nicolas", "user_2", "event_type_2");
+            var trackResult3 = client.Track("redo", "user_3", "event_type_3");
+
+            // Assert.
+            Thread.Sleep(1500);
+
+            // Impressions
+            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+
+            foreach (var item in redisImpressions)
+            {
+                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+
+                Assert.AreNotEqual("NA", impression.M.I);
+                Assert.AreNotEqual("NA", impression.M.N);
+            }
+
+            // Events 
+            var sdkVersion = string.Empty;
+            var redisEvents = _redisAdapter.ListRange("SPLITIO.events");
+
+            foreach (var item in redisEvents)
+            {
+                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+
+                Assert.AreNotEqual("NA", eventRedis.M.I);
+                Assert.AreNotEqual("NA", eventRedis.M.N);
+
+                sdkVersion = eventRedis.M.S;
+            }
+
+            // Metrics
+            var keys = _redisAdapter.Keys($"SPLITIO/{sdkVersion}/*");
+
+            foreach (var key in keys)
+            {
+                Assert.IsFalse(key.ToString().Contains("/NA/"));
+            }
+
+            ShutdownServer();
+        }
+
+        [TestMethod]
+        public void CheckingMachineIpAndMachineName_WithIPAddressesDisabled_ReturnsNA()
+        {
+            // Arrange.           
+            GetHttpClientMock();
+            var configurations = GetConfigurationOptions(ipAddressesEnabled: false);
+
+            var apikey = "apikey1";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(10000);
+
+            // Act.
+            var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
+            var treatmentResult2 = client.GetTreatment("nico_test", "FACUNDO_TEST");
+            var treatmentResult3 = client.GetTreatment("redo_test", "FACUNDO_TEST");
+            var trackResult1 = client.Track("mauro", "user", "event_type");
+            var trackResult2 = client.Track("nicolas", "user_2", "event_type_2");
+            var trackResult3 = client.Track("redo", "user_3", "event_type_3");
+
+            // Assert.
+            Thread.Sleep(1500);
+
+            // Impressions
+            var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
+
+            foreach (var item in redisImpressions)
+            {
+                var impression = JsonConvert.DeserializeObject<KeyImpressionRedis>(item);
+
+                Assert.AreEqual("NA", impression.M.I);
+                Assert.AreEqual("NA", impression.M.N);
+            }
+
+            // Events 
+            var sdkVersion = string.Empty;
+            var redisEvents = _redisAdapter.ListRange("SPLITIO.events");
+
+            foreach (var item in redisEvents)
+            {
+                var eventRedis = JsonConvert.DeserializeObject<EventRedis>(item);
+
+                Assert.AreEqual("NA", eventRedis.M.I);
+                Assert.AreEqual("NA", eventRedis.M.N);
+
+                sdkVersion = eventRedis.M.S;
+            }
+
+            // Metrics
+            var keys = _redisAdapter.Keys($"SPLITIO/{sdkVersion}/*");
+
+            foreach (var key in keys)
+            {
+                Assert.IsTrue(key.ToString().Contains("/NA/"));
+            }
+
+            ShutdownServer();
+        }
+
         #region Protected Methods
-        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null)
+        protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
         {
             _impressionListener = new IntegrationTestsImpressionListener(50);
 
@@ -64,7 +186,8 @@ namespace Splitio_net_core.Integration_tests
                 MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 Mode = Mode.Consumer,
-                CacheAdapterConfig = cacheConfig
+                CacheAdapterConfig = cacheConfig,
+                IPAddressesEnabled = ipAddressesEnabled
             };
         }
 
@@ -83,8 +206,6 @@ namespace Splitio_net_core.Integration_tests
         protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
             Thread.Sleep(1500);
-
-            var actualImpressions = new List<KeyImpressionRedis>();
 
             var redisImpressions = _redisAdapter.ListRange("SPLITIO.impressions");
 
