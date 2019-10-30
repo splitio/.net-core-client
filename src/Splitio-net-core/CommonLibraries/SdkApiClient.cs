@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -32,17 +33,19 @@ namespace Splitio.CommonLibraries
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", header.authorizationApiKey);
             httpClient.DefaultRequestHeaders.Add("SplitSDKVersion", header.splitSDKVersion);
             httpClient.DefaultRequestHeaders.Add("SplitSDKSpecVersion", header.splitSDKSpecVersion);
-            if (!string.IsNullOrEmpty(header.splitSDKMachineName))
-            {
-                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineName", header.splitSDKMachineName);
-            }
-            if (!string.IsNullOrEmpty(header.splitSDKMachineIP))
-            {
-                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
-            }
             httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
             httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            if (!string.IsNullOrEmpty(header.splitSDKMachineName) && !header.splitSDKMachineName.Equals(Constans.Unknown))
+            {
+                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineName", header.splitSDKMachineName);
+            }
+
+            if (!string.IsNullOrEmpty(header.splitSDKMachineIP) && !header.splitSDKMachineIP.Equals(Constans.Unknown))
+            {
+                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
+            }
 
             //TODO: find a way to store it in sepparated parameters
             httpClient.Timeout = TimeSpan.FromMilliseconds((connectionTimeOut + readTimeout));
