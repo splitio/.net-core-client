@@ -93,12 +93,12 @@ namespace Splitio.Services.Shared.Classes
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine name.", e);
-                    return "unknown";
+                    return Constans.Unknown;
                 }
             }
             else if(config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
-                return "NA";
+                return Constans.NA;
             }
 
             return string.Empty;
@@ -121,12 +121,12 @@ namespace Splitio.Services.Shared.Classes
                 catch (Exception e)
                 {
                     log.Warn("Exception retrieving machine IP.", e);
-                    return "unknown";
+                    return Constans.Unknown;
                 }
             }
             else if (config.CacheAdapterConfig?.Type == AdapterType.Redis)
             {
-                return "NA";
+                return Constans.NA;
             }
 
             return string.Empty;
