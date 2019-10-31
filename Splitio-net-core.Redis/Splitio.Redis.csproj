@@ -4,7 +4,9 @@
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
     <AssemblyName>Splitio.Redis</AssemblyName>
     <PackageId>Splitio.Redis</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
+      $(PackageTargetFallback);dnxcore50
+    </PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
