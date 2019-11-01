@@ -1,19 +1,20 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Linq;
 
 namespace Splitio.Services.InputValidation.Classes
 {
     public class TrafficTypeValidator : ITrafficTypeValidator
     {
-        private readonly ILog _log;
+        private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
 
-        public TrafficTypeValidator(ILog log, ISplitCache splitCache)
+        public TrafficTypeValidator(ISplitCache splitCache, ISplitLogger log = null)
         {
-            _log = log;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(TrafficTypeValidator));
             _splitCache = splitCache;
         }
 

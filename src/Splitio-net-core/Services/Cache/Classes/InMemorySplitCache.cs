@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySplitCache : ISplitCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySplitCache));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemorySplitCache));
 
         private ConcurrentDictionary<string, ParsedSplit> _splits;
         private ConcurrentDictionary<string, int> _trafficTypes;
@@ -35,6 +36,8 @@ namespace Splitio.Services.Cache.Classes
 
         public bool AddOrUpdate(string splitName, SplitBase split)
         {
+            if (split == null) return false;
+
             var parsedSplit = (ParsedSplit)split;
 
             var exists = _splits.TryGetValue(splitName, out ParsedSplit oldSplit);
@@ -88,16 +91,19 @@ namespace Splitio.Services.Cache.Classes
             return _changeNumber;
         }
 
-        public SplitBase GetSplit(string splitName)
+        public ParsedSplit GetSplit(string splitName)
         {
             _splits.TryGetValue(splitName, out ParsedSplit value);
 
             return value;
         }
 
-        public List<SplitBase> GetAllSplits()
+        public List<ParsedSplit> GetAllSplits()
         {            
-            return _splits.Values.ToList<SplitBase>();            
+            return _splits
+                .Values
+                .Where(s => s != null)
+                .ToList();
         }
 
         public void Clear()
@@ -141,6 +147,20 @@ namespace Splitio.Services.Cache.Classes
 
                 _trafficTypes.TryUpdate(split.trafficTypeName, newQuantity, quantity);
             }
+        }
+
+        public List<ParsedSplit> FetchMany(List<string> splitNames)
+        {
+            var splits = new List<ParsedSplit>();
+
+            foreach (var name in splitNames)
+            {
+                splits.Add(GetSplit(name));
+            }
+
+            return splits
+                .Where(s => s != null)
+                .ToList();
         }
     }
 }

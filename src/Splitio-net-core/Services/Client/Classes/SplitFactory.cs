@@ -1,4 +1,3 @@
-using Common.Logging;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
@@ -12,7 +11,6 @@ namespace Splitio.Services.Client.Classes
     public class SplitFactory
     {
         private readonly IApiKeyValidator _apiKeyValidator;
-        private readonly ILog _log;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
         private readonly string _apiKey;
 
@@ -26,9 +24,8 @@ namespace Splitio.Services.Client.Classes
             _apiKey = apiKey;
             _options = options;
 
-            _log = LogManager.GetLogger(typeof(SplitClient));
-            _apiKeyValidator = new ApiKeyValidator(_log);
-            _factoryInstantiationsService = FactoryInstantiationsService.Instance(_log);
+            _apiKeyValidator = new ApiKeyValidator();
+            _factoryInstantiationsService = FactoryInstantiationsService.Instance();
         }
 
         public ISplitClient Client()
@@ -45,11 +42,6 @@ namespace Splitio.Services.Client.Classes
         {
             _options = _options ?? new ConfigurationOptions();
 
-            if (!_options.Ready.HasValue)
-            {
-                _log.Warn("no ready parameter has been set - incorrect control treatments could be logged if no ready config has been set when building factory");
-            }
-
             _apiKeyValidator.Validate(_apiKey);
 
             switch (_options.Mode)
@@ -61,11 +53,11 @@ namespace Splitio.Services.Client.Classes
                     }
                     if (_apiKey == "localhost")
                     {
-                        _client = new LocalhostClient(_options.LocalhostFilePath, _log);
+                        _client = new LocalhostClient(_options.LocalhostFilePath);
                     }
                     else
                     {
-                        _client = new SelfRefreshingClient(_apiKey, _options, _log);
+                        _client = new SelfRefreshingClient(_apiKey, _options);
                     }
                     break;
                 case Mode.Consumer:
@@ -81,7 +73,7 @@ namespace Splitio.Services.Client.Classes
                             var redisAssembly = Assembly.Load(new AssemblyName("Splitio-net-core.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
-                            _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _log, _apiKey });
+                            _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, null });
 
                         }
                         catch (Exception e)

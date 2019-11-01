@@ -15,12 +15,14 @@ namespace Splitio.Services.Cache.Interfaces
 
         long GetChangeNumber();
 
-        SplitBase GetSplit(string splitName);
+        ParsedSplit GetSplit(string splitName);
 
-        List<SplitBase> GetAllSplits();
+        List<ParsedSplit> GetAllSplits();
 
         void Clear();
 
         bool TrafficTypeExists(string trafficType);
+
+        List<ParsedSplit> FetchMany(List<string> splitNames);
     }
 }

@@ -1,0 +1,10 @@
+language: minimal
+
+addons:
+  sonarqube: true
+
+git:
+  depth: false
+
+script:
+  - bash sonar-scanner.sh

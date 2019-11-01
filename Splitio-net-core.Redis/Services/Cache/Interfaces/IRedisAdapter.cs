@@ -9,7 +9,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
 
         string Get(string key);
 
-        RedisValue[] Get(RedisKey[] keys);
+        RedisValue[] MGet(RedisKey[] keys);
 
         RedisKey[] Keys(string pattern);
 
@@ -38,5 +38,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         bool IsConnected();
 
         bool KeyExpire(string key, TimeSpan expiry);
+
+        RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1);
     }
 }

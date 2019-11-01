@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Services.Parsing.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,15 @@ namespace Splitio_Tests.Unit_Tests.Cache
         private const string trafficTypeKeyPrefix = "SPLITIO.trafficType.";
 
         private readonly Mock<IRedisAdapter> _redisAdapterMock;
+        private readonly Mock<ISplitParser> _splitParserMock;
         private readonly RedisSplitCache _redisSplitCache;
 
         public RedisSplitCacheTests()
         {
             _redisAdapterMock = new Mock<IRedisAdapter>();
+            _splitParserMock = new Mock<ISplitParser>();
 
-            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object);
+            _redisSplitCache = new RedisSplitCache(_redisAdapterMock.Object, _splitParserMock.Object);
         }
 
         [TestMethod]
@@ -95,15 +98,19 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var split = BuildSplit(splitName);
             var split2 = BuildSplit(splitName2);
             var splitJson = JsonConvert.SerializeObject(split);
-            var splitJson2 = JsonConvert.SerializeObject(split);
+            var splitJson2 = JsonConvert.SerializeObject(split2);
 
             _redisAdapterMock
                 .Setup(x => x.Keys(splitKeyPrefix + "*"))
                 .Returns(new RedisKey[] { "test_split", "test_split2" });
 
             _redisAdapterMock
-                .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
+                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
                 .Returns(new RedisValue[] { splitJson, splitJson2 });
+
+            _splitParserMock
+                .Setup(mock => mock.Parse(It.IsAny<Split>()))
+                .Returns(new ParsedSplit());                
 
             //Act
             var result = _redisSplitCache.GetAllSplits();
@@ -121,7 +128,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Returns(new RedisKey[] { });
 
             _redisAdapterMock
-                .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
+                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
                 .Returns(new RedisValue[] { });
 
             //Act
@@ -143,7 +150,7 @@ namespace Splitio_Tests.Unit_Tests.Cache
                 .Returns(new RedisKey[] { });
 
             _redisAdapterMock
-                .Setup(x => x.Get(It.IsAny<RedisKey[]>()))
+                .Setup(x => x.MGet(It.IsAny<RedisKey[]>()))
                 .Returns(expectedResult);
 
             //Act
@@ -290,6 +297,24 @@ namespace Splitio_Tests.Unit_Tests.Cache
             Assert.IsFalse(result);
         }
         #endregion
+
+        [TestMethod]
+        public void FetchMany_VerifyMGetCall_Once()
+        {
+            // Arrange.
+            var splitNames = new List<string> { "Split_1", "Split_2", "Split_3" };
+
+            _redisAdapterMock
+                .Setup(mock => mock.MGet(It.IsAny<RedisKey[]>()))
+                .Returns(new RedisValue[3]);
+
+            // Act.
+            var result = _redisSplitCache.FetchMany(splitNames);
+
+            // Assert.
+            _redisAdapterMock.Verify(mock => mock.MGet(It.IsAny<RedisKey[]>()), Times.Once);
+            _redisAdapterMock.Verify(mock => mock.Get(It.IsAny<string>()), Times.Never);
+        }
 
         private Split BuildSplit(string splitName)
         {

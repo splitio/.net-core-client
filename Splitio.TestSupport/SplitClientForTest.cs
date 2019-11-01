@@ -1,5 +1,5 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Client.Classes
@@ -8,7 +8,7 @@ namespace Splitio.Services.Client.Classes
     {
         private Dictionary<string, string> _tests;
 
-        public SplitClientForTest(ILog log) : base(log)
+        public SplitClientForTest(ISplitLogger log) : base(log)
         {
             _tests = new Dictionary<string, string>();
         }
@@ -44,19 +44,14 @@ namespace Splitio.Services.Client.Classes
             return _tests.ContainsKey(feature) ? _tests[feature] : "control";
         }
 
-        public string GetTreatment(string key, string feature, Dictionary<string, object> attributes)
+        public override string GetTreatment(string key, string feature, Dictionary<string, object> attributes = null)
         {
-            return this.GetTreatment(key, feature);
+            return GetTreatment(key, feature);
         }
 
-        public string GetTreatment(Key key, string feature, Dictionary<string, object> attributes)
+        public override string GetTreatment(Key key, string feature, Dictionary<string, object> attributes = null)
         {
             return _tests.ContainsKey(feature) ? _tests[feature] : "control";
-        }
-
-        public override void BlockUntilReady(int blockMilisecondsUntilReady)
-        {
-            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
     }
 }

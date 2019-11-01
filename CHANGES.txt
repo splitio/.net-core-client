@@ -1,13 +1,23 @@
 CHANGES
 
-5.0.2
+6.0.0 (Nov 1, 2019)
+- BREAKING CHANGE: Changed our logging framework implementation for .NET Core sdk. We use Microsoft.Extensions.Logging now.
+- Improved the performance of the getTreatments() and getTreatmentsWithConfig() call, by minimizing the amount of calls to redis when fetching splits.
+- Added IPAddressesEnabled to enable/disable sending MachineName and MachineIP headers when data is posted to Split Servers.
+- Added support for NET core 3.0. 
+
+5.0.3 (Oct 10, 2019)
+- Refactor Evaluator.
+- Added Integration Tests.
+
+5.0.2 (Oct 02, 2019)
 - Avoid unnecessary dependencies for .Net Framework 4.5+
 
-5.0.1
+5.0.1 (Sep 16, 2019)
 - Added HttpClientMock for improved Integration Tests.
 - Merged NET and NET Core repositories to improved our productivity and code.
 
-5.0.0
+5.0.0 (Jul 22, 2019)
 - BREAKING CHANGE: Moving block until ready out of the factory into the split client and manager client.
 - Added validation for traffic type name when calling track.
 - Added new label when the sdk is not ready.
@@ -57,62 +67,47 @@ CHANGES
 - Solved Issue 94: Invalid Api key causes high CPU usage
 
 3.3.1
-
 - Bug fix on RedisSplitManager.
 
 3.3.0
-
-- Changed Splitio package to support just Standalone mode, and added Splitio.Redis package 
-for Consumer mode.
+- Changed Splitio package to support just Standalone mode, and added Splitio.Redis package for Consumer mode.
 - Included Splitio.TestSupport framework, for unit testing.
 
 3.2.1
-
 - Updated Split Manager to return treatments from ROLLOUT condition.
 
 3.2.0
-
 - Support for Boolean and Regex matchers.
 - Support for Dependency Matcher.
 - Support for Client Destroy using In Memory mode.
 
 3.1.2
-
 - Changed logging approach by supporting Common.Logging integration. Client can configure its already existing logging system 
 by using Common.Logging adapter, to be used in Splitio SDK.
 
 3.1.1
-
 - Bug fixes.
 
 3.1.0
-
 - Support for new string and set matchers: ContainsAllOfSet, ContainsAnyOfSet, ContainsString, EndsWith, EqualToSet, PartOfSet and StartsWith.
 
 3.0.1
-
 - Bug fixes.
 
 3.0.0
-
 - New hashing algorithm for splitter: Murmur hash. 
 
 1.1.1
-
- - Support for Impression Listener on configurations
+- Support for Impression Listener on configurations
 
 1.1.0
-
- - Support for Traffic Allocation
+- Support for Traffic Allocation
 
 1.0.2
-
- - NLog logger can be configured by user. If not configured, the SDK will use default log file in 'Logs\split-sdk.log'
+- NLog logger can be configured by user. If not configured, the SDK will use default log file in 'Logs\split-sdk.log'
 
 1.0.1
- 
-  - No changes for this update
+- No changes for this update
 
 1.0.0
-
- - First release of Split.io SDK for Net Core
+- First release of Split.io SDK for Net Core

@@ -1,7 +1,8 @@
-﻿using Common.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,13 +22,13 @@ namespace Splitio.Services.Metrics.Classes
         private object countMetricsLockObject = new Object();
         private object timeMetricsLockObject = new Object();
         private object gaugeMetricsLockObject = new Object();
-        private Boolean sendingCountMetrics = false;
-        private Boolean sendingTimeMetrics = false;
-        private Boolean sendingGaugeMetrics = false;
+        private bool sendingCountMetrics = false;
+        private bool sendingTimeMetrics = false;
+        private bool sendingGaugeMetrics = false;
         private int gaugeCallCount = 0;
 
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(InMemoryMetricsLog));
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(InMemoryMetricsLog));
 
         public InMemoryMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = 1000, int maxTimeBetweenCalls = 60)
         {

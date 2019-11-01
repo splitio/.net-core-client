@@ -1,25 +1,25 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
 {
     [TestClass]
     public class TrafficTypeValidatorTests
     {
-        private Mock<ILog> _log;
+        private Mock<ISplitLogger> _log;
         private Mock<ISplitCache> _splitCache;
         private TrafficTypeValidator trafficTypeValidator;
 
         [TestInitialize]
         public void Initialize()
         {
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
             _splitCache = new Mock<ISplitCache>();
 
-            trafficTypeValidator = new TrafficTypeValidator(_log.Object, _splitCache.Object);
+            trafficTypeValidator = new TrafficTypeValidator(_splitCache.Object, _log.Object);
         }
 
         [TestMethod]

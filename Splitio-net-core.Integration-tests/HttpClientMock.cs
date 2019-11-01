@@ -1,6 +1,8 @@
 ﻿using Splitio_net_core.Integration_tests.Resources;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using WireMock.Logging;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
@@ -26,7 +28,7 @@ namespace Splitio_net_core.Integration_tests
         #region SplitChanges        
         public void SplitChangesOk(string fileName, string since)
         {
-            string jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
+            var jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
 
             _mockServer
                 .Given(
@@ -71,7 +73,7 @@ namespace Splitio_net_core.Integration_tests
         #region SegmentChanges        
         public void SegmentChangesOk(string since, string segmentName)
         {
-            string json = File.ReadAllText($"{rootFilePath}split_{segmentName}.json");
+            var json = File.ReadAllText($"{rootFilePath}split_{segmentName}.json");
 
             _mockServer
                 .Given(
@@ -121,6 +123,27 @@ namespace Splitio_net_core.Integration_tests
         public int GetPort()
         {
             return _mockServer.Ports.First();
+        }
+
+        public List<LogEntry> GetLogs()
+        {
+            return _mockServer.LogEntries.ToList();
+        }
+
+        public List<LogEntry> GetImpressionLogs()
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/bulk"))
+                .ToList();
+        }
+
+        public List<LogEntry> GetEventsLog()
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
+                .ToList();
         }
     }
 }

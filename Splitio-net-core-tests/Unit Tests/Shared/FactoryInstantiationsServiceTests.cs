@@ -1,6 +1,6 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 
 namespace Splitio_Tests.Unit_Tests.Shared
@@ -8,13 +8,13 @@ namespace Splitio_Tests.Unit_Tests.Shared
     [TestClass]
     public class FactoryInstantiationsServiceTests
     {
-        private readonly Mock<ILog> _logMock;
+        private readonly Mock<ISplitLogger> _logMock;
 
         private FactoryInstantiationsService _factoryInstantiationsService;
 
         public FactoryInstantiationsServiceTests()
         {
-            _logMock = new Mock<ILog>();
+            _logMock = new Mock<ISplitLogger>();
 
             _factoryInstantiationsService = (FactoryInstantiationsService)FactoryInstantiationsService.Instance(_logMock.Object);
         }

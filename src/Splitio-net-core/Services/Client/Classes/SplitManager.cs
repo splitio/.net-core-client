@@ -1,9 +1,10 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,17 @@ namespace Splitio.Services.Client.Classes
 {
     public class SplitManager : ISplitManager
     {
-        private readonly ILog _log;
+        private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
         private readonly ISplitNameValidator _splitNameValidator;
         private readonly IBlockUntilReadyService _blockUntilReadyService;
 
         public SplitManager(ISplitCache splitCache,
             IBlockUntilReadyService blockUntilReadyService,
-            ILog log = null)
+            ISplitLogger log = null)
         {
             _splitCache = splitCache;
-            _log = log ?? LogManager.GetLogger(typeof(SplitManager));
+            _log = log ?? WrapperAdapter.GetLogger(typeof(SplitManager));
             _splitNameValidator = new SplitNameValidator(_log);
             _blockUntilReadyService = blockUntilReadyService;
         }
@@ -34,9 +35,10 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits();
 
-            var lightSplits = currentSplits.Select(x =>
+            var lightSplits = currentSplits
+                .Select(x =>
                 new SplitView()
                 {
                     name = x.name,
@@ -66,7 +68,7 @@ namespace Splitio.Services.Client.Classes
 
             featureName = result.Value;
 
-            var split = (ParsedSplit)_splitCache.GetSplit(featureName);
+            var split = _splitCache.GetSplit(featureName);
 
             if (split == null)
             {
@@ -99,7 +101,7 @@ namespace Splitio.Services.Client.Classes
                 return null;
             }
 
-            var currentSplits = _splitCache.GetAllSplits().Cast<ParsedSplit>();
+            var currentSplits = _splitCache.GetAllSplits();
 
             return currentSplits.Select(x => x?.name).ToList();
         }

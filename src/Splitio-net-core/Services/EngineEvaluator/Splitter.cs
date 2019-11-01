@@ -8,13 +8,13 @@ using System.Text;
 
 namespace Splitio.Services.EngineEvaluator
 {
-    public class Splitter
+    public class Splitter : ISplitter
     {
         private const string Control = "control";
 
-        public virtual string GetTreatment(string key, int seed, List<PartitionDefinition> partitions, AlgorithmEnum algorithm)
+        public string GetTreatment(string key, int seed, List<PartitionDefinition> partitions, AlgorithmEnum algorithm)
         {
-            if (String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 return Control;
             }
@@ -24,7 +24,7 @@ namespace Splitio.Services.EngineEvaluator
                 return partitions.First().treatment;
             }
 
-            var bucket = algorithm == AlgorithmEnum.LegacyHash ? LegacyBucket(key, seed) : Bucket(key, seed);
+            var bucket = GetBucket(key, seed, algorithm);
 
             var covered = 0;
             foreach (PartitionDefinition partition in partitions)
@@ -39,14 +39,11 @@ namespace Splitio.Services.EngineEvaluator
             return Control;
         }
 
-        public int Bucket(string key, int seed)
+        public int GetBucket(string key, int seed, AlgorithmEnum algorithm)
         {
-            return (int)Math.Abs(Hash(key, seed) % 100) + 1;
-        }
-
-        public int LegacyBucket(string key, int seed)
-        {
-            return Math.Abs(LegacyHash(key, seed) % 100) + 1;
+            return algorithm == AlgorithmEnum.LegacyHash
+                ? LegacyBucket(key, seed)
+                : Bucket(key, seed);
         }
 
         public long Hash(string key, int seed)
@@ -69,5 +66,15 @@ namespace Splitio.Services.EngineEvaluator
             }
             return h ^ seed;
         }
+
+        private int Bucket(string key, int seed)
+        {
+            return (int)Math.Abs(Hash(key, seed) % 100) + 1;
+        }
+
+        private int LegacyBucket(string key, int seed)
+        {
+            return Math.Abs(LegacyHash(key, seed) % 100) + 1;
+        }        
     }
 }

@@ -1,5 +1,7 @@
-﻿using Common.Logging;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -11,8 +13,9 @@ namespace Splitio.CommonLibraries
 {
     public class SdkApiClient : ISdkApiClient
     {
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SdkApiClient));
+
         private HttpClient httpClient;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SdkApiClient));
         protected IMetricsLog metricsLog;
 
         public SdkApiClient (HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null)
@@ -30,17 +33,19 @@ namespace Splitio.CommonLibraries
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", header.authorizationApiKey);
             httpClient.DefaultRequestHeaders.Add("SplitSDKVersion", header.splitSDKVersion);
             httpClient.DefaultRequestHeaders.Add("SplitSDKSpecVersion", header.splitSDKSpecVersion);
-            if (!string.IsNullOrEmpty(header.splitSDKMachineName))
-            {
-                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineName", header.splitSDKMachineName);
-            }
-            if (!string.IsNullOrEmpty(header.splitSDKMachineIP))
-            {
-                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
-            }
             httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
             httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            if (!string.IsNullOrEmpty(header.splitSDKMachineName) && !header.splitSDKMachineName.Equals(Constans.Unknown))
+            {
+                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineName", header.splitSDKMachineName);
+            }
+
+            if (!string.IsNullOrEmpty(header.splitSDKMachineIP) && !header.splitSDKMachineIP.Equals(Constans.Unknown))
+            {
+                httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
+            }
 
             //TODO: find a way to store it in sepparated parameters
             httpClient.Timeout = TimeSpan.FromMilliseconds((connectionTimeOut + readTimeout));

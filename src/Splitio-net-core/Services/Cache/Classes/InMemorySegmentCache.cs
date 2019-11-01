@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -8,7 +9,7 @@ namespace Splitio.Services.Cache.Classes
 {
     public class InMemorySegmentCache : ISegmentCache
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(InMemorySegmentCache));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(InMemorySegmentCache));
 
         private ConcurrentDictionary<string, Segment> segments;
 

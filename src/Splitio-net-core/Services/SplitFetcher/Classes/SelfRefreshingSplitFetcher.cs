@@ -1,8 +1,9 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Parsing;
+using Splitio.Services.Logger;
+using Splitio.Services.Parsing.Interfaces;
+using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -14,16 +15,21 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SelfRefreshingSplitFetcher
     {
-        protected ISplitCache splitCache;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSplitFetcher));
+
         private readonly ISplitChangeFetcher splitChangeFetcher;
-        private readonly SplitParser splitParser;
-        private readonly int interval;
-        private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private readonly ISplitParser splitParser;
         private readonly IReadinessGatesCache gates;
+        private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private readonly int interval;
+
+        protected ISplitCache splitCache;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
-            SplitParser splitParser, IReadinessGatesCache gates, int interval, ISplitCache splitCache = null)
+            ISplitParser splitParser, 
+            IReadinessGatesCache gates, 
+            int interval, 
+            ISplitCache splitCache = null)
         {
             this.splitChangeFetcher = splitChangeFetcher;
             this.splitParser = splitParser;

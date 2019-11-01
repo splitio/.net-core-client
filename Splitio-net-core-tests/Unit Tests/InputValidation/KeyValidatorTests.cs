@@ -1,21 +1,21 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 
 namespace Splitio_Tests.Unit_Tests.InputValidation
 {
     [TestClass]
     public class KeyValidatorTests
     {
-        private Mock<ILog> _log;
+        private Mock<ISplitLogger> _log;
         private KeyValidator keyValidator;
 
         [TestInitialize]
         public void Initialize()
         {
-            _log = new Mock<ILog>();
+            _log = new Mock<ISplitLogger>();
 
             keyValidator = new KeyValidator(_log.Object);
         }

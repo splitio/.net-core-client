@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
     public abstract class SegmentChangeFetcher: ISegmentChangeFetcher
     {
         private SegmentChange segmentChange;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SegmentChangeFetcher));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SegmentChangeFetcher));
 
         protected abstract Task<SegmentChange> FetchFromBackend(string name, long since);
 

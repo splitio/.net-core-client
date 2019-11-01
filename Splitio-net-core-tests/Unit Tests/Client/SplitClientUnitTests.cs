@@ -1,11 +1,9 @@
-﻿using Common.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Client.Interfaces;
-using Splitio.Services.EngineEvaluator;
-using Splitio.Services.Shared.Classes;
+using Splitio.Services.Evaluator;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
 using System.Collections.Generic;
 
@@ -14,28 +12,28 @@ namespace Splitio_Tests.Unit_Tests.Client
     [TestClass]
     public class SplitClientUnitTests
     {        
-        private Mock<ILog> _logMock;
+        private Mock<ISplitLogger> _logMock;
         private Mock<IListener<WrappedEvent>> _eventListenerMock;
         private Mock<ISplitCache> _splitCacheMock;
         private Mock<IListener<KeyImpression>> _impressionListenerMock;
-        private Mock<Splitter> _splitterMock;
         private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
+        private Mock<IEvaluator> _evaluatorMock;
 
         private SplitClientForTesting _splitClientForTesting;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _logMock = new Mock<ILog>();
+            _logMock = new Mock<ISplitLogger>();
             _splitCacheMock = new Mock<ISplitCache>();
-            _splitterMock = new Mock<Splitter>();
             _combiningMatcher = new Mock<CombiningMatcher>();
             _eventListenerMock = new Mock<IListener<WrappedEvent>>();
             _impressionListenerMock = new Mock<IListener<KeyImpression>>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
+            _evaluatorMock = new Mock<IEvaluator>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _splitterMock.Object, _eventListenerMock.Object, _impressionListenerMock.Object, _blockUntilReadyService.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object,  _eventListenerMock.Object, _impressionListenerMock.Object, _blockUntilReadyService.Object, _evaluatorMock.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
@@ -54,7 +52,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -70,7 +67,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -86,7 +82,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -97,12 +92,15 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("definition not found", "control", null));
+
             // Act
             var result = _splitClientForTesting.GetTreatment("key", "not_exist");
 
             // Assert
             Assert.AreEqual("control", result);
-            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed not_exist that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
             _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
         #endregion
@@ -122,7 +120,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -139,7 +136,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -153,31 +149,30 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
-
+            var configExpected = configurations[treatmentExpected];
             var parsedSplit = GetParsedSplit(feature, defaultTreatment: "off", configurations: configurations);
 
             _combiningMatcher
-                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<IEvaluator>()))
                 .Returns(true);
 
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
 
-            _splitterMock
-                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
-                .Returns(treatmentExpected);
-
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
+
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, null, configExpected));
 
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(treatmentExpected, result.Treatment);
-            var configExpected = configurations[treatmentExpected];
+            Assert.AreEqual(treatmentExpected, result.Treatment);            
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -192,11 +187,12 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
+            var configExpected = configurations[defaultTreatment];
 
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations);
 
             _combiningMatcher
-                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<IEvaluator>()))
                 .Returns(false);
 
             _splitCacheMock
@@ -207,12 +203,15 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);
-            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(defaultTreatment, result.Treatment);            
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -227,16 +226,16 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplit = GetParsedSplit(feature, defaultTreatment);
 
             _combiningMatcher
-                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<IEvaluator>()))
                 .Returns(true);
 
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
 
-            _splitterMock
-                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
-                .Returns(treatmentExpected);
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, null));
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -261,6 +260,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
+            var configExpected = configurations[defaultTreatment];
 
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, killed: true, configurations: configurations);
 
@@ -272,12 +272,15 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, null, configExpected));
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);
-            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(defaultTreatment, result.Treatment);            
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -292,6 +295,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
+            var configExpected = configurations[defaultTreatment];
 
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20);
 
@@ -303,12 +307,15 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);
-            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(defaultTreatment, result.Treatment);            
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -324,6 +331,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
+            var configExpected = configurations[treatmentExpected];
 
             var conditions = new List<ConditionWithLogic>
             {
@@ -351,16 +359,16 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20, conditions: conditions);
 
             _combiningMatcher
-                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<IEvaluator>()))
                 .Returns(true);
 
             _splitCacheMock
                 .Setup(mock => mock.GetSplit(feature))
                 .Returns(parsedSplit);
 
-            _splitterMock
-                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
-                .Returns(treatmentExpected);
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", treatmentExpected, config: configExpected));
 
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
@@ -371,7 +379,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual(treatmentExpected, result.Treatment);
-            var configExpected = configurations[treatmentExpected];
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -386,7 +393,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
-
+            var configExpected = configurations[defaultTreatment];
             var parsedSplit = GetParsedSplit(feature, defaultTreatment, configurations: configurations, trafficAllocation: 20, conditions: new List<ConditionWithLogic>());
 
             _splitCacheMock
@@ -397,12 +404,15 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("label", defaultTreatment, config: configExpected));
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("user", feature);
 
             // Assert
-            Assert.AreEqual(defaultTreatment, result.Treatment);
-            var configExpected = configurations[defaultTreatment];
+            Assert.AreEqual(defaultTreatment, result.Treatment);            
             Assert.AreEqual(configExpected, result.Config);
         }
 
@@ -414,13 +424,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .Setup(mock => mock.EvaluateFeature(It.IsAny<Key>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new TreatmentResult("definition not found", "control"));
+
             // Act
             var result = _splitClientForTesting.GetTreatmentWithConfig("key", "not_exist");
 
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed not_exist that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
             _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
         }
         #endregion
@@ -443,8 +456,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
             }
-
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -464,8 +475,6 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
             }
-
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -479,6 +488,8 @@ namespace Splitio_Tests.Unit_Tests.Client
                 { "off", "{\"name\": \"off config\", \"lastName\": \"split\"}" },
                 { "on", "{\"name\": \"mauro\"}" }
             };
+            var configExpectedOn = configurations["on"];
+            var configExpectedOff = configurations["off"];
 
             var offConditions = new List<ConditionWithLogic>
             {
@@ -507,7 +518,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var parsedSplitOff = GetParsedSplit(treatmenOff, defaultTreatment: "on", configurations: configurations, conditions: offConditions, seed: 2095087413);
 
             _combiningMatcher
-                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<ISplitClient>()))
+                .Setup(mock => mock.Match(It.IsAny<Key>(), It.IsAny<Dictionary<string, object>>(), It.IsAny<IEvaluator>()))
                 .Returns(true);
 
             _splitCacheMock
@@ -518,14 +529,17 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.GetSplit(treatmenOff))
                 .Returns(parsedSplitOff);
 
-            _splitterMock
-                .Setup(mock => mock.GetTreatment(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<List<PartitionDefinition>>(), It.IsAny<AlgorithmEnum>()))
-                .Returns("on");
-
-            _splitterMock
-                .Setup(mock => mock.GetTreatment("user", 2095087413, It.IsAny<List<PartitionDefinition>>(), AlgorithmEnum.Murmur))
-                .Returns("off");
-
+            _evaluatorMock
+                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    TreatmentResults = new Dictionary<string, TreatmentResult>
+                    {
+                        { treatmenOff, new TreatmentResult("label", "off", null, configExpectedOff) },
+                        { treatmenOn, new TreatmentResult("label", "on", null, configExpectedOn)}
+                    }
+                });
+                                        
             _blockUntilReadyService
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
@@ -535,14 +549,12 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             var resultOn = result[parsedSplitOn.name];
-            Assert.AreEqual("on", resultOn.Treatment);
-            var configExpected = configurations[resultOn.Treatment];
-            Assert.AreEqual(configExpected, resultOn.Config);
+            Assert.AreEqual("on", resultOn.Treatment);            
+            Assert.AreEqual(configExpectedOn, resultOn.Config);
 
             var resultOff = result[parsedSplitOff.name];
-            Assert.AreEqual("off", resultOff.Treatment);
-            configExpected = configurations[resultOff.Treatment];
-            Assert.AreEqual(configExpected, resultOff.Config);
+            Assert.AreEqual("off", resultOff.Treatment);            
+            Assert.AreEqual(configExpectedOff, resultOff.Config);
         }
 
         [TestMethod]
@@ -555,6 +567,16 @@ namespace Splitio_Tests.Unit_Tests.Client
                 .Setup(mock => mock.IsSdkReady())
                 .Returns(true);
 
+            _evaluatorMock
+                .SetupSequence(mock => mock.EvaluateFeatures(It.IsAny<Key>(), It.IsAny<List<string>>(), It.IsAny<Dictionary<string, object>>()))
+                .Returns(new MultipleEvaluatorResult
+                {
+                    TreatmentResults = new Dictionary<string, TreatmentResult>
+                    {
+                        { "control_treatment", new TreatmentResult("definition not found", "control", null)}
+                    }
+                });
+
             // Act
             var result = _splitClientForTesting.GetTreatmentsWithConfig("key", splitNames);
 
@@ -563,7 +585,6 @@ namespace Splitio_Tests.Unit_Tests.Client
             {
                 Assert.AreEqual("control", res.Value.Treatment);
                 Assert.IsNull(res.Value.Config);
-                _logMock.Verify(mock => mock.Warn($"GetTreatment: you passed {res.Key} that does not exist in this environment, please double check what Splits exist in the web console."), Times.Once);
             }
 
             _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
@@ -584,7 +605,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -600,7 +620,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -616,7 +635,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.IsFalse(result);
-            _logMock.Verify(x => x.Error(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -659,7 +677,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _logMock.Verify(mock => mock.Warn("Property Splitio.Domain.ParsedSplit is of invalid type. Setting value to null"), Times.Once);
             _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties != null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")

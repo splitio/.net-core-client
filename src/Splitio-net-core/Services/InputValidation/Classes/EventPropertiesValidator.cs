@@ -1,6 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.InputValidation.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.Collections.Generic;
 
@@ -9,11 +10,11 @@ namespace Splitio.Services.InputValidation.Classes
     public class EventPropertiesValidator : IEventPropertiesValidator
     {
         private const int MAX_PROPERTIES_LENGTH_BYTES = 32 * 1024;
-        protected readonly ILog _log;
+        protected readonly ISplitLogger _log;
 
-        public EventPropertiesValidator(ILog log)
+        public EventPropertiesValidator(ISplitLogger log = null)
         {
-            _log = log;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(EventPropertiesValidator));
         }
 
         public EventValidatorResult IsValid(Dictionary<string, object> properties)

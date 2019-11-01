@@ -1,29 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
     <AssemblyName>Splitio-net-core.Redis</AssemblyName>
     <PackageId>Splitio-net-core.Redis</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
+      $(PackageTargetFallback);dnxcore50
+    </PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>5.0.2</Version>
+    <Version>6.0.0</Version>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETSTANDARD</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="Common.Logging" Version="3.4.0" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45'">
-    <PackageReference Include="Common.Logging" version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
   </ItemGroup>
 

@@ -1,8 +1,7 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
-using Splitio.Services.EngineEvaluator;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -14,8 +13,6 @@ namespace Splitio.Services.Client.Classes
 {
     public class LocalhostClient : SplitClient
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(LocalhostClient));
-
         private const string DefaultSplitFileName = ".split";
         private const string SplitFileYml = ".yml";
         private const string SplitFileYaml = ".yaml";
@@ -26,20 +23,19 @@ namespace Splitio.Services.Client.Classes
         private readonly string FullPath;
 
         public LocalhostClient(string filePath, 
-            ILog log,
-            Splitter splitter = null) : base(log)
+            ISplitLogger log = null) : base(GetLogger(log))
         {
             FullPath = LookupFilePath(filePath);
 
             if (FullPath.ToLower().EndsWith(SplitFileYaml) || FullPath.ToLower().EndsWith(SplitFileYml))
             {
-                _localhostFileService = new YamlLocalhostFileService(Log);
+                _localhostFileService = new YamlLocalhostFileService();
             }
             else
             {
-                Log.Warn("Localhost mode: .split/.splits mocks will be deprecated soon in favor of YAML files, which provide more targeting power. Take a look in our documentation.");
+                _log.Warn("Localhost mode: .split/.splits mocks will be deprecated soon in favor of YAML files, which provide more targeting power. Take a look in our documentation.");
 
-                _localhostFileService = new LocalhostFileService(Log);
+                _localhostFileService = new LocalhostFileService();
             }
 
             var directoryPath = Path.GetDirectoryName(FullPath);
@@ -51,7 +47,6 @@ namespace Splitio.Services.Client.Classes
 
             var splits = ParseSplitFile(FullPath);
             splitCache = new InMemorySplitCache(splits);
-            BuildSplitter(splitter);
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
             manager = new SplitManager(splitCache, _blockUntilReadyService);
@@ -60,7 +55,9 @@ namespace Splitio.Services.Client.Classes
 
             Destroyed = false;
 
-            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
+
+            BuildEvaluator();
         }
 
         #region Public Methods
@@ -78,18 +75,22 @@ namespace Splitio.Services.Client.Classes
                 base.Destroy();
             }
         }
-
-        public override void BlockUntilReady(int blockMilisecondsUntilReady)
-        {
-            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
-        }
         #endregion
 
         #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             var splits = ParseSplitFile(FullPath);
-            splitCache = new InMemorySplitCache(splits);
+
+            splitCache.Clear();
+
+            foreach (var split in splits)
+            {
+                if (split.Value != null)
+                {
+                    splitCache.AddSplit(split.Key, split.Value);
+                }
+            }
         }
 
         private string LookupFilePath(string filePath)
@@ -120,9 +121,9 @@ namespace Splitio.Services.Client.Classes
             return _localhostFileService.ParseSplitFile(filePath);
         }
 
-        private void BuildSplitter(Splitter splitter)
+        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
         {
-            this.splitter = splitter ?? new Splitter();
+            return splitLogger ?? WrapperAdapter.GetLogger(typeof(LocalhostClient));
         }
         #endregion
     }

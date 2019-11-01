@@ -1,24 +1,21 @@
-﻿using Common.Logging;
-using Splitio.Domain;
+﻿using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Services.Client.Classes;
-using Splitio.Services.EngineEvaluator;
 using Splitio.Services.InputValidation.Classes;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
     public class RedisClient : SplitClient
     {
-        private RedisSplitParser splitParser;
         private RedisAdapter redisAdapter;
         private IListener<IList<KeyImpression>> impressionListenerRedis;
         private ISimpleCache<IList<KeyImpression>> impressionsCacheRedis;
@@ -37,9 +34,9 @@ namespace Splitio.Redis.Services.Client.Classes
         private static string RedisUserPrefix;
         private static int BlockMilisecondsUntilReady;
 
-        public RedisClient(ConfigurationOptions config, 
-            ILog log,
-            string apiKey) : base(log)
+        public RedisClient(ConfigurationOptions config,
+            string apiKey,
+            ISplitLogger log = null) : base(GetLogger(log))
         {
             ApiKey = apiKey;
 
@@ -47,51 +44,14 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildRedisCache();
             BuildTreatmentLog(config);
             BuildEventLog(config);
-            BuildMetricsLog();
-            BuildSplitter();
+            BuildMetricsLog();            
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildParser();            
+            BuildParser();
+            BuildEvaluator();
         }
-
-        #region Public Methods
-        public override void BlockUntilReady(int blockMilisecondsUntilReady)
-        {
-            _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
-        }
-        #endregion
 
         #region Protected Methods
-        protected override TreatmentResult GetTreatmentForFeature(Key key, string feature, Dictionary<string, object> attributes = null)
-        {
-            try
-            {
-                var split = splitCache.GetSplit(feature);
-
-                if (split == null)
-                {
-
-                    _log.Warn(string.Format("Unknown or invalid feature: {0}", feature));
-
-                    return new TreatmentResult(LabelSplitNotFound, Control, null);
-                }
-
-                var parsedSplit = splitParser.Parse((Split)split);
-
-                var treatmentResult = GetTreatment(key, parsedSplit, attributes, this);
-
-                treatmentResult.Config = parsedSplit.configurations == null || !parsedSplit.configurations.Any() ? null : parsedSplit.configurations[treatmentResult.Treatment];
-
-                return treatmentResult;
-            }
-            catch (Exception e)
-            {
-                _log.Error(string.Format("Exception caught getting treatment for feature: {0}", feature), e);
-
-                return new TreatmentResult(LabelException, Control, null);
-            }
-        }
-
         protected override void ImpressionLog(List<KeyImpression> impressionsQueue)
         {
             base.ImpressionLog(impressionsQueue);
@@ -133,24 +93,26 @@ namespace Splitio.Redis.Services.Client.Classes
                 throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds. Could not connect to Redis");
             }
 
-            splitCache = new RedisSplitCache(redisAdapter, RedisUserPrefix);
             segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
-            metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
-            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, RedisUserPrefix);
+            BuildParser();
+            splitCache = new RedisSplitCache(redisAdapter, _splitParser, RedisUserPrefix);
+            
+            metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
+            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
             eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
 
-            _trafficTypeValidator = new TrafficTypeValidator(_log, splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var treatmentLog = new RedisTreatmentLog(impressionsCacheRedis);
-            impressionListenerRedis = new AsynchronousListener<IList<KeyImpression>>(LogManager.GetLogger("AsynchronousImpressionListener"));
+            impressionListenerRedis = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
             ((AsynchronousListener<IList<KeyImpression>>)impressionListenerRedis).AddListener(treatmentLog);
 
             if (config.ImpressionListener != null)
             {
-                impressionListener = new AsynchronousListener<KeyImpression>(LogManager.GetLogger("AsynchronousImpressionListener"));
+                impressionListener = new AsynchronousListener<KeyImpression>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
                 ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
             }
         }
@@ -158,7 +120,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildEventLog(ConfigurationOptions config)
         {
             var eventLog = new RedisEventLog(eventsCache);
-            eventListener = new AsynchronousListener<WrappedEvent>(LogManager.GetLogger("AsynchronousEventListener"));
+            eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
             ((AsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
         }
 
@@ -166,25 +128,25 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             metricsLog = new RedisMetricsLog(metricsCache);
         }
-
-        private void BuildSplitter()
-        {
-            splitter = new Splitter();
-        }
-
+        
         private void BuildManager()
         {
-            manager = new RedisSplitManager(splitCache, _blockUntilReadyService);
+            manager = new SplitManager(splitCache, _blockUntilReadyService);
         }
 
         private void BuildParser()
         {
-            splitParser = new RedisSplitParser(segmentCache);
+            _splitParser = new RedisSplitParser(segmentCache);
         }
 
         private void BuildBlockUntilReadyService()
         {
             _blockUntilReadyService = new NoopBlockUntilReadyService();
+        }
+
+        private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
+        {
+            return splitLogger ?? WrapperAdapter.GetLogger(typeof(RedisClient));
         }
         #endregion
     }

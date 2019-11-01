@@ -1,7 +1,7 @@
-﻿using Common.Logging;
-using Splitio.CommonLibraries;
+﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -23,7 +23,7 @@ namespace Splitio.Services.Events.Classes
         private ISimpleProducerCache<WrappedEvent> wrappedEventsCache;
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof(SelfUpdatingEventLog));
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(SelfUpdatingEventLog));
 
         public SelfUpdatingEventLog(IEventSdkApiClient apiClient, int firstPushWindow, int interval, ISimpleCache<WrappedEvent> eventsCache, int maximumNumberOfKeysToCache = -1)
         {

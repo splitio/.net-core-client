@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-using System.Linq;
+using Splitio.Domain;
 using Splitio.Services.EngineEvaluator;
 using System;
-using Splitio.Domain;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Splitio_Tests.Unit_Tests
 {
@@ -74,8 +74,10 @@ namespace Splitio_Tests.Unit_Tests
                 {
                     if (item.Length == 4)
                     {
+                        var algo = legacy ? AlgorithmEnum.LegacyHash : AlgorithmEnum.Murmur;
+
                         var hash = legacy ? splitter.LegacyHash(item[1], int.Parse(item[0])) : splitter.Hash(item[1], int.Parse(item[0]));
-                        var bucket = legacy ? splitter.LegacyBucket(item[1], int.Parse(item[0])) : splitter.Bucket(item[1], int.Parse(item[0]));
+                        var bucket = splitter.GetBucket(item[1], int.Parse(item[0]), algo);
 
                         //Assert
                         Assert.AreEqual(hash, long.Parse(item[2]));

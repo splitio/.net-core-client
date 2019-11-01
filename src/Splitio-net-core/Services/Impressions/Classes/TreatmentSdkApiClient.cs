@@ -1,8 +1,9 @@
-﻿using Common.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Splitio.CommonLibraries;
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,7 +14,7 @@ namespace Splitio.Services.Impressions.Classes
     {
         private const string TestImpressionsUrlTemplate = "/api/testImpressions/bulk";
         
-        private static readonly ILog Log = LogManager.GetLogger(typeof(TreatmentSdkApiClient));
+        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(TreatmentSdkApiClient));
 
         public TreatmentSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout) 
             : base(header, baseUrl, connectionTimeOut, readTimeout)
@@ -37,6 +38,7 @@ namespace Splitio.Services.Impressions.Classes
                 impressions
                 .GroupBy(item => item.feature)
                 .Select(group => new { testName = group.Key, keyImpressions = group.Select(x => new { keyName = x.keyName, treatment = x.treatment, time = x.time, changeNumber = x.changeNumber, label = x.label, bucketingKey = x.bucketingKey }) });
+
             return JsonConvert.SerializeObject(impressionsPerFeature);
         }
     }

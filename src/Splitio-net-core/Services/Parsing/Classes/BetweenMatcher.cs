@@ -1,12 +1,12 @@
 ﻿using Splitio.CommonLibraries;
 using Splitio.Domain;
-using Splitio.Services.Client.Interfaces;
+using Splitio.Services.Evaluator;
 using System;
 using System.Collections.Generic;
 
 namespace Splitio.Services.Parsing
 {
-    public class BetweenMatcher : CompareMatcher, IMatcher
+    public class BetweenMatcher : CompareMatcher
     {
 
         public BetweenMatcher(DataTypeEnum? dataType, long start, long end)
@@ -16,12 +16,12 @@ namespace Splitio.Services.Parsing
             this.end = end;
         }
 
-        public override bool Match(long key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(long key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             return (start <= key) && (key <= end);         
         }
 
-        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, ISplitClient splitClient = null)
+        public override bool Match(DateTime key, Dictionary<string, object> attributes = null, IEvaluator evaluator = null)
         {
             var startDate = start.ToDateTime();
             var endDate = end.ToDateTime();

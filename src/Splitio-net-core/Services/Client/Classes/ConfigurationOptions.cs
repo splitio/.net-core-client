@@ -1,6 +1,4 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Impressions.Interfaces;
-using Splitio.Services.Shared.Interfaces;
+﻿using Splitio.Services.Impressions.Interfaces;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -30,5 +28,6 @@ namespace Splitio.Services.Client.Classes
         public bool? LabelsEnabled { get; set; }
         public IImpressionListener ImpressionListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
+        public bool? IPAddressesEnabled { get; set; }
     }
 }
