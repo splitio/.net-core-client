@@ -70,7 +70,7 @@ namespace Splitio.Services.Client.Classes
                                 throw new Exception("Redis Host and Port should be set to initialize Split SDK in Redis Mode.");
                             }
 
-                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
+                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio-net-core.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
                             _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, null });
