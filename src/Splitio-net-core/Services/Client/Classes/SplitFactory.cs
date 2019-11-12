@@ -26,6 +26,8 @@ namespace Splitio.Services.Client.Classes
 
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
+
+            Client();
         }
 
         public ISplitClient Client()
