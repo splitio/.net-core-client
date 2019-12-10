@@ -677,11 +677,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties != null
-                                                                              && we.Event.key.Equals("key")
-                                                                              && we.Event.eventTypeId.Equals("event_type")
-                                                                              && we.Event.trafficTypeName.Equals("user")
-                                                                              && we.Event.value == 132)), Times.Once);
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties != null &&
+                                                                                    we.Event.key.Equals("key") &&
+                                                                                    we.Event.eventTypeId.Equals("event_type") &&
+                                                                                    we.Event.trafficTypeName.Equals("user") &&
+                                                                                    we.Event.value == 132)), Times.Once);
         }
 
         [TestMethod]
@@ -699,11 +699,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
-                                                                              && we.Event.key.Equals("key")
-                                                                              && we.Event.eventTypeId.Equals("event_type")
-                                                                              && we.Event.trafficTypeName.Equals("user")
-                                                                              && we.Event.value == 132)), Times.Once);
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                                    we.Event.key.Equals("key") &&
+                                                                                    we.Event.eventTypeId.Equals("event_type") &&
+                                                                                    we.Event.trafficTypeName.Equals("user") &&
+                                                                                    we.Event.value == 132)), Times.Once);
         }
 
         [TestMethod]
@@ -725,11 +725,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
-                                                                              && we.Event.key.Equals("key")
-                                                                              && we.Event.eventTypeId.Equals("event_type")
-                                                                              && we.Event.trafficTypeName.Equals(trafficType)
-                                                                              && we.Event.value == 132)), Times.Once);
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                                    we.Event.key.Equals("key") &&
+                                                                                    we.Event.eventTypeId.Equals("event_type") &&
+                                                                                    we.Event.trafficTypeName.Equals(trafficType) &&
+                                                                                    we.Event.value == 132)), Times.Once);
 
             _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Once);
         }
@@ -753,11 +753,11 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
-                                                                              && we.Event.key.Equals("key")
-                                                                              && we.Event.eventTypeId.Equals("event_type")
-                                                                              && we.Event.trafficTypeName.Equals(trafficType)
-                                                                              && we.Event.value == 132)), Times.Once);
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null &&
+                                                                                    we.Event.key.Equals("key") &&
+                                                                                    we.Event.eventTypeId.Equals("event_type") &&
+                                                                                    we.Event.trafficTypeName.Equals(trafficType) &&
+                                                                                    we.Event.value == 132)), Times.Once);
 
             _logMock.Verify(mock => mock.Warn($"Track: Traffic Type {trafficType} does not have any corresponding Splits in this environment, make sure you’re tracking your events to a valid traffic type defined in the Split console."), Times.Never);
         }

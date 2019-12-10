@@ -270,12 +270,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" && 
-                                                                                p.FirstOrDefault().feature == "test_jw3" && 
-                                                                                p.FirstOrDefault().treatment == "off" && 
-                                                                                p.FirstOrDefault().time > 0 && 
-                                                                                p.FirstOrDefault().changeNumber == 1470947806420 && 
-                                                                                p.FirstOrDefault().label == "killed" && 
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "test_jw3" && 
+                                                                                   p.FirstOrDefault().treatment == "off" && 
+                                                                                   p.FirstOrDefault().time > 0 && 
+                                                                                   p.FirstOrDefault().changeNumber == 1470947806420 && 
+                                                                                   p.FirstOrDefault().label == "killed" && 
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -293,12 +293,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" && 
-                                                                                p.FirstOrDefault().feature == "whitelisting_elements" && 
-                                                                                p.FirstOrDefault().treatment == "off" && 
-                                                                                p.FirstOrDefault().time > 0 && 
-                                                                                p.FirstOrDefault().changeNumber == 1471368078203 && 
-                                                                                p.FirstOrDefault().label == "default rule" && 
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "whitelisting_elements" && 
+                                                                                   p.FirstOrDefault().treatment == "off" && 
+                                                                                   p.FirstOrDefault().time > 0 && 
+                                                                                   p.FirstOrDefault().changeNumber == 1471368078203 && 
+                                                                                   p.FirstOrDefault().label == "default rule" && 
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
 
         }
 
@@ -317,12 +317,12 @@ namespace Splitio_Tests.Integration_Tests
             //Assert
             Assert.AreEqual("control", result);
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
-                                                                                p.FirstOrDefault().feature == "asd" &&
-                                                                                p.FirstOrDefault().treatment == "control" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == null &&
-                                                                                p.FirstOrDefault().label == "definition not found" &&
-                                                                                p.FirstOrDefault().bucketingKey == null)), Times.Never);
+                                                                                   p.FirstOrDefault().feature == "asd" &&
+                                                                                   p.FirstOrDefault().treatment == "control" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == null &&
+                                                                                   p.FirstOrDefault().label == "definition not found" &&
+                                                                                   p.FirstOrDefault().bucketingKey == null)), Times.Never);
         }
 
         [TestMethod]
@@ -346,12 +346,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
-                                                                                p.FirstOrDefault().feature == "asd" &&
-                                                                                p.FirstOrDefault().treatment == "control" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == null &&
-                                                                                p.FirstOrDefault().label == "exception" &&
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "asd" &&
+                                                                                   p.FirstOrDefault().treatment == "control" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == null &&
+                                                                                   p.FirstOrDefault().label == "exception" &&
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -369,12 +369,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "test" &&
-                                                                                p.FirstOrDefault().feature == "Traffic_Allocation_UI2" &&
-                                                                                p.FirstOrDefault().treatment == "off" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == 1490652849498 &&
-                                                                                p.FirstOrDefault().label == "not in split" &&
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "Traffic_Allocation_UI2" &&
+                                                                                   p.FirstOrDefault().treatment == "off" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == 1490652849498 &&
+                                                                                   p.FirstOrDefault().label == "not in split" &&
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -392,12 +392,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
-                                                                                p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
-                                                                                p.FirstOrDefault().treatment == "on" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == 1484084207827 &&
-                                                                                p.FirstOrDefault().label == "explicitly included" &&
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
+                                                                                   p.FirstOrDefault().treatment == "on" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == 1484084207827 &&
+                                                                                   p.FirstOrDefault().label == "explicitly included" &&
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -430,12 +430,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
-                                                                                p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
-                                                                                p.FirstOrDefault().treatment == "on" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == 1484084207827 &&
-                                                                                p.FirstOrDefault().label == null &&
-                                                                                p.FirstOrDefault().bucketingKey == null)));
+                                                                                   p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
+                                                                                   p.FirstOrDefault().treatment == "on" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == 1484084207827 &&
+                                                                                   p.FirstOrDefault().label == null &&
+                                                                                   p.FirstOrDefault().bucketingKey == null)));
         }
 
         [TestMethod]
@@ -454,12 +454,12 @@ namespace Splitio_Tests.Integration_Tests
 
             //Assert
             treatmentLogMock.Verify(x => x.Notify(It.Is<IList<KeyImpression>>(p => p.FirstOrDefault().keyName == "db765170-e9f2-11e5-885c-c2f58c3a47a7" &&
-                                                                                p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
-                                                                                p.FirstOrDefault().treatment == "on" &&
-                                                                                p.FirstOrDefault().time > 0 &&
-                                                                                p.FirstOrDefault().changeNumber == 1484084207827 &&
-                                                                                p.FirstOrDefault().label == "explicitly included" &&
-                                                                                p.FirstOrDefault().bucketingKey == "ab765170-e9f2-11e5-885c-c2f58c3a47a7")));
+                                                                                   p.FirstOrDefault().feature == "Segments_Restructuring_UI" &&
+                                                                                   p.FirstOrDefault().treatment == "on" &&
+                                                                                   p.FirstOrDefault().time > 0 &&
+                                                                                   p.FirstOrDefault().changeNumber == 1484084207827 &&
+                                                                                   p.FirstOrDefault().label == "explicitly included" &&
+                                                                                   p.FirstOrDefault().bucketingKey == "ab765170-e9f2-11e5-885c-c2f58c3a47a7")));
 
         }
 
