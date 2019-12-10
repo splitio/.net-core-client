@@ -11,9 +11,9 @@ namespace Splitio.Redis.Services.Cache.Classes
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
 
-        private ConnectionMultiplexer redis;
-        private IDatabase database;
-        private IServer server;
+        private readonly IConnectionMultiplexer _redis;
+        private readonly IDatabase _database;
+        private readonly IServer _server;
 
         public RedisAdapter(string host, 
             string port, 
@@ -26,9 +26,10 @@ namespace Splitio.Redis.Services.Cache.Classes
             try
             {
                 var config = GetConfig(host, port, password, connectTimeout, connectRetry, syncTimeout);
-                redis = ConnectionMultiplexer.Connect(config);
-                database = redis.GetDatabase(databaseNumber);
-                server = redis.GetServer(string.Format("{0}:{1}", host, port));
+
+                _redis = ConnectionMultiplexer.Connect(config);
+                _database = _redis.GetDatabase(databaseNumber);
+                _server = _redis.GetServer($"{host}:{port}");
             }
             catch (Exception e)
             {
@@ -38,7 +39,7 @@ namespace Splitio.Redis.Services.Cache.Classes
 
         public bool IsConnected()
         {
-            return server?.IsConnected ?? false;
+            return _server?.IsConnected ?? false;
         }
 
         private static string GetConfig(string host, string port, string password, int connectTimeout, int connectRetry, int syncTimeout)
@@ -69,7 +70,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringSet(key, value);
+                return _database.StringSet(key, value);
             }
             catch (Exception e)
             {
@@ -82,7 +83,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringGet(key);
+                return _database.StringGet(key);
             }
             catch (Exception e)
             {
@@ -95,7 +96,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringGet(keys);
+                return _database.StringGet(keys);
             }
             catch (Exception e)
             {
@@ -108,7 +109,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                var keys = server.Keys(pattern: pattern);
+                var keys = _server.Keys(pattern: pattern);
                 return keys.ToArray();
             }
             catch (Exception e)
@@ -122,7 +123,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyDelete(key);
+                return _database.KeyDelete(key);
             }
             catch (Exception e)
             {
@@ -135,7 +136,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyDelete(keys);
+                return _database.KeyDelete(keys);
             }
             catch (Exception e)
             {
@@ -148,7 +149,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetAdd(key, value);
+                return _database.SetAdd(key, value);
             }
             catch (Exception e)
             {
@@ -161,7 +162,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetAdd(key, values);
+                return _database.SetAdd(key, values);
             }
             catch (Exception e)
             {
@@ -174,7 +175,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetRemove(key, values);
+                return _database.SetRemove(key, values);
             }
             catch (Exception e)
             {
@@ -187,7 +188,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetContains(key, value);
+                return _database.SetContains(key, value);
             }
             catch (Exception e)
             {
@@ -200,7 +201,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetMembers(key);
+                return _database.SetMembers(key);
             }
             catch (Exception e)
             {
@@ -213,7 +214,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringIncrement(key, value);
+                return _database.StringIncrement(key, value);
             }
             catch (Exception e)
             {
@@ -226,7 +227,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRightPush(key, value);
+                return _database.ListRightPush(key, value);
             }
             catch (Exception e)
             {
@@ -239,7 +240,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                server.FlushDatabase();
+                _server.FlushDatabase();
             }
             catch (Exception e)
             {
@@ -251,7 +252,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyExpire(key, expiry);
+                return _database.KeyExpire(key, expiry);
             }
             catch (Exception e)
             {
@@ -264,7 +265,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRightPush(key, values);
+                return _database.ListRightPush(key, values);
             }
             catch (Exception e)
             {
@@ -277,7 +278,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRange(key, start, stop);
+                return _database.ListRange(key, start, stop);
             }
             catch (Exception e)
             {

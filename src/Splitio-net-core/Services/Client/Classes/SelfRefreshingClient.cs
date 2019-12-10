@@ -18,6 +18,7 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -34,7 +35,6 @@ namespace Splitio.Services.Client.Classes
         private static string SdkMachineName;
         private static string SdkMachineIP;
         private static bool RandomizeRefreshRates;
-        private static int BlockMilisecondsUntilReady;
         private static int ConcurrencyLevel;
         private static int TreatmentLogRefreshRate;
         private static int TreatmentLogSize;
@@ -54,16 +54,16 @@ namespace Splitio.Services.Client.Classes
         /// </summary>
         private const int InitialCapacity = 31;
 
-        private IReadinessGatesCache gates;
-        private SelfRefreshingSplitFetcher splitFetcher;
-        private ISplitSdkApiClient splitSdkApiClient;
-        private ISegmentSdkApiClient segmentSdkApiClient;
-        private ITreatmentSdkApiClient treatmentSdkApiClient;
-        private IEventSdkApiClient eventSdkApiClient;
-        private IMetricsSdkApiClient metricsSdkApiClient;
-        private SelfRefreshingSegmentFetcher selfRefreshingSegmentFetcher;
-        private IListener<KeyImpression> treatmentLog;
-        private IListener<WrappedEvent> eventLog;
+        private IReadinessGatesCache _gates;
+        private ISplitFetcher _splitFetcher;
+        private ISplitSdkApiClient _splitSdkApiClient;
+        private ISegmentSdkApiClient _segmentSdkApiClient;
+        private ITreatmentSdkApiClient _treatmentSdkApiClient;
+        private IEventSdkApiClient _eventSdkApiClient;
+        private IMetricsSdkApiClient _metricsSdkApiClient;
+        private ISplitFetcher _selfRefreshingSegmentFetcher;
+        private IListener<IList<KeyImpression>> _treatmentLog;
+        private IListener<WrappedEvent> _eventLog;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -89,18 +89,18 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void Start()
         {
-            ((SelfUpdatingTreatmentLog)treatmentLog).Start();
-            ((SelfUpdatingEventLog)eventLog).Start();
-            splitFetcher.Start();
+            ((SelfUpdatingTreatmentLog)_treatmentLog).Start();
+            ((SelfUpdatingEventLog)_eventLog).Start();
+            _splitFetcher.Start();
         }
 
         public void Stop()
         {
-            splitFetcher.Stop(); // Stop + Clear
-            selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
-            ((SelfUpdatingTreatmentLog)treatmentLog).Stop(); //Stop + SendBulk + Clear
-            ((SelfUpdatingEventLog)eventLog).Stop(); //Stop + SendBulk + Clear
-            metricsLog.Clear(); //Clear
+            _splitFetcher.Stop(); // Stop + Clear
+            _selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
+            ((SelfUpdatingTreatmentLog)_treatmentLog).Stop(); //Stop + SendBulk + Clear
+            ((SelfUpdatingEventLog)_eventLog).Stop(); //Stop + SendBulk + Clear
+            _metricsLog.Clear(); //Clear
         }
 
         public override void Destroy()
@@ -130,7 +130,6 @@ namespace Splitio.Services.Client.Classes
             SdkMachineIP = data.SdkMachineIP;
 
             RandomizeRefreshRates = config.RandomizeRefreshRates;
-            BlockMilisecondsUntilReady = config.Ready ?? 0;
             ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
             TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30;
             TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000;
@@ -145,7 +144,7 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSdkReadinessGates()
         {
-            gates = new InMemoryReadinessGatesCache();
+            _gates = new InMemoryReadinessGatesCache();
         }
 
         private void BuildSplitFetcher()
@@ -153,42 +152,44 @@ namespace Splitio.Services.Client.Classes
             var segmentRefreshRate = RandomizeRefreshRates ? Random(SegmentRefreshRate) : SegmentRefreshRate;
             var splitsRefreshRate = RandomizeRefreshRates ? Random(SplitsRefreshRate) : SplitsRefreshRate;
 
-            segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(ConcurrencyLevel, InitialCapacity));
-            var segmentChangeFetcher = new ApiSegmentChangeFetcher(segmentSdkApiClient);
-            selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, gates, segmentRefreshRate, segmentCache, NumberOfParalellSegmentTasks);
-            var splitChangeFetcher = new ApiSplitChangeFetcher(splitSdkApiClient);
-            _splitParser = new InMemorySplitParser(selfRefreshingSegmentFetcher, segmentCache);
-            splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
-            splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, gates, splitsRefreshRate, splitCache);
+            _segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>(ConcurrencyLevel, InitialCapacity));
 
-            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
+            var segmentChangeFetcher = new ApiSegmentChangeFetcher(_segmentSdkApiClient);
+            _selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(segmentChangeFetcher, _gates, segmentRefreshRate, _segmentCache, NumberOfParalellSegmentTasks);
+
+            var splitChangeFetcher = new ApiSplitChangeFetcher(_splitSdkApiClient);
+            _splitParser = new InMemorySplitParser((SelfRefreshingSegmentFetcher)_selfRefreshingSegmentFetcher, _segmentCache);
+            _splitCache = new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(ConcurrencyLevel, InitialCapacity));
+            _splitFetcher = new SelfRefreshingSplitFetcher(splitChangeFetcher, _splitParser, _gates, splitsRefreshRate, _splitCache);
+
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(TreatmentLogSize));
-            treatmentLog = new SelfUpdatingTreatmentLog(treatmentSdkApiClient, TreatmentLogRefreshRate, impressionsCache);
-            impressionListener = new AsynchronousListener<KeyImpression>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
-            ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(treatmentLog);
+            _impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(TreatmentLogSize));
+            _treatmentLog = new SelfUpdatingTreatmentLog(_treatmentSdkApiClient, TreatmentLogRefreshRate, _impressionsCache);
+            _impressionListener = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
+            _impressionListener.AddListener(_treatmentLog);
 
             if (config.ImpressionListener != null)
             {
-                ((IAsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
+                _impressionListener.AddListener(config.ImpressionListener);
             }
         }
 
         private void BuildEventLog(ConfigurationOptions config)
         {
-            eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(EventLogSize));
-            eventLog = new SelfUpdatingEventLog(eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, eventsCache);
-            eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
-            ((IAsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
+            _eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(EventLogSize));
+            _eventLog = new SelfUpdatingEventLog(_eventSdkApiClient, EventsFirstPushWindow, EventLogRefreshRate, _eventsCache);
+            _eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
+            _eventListener.AddListener(_eventLog);
         }
         
         private void BuildMetricsLog()
         {
-            metricsCache = new InMemoryMetricsCache(new ConcurrentDictionary<string, Counter>(), new ConcurrentDictionary<string, ILatencyTracker>(), new ConcurrentDictionary<string, long>());
-            metricsLog = new AsyncMetricsLog(metricsSdkApiClient, metricsCache, MaxCountCalls, MaxTimeBetweenCalls);
+            _metricsCache = new InMemoryMetricsCache(new ConcurrentDictionary<string, Counter>(), new ConcurrentDictionary<string, ILatencyTracker>(), new ConcurrentDictionary<string, long>());
+            _metricsLog = new AsyncMetricsLog(_metricsSdkApiClient, _metricsCache, MaxCountCalls, MaxTimeBetweenCalls);
         }
 
         private int Random(int refreshRate)
@@ -208,33 +209,33 @@ namespace Splitio.Services.Client.Classes
                 splitSDKMachineIP = SdkMachineIP
             };
 
-            metricsSdkApiClient = new MetricsSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
+            _metricsSdkApiClient = new MetricsSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
             BuildMetricsLog();
-            splitSdkApiClient = new SplitSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, metricsLog);
-            segmentSdkApiClient = new SegmentSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, metricsLog);
-            treatmentSdkApiClient = new TreatmentSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
-            eventSdkApiClient = new EventSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
+            _splitSdkApiClient = new SplitSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, _metricsLog);
+            _segmentSdkApiClient = new SegmentSdkApiClient(header, BaseUrl, HttpConnectionTimeout, HttpReadTimeout, _metricsLog);
+            _treatmentSdkApiClient = new TreatmentSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
+            _eventSdkApiClient = new EventSdkApiClient(header, EventsBaseUrl, HttpConnectionTimeout, HttpReadTimeout);
         }
 
         private void BuildManager()
         {
-            manager = new SplitManager(splitCache, _blockUntilReadyService);
+            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
         }
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(gates, splitFetcher, selfRefreshingSegmentFetcher, treatmentLog, eventLog, _log);
+            _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
         }
 
         private void LaunchTaskSchedulerOnReady()
         {
-            Task workerTask = Task.Factory.StartNew(
+            var workerTask = Task.Factory.StartNew(
                 () => {
                     while (true)
                     {
-                        if (gates.IsSDKReady(0))
+                        if (_gates.IsSDKReady(0))
                         {
-                            selfRefreshingSegmentFetcher.StartScheduler();
+                            _selfRefreshingSegmentFetcher.Start();
                             break;
                         }
 

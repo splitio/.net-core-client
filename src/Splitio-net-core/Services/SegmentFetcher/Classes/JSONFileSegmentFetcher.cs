@@ -6,10 +6,12 @@ using System.IO;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class JSONFileSegmentFetcher:SegmentFetcher
+    public class JSONFileSegmentFetcher : SegmentFetcher
     {
         List<string> added;
-        public JSONFileSegmentFetcher(string filePath, ISegmentCache segmentsCache):base(segmentsCache)
+
+        public JSONFileSegmentFetcher(string filePath, 
+            ISegmentCache segmentsCache) : base(segmentsCache)
         {
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -23,9 +25,8 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             if (added != null)
             {
-                segmentCache.AddToSegment(name, added);
+                _segmentCache.AddToSegment(name, added);
             }
         }
-
     }
 }

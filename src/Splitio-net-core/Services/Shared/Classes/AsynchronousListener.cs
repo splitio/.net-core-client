@@ -9,20 +9,21 @@ namespace Splitio.Services.Shared.Classes
 {
     public class AsynchronousListener<T> : IAsynchronousListener<T>
     {
-        protected readonly ISplitLogger _logger;
-        private List<IListener<T>> workers = new List<IListener<T>>();
+        private readonly ISplitLogger _logger;
+        private readonly List<IListener<T>> _workers;
 
         public AsynchronousListener(ISplitLogger logger)
         {
             _logger = logger;
+            _workers = new List<IListener<T>>();
         }
 
         public void AddListener(IListener<T> worker)
         {
-            workers.Add(worker);
+            _workers.Add(worker);
         }
 
-        public void Log(T item)
+        public void Notify(T item)
         {
             try
             {
@@ -30,19 +31,20 @@ namespace Splitio.Services.Shared.Classes
                 //all worker's tasks in the main thread
                 var listenerTask = new Task(() =>
                 {
-                    foreach (IListener<T> worker in workers)
+                    foreach (var worker in _workers)
                     {
                         try
                         {
                             //This task makes worker.Log() run independently 
                             //and avoid one worker to block another.
                             var logTask = new Task(() =>
-                                                {
-                                                    var stopwatch = Stopwatch.StartNew();
-                                                    worker.Log(item);
-                                                    stopwatch.Stop();
-                                                    _logger.Info(worker.GetType() + " took " + stopwatch.ElapsedMilliseconds + " milliseconds");
-                                                });
+                            {
+                                var stopwatch = Stopwatch.StartNew();
+                                worker.Log(item);
+                                stopwatch.Stop();
+                                _logger.Info(worker.GetType() + " took " + stopwatch.ElapsedMilliseconds + " milliseconds");
+                            });
+
                             logTask.Start();
                         }
                         catch (Exception e)
@@ -51,6 +53,7 @@ namespace Splitio.Services.Shared.Classes
                         }
                     }
                 });
+
                 listenerTask.Start();
             }
             catch (Exception e)

@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _asyncListener.AddListener(_listenerMock.Object);
 
             //Act
-            _asyncListener.Log(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
+            _asyncListener.Notify(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
             Thread.Sleep(1000);
 
             //Assert
@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _asyncListener.AddListener(listenerMock2.Object);
 
             //Act
-            _asyncListener.Log(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
+            _asyncListener.Notify(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
             // TODO: Adding Thread.Sleep is awful, we should create a LogAsync method that returns a task and wait for that task to finish 
             Thread.Sleep(2000);
 
@@ -66,7 +66,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             _asyncListener.AddListener(listenerMock2.Object);
 
             //Act
-            _asyncListener.Log(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
+            _asyncListener.Notify(new Event { key = "Key1", eventTypeId = "testEventType", trafficTypeName = "testTrafficType", timestamp = 7000, value = 12.34 });
             Thread.Sleep(1000);
 
             //Assert

@@ -16,9 +16,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             Destroyed = isDestroyed;
         }
 
-        public IListener<WrappedEvent> GetEventListener()
+        public IAsynchronousListener<WrappedEvent> GetEventListener()
         {
-            return eventListener;
+            return _eventListener;
         }
     }
 }

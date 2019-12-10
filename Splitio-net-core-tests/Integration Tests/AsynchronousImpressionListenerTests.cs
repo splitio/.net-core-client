@@ -49,7 +49,7 @@ namespace Splitio_Tests.Integration_Tests
 
 
             //Act
-            asyncListener.Log(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             Thread.Sleep(1000);
 
             //Assert
@@ -70,7 +70,7 @@ namespace Splitio_Tests.Integration_Tests
 
 
             //Act
-            asyncListener.Log(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             Thread.Sleep(1000);
 
             //Assert

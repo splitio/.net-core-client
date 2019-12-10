@@ -4,31 +4,38 @@ using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class SelfRefreshingSegmentFetcher : SegmentFetcher
+    public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISplitFetcher
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
-        private readonly ISegmentChangeFetcher segmentChangeFetcher;
-        private readonly ConcurrentDictionary<string, SelfRefreshingSegment> segments;
-        private readonly SegmentTaskWorker worker;
-        private readonly IReadinessGatesCache gates;
-        private readonly int interval;
-        private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private readonly ISegmentChangeFetcher _segmentChangeFetcher;
+        private readonly IReadinessGatesCache _gates;
         private readonly IWrapperAdapter _wrappedAdapter;
+        private readonly ConcurrentDictionary<string, SelfRefreshingSegment> _segments;
+        private readonly SegmentTaskWorker _worker;
+        private readonly CancellationTokenSource _cancelTokenSource;
+        private readonly int _interval;
 
-        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, IReadinessGatesCache gates, int interval, ISegmentCache segmentsCache, int numberOfParallelSegments) : base(segmentsCache)
+        public SelfRefreshingSegmentFetcher(ISegmentChangeFetcher segmentChangeFetcher, 
+            IReadinessGatesCache gates, 
+            int interval, 
+            ISegmentCache segmentsCache, 
+            int numberOfParallelSegments) : base(segmentsCache)
         {
-            this.segmentChangeFetcher = segmentChangeFetcher;
-            this.segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
-            worker = new SegmentTaskWorker(numberOfParallelSegments);
-            this.interval = interval;
-            this.gates = gates;
+            _cancelTokenSource = new CancellationTokenSource();
+
+            _segmentChangeFetcher = segmentChangeFetcher;
+            _segments = new ConcurrentDictionary<string, SelfRefreshingSegment>();
+            _worker = new SegmentTaskWorker(numberOfParallelSegments);
+            _interval = interval;
+            _gates = gates;
             _wrappedAdapter = new WrapperAdapter();
 
             StartWorker();
@@ -36,56 +43,55 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public void Stop()
         {
-            cancelTokenSource.Cancel();
+            _cancelTokenSource.Cancel();
             SegmentTaskQueue.segmentsQueue.Dispose();
-            segments.Clear();
-            segmentCache.Clear();
+            _segments.Clear();
+            _segmentCache.Clear();
         }
 
-        private void StartWorker()
-        {
-            Task workerTask = Task.Factory.StartNew(
-                () => worker.ExecuteTasks(cancelTokenSource.Token),
-                cancelTokenSource.Token);
-        }
-
-        public void StartScheduler()
+        public void Start()
         {
             //Delay first execution until expected time has passed
-            _wrappedAdapter.TaskDelay(interval * 1000).Wait();
+            _wrappedAdapter.TaskDelay(_interval * 1000).Wait();
 
-            Task schedulerTask = PeriodicTaskFactory.Start(
-                    () => AddSegmentsToQueue(),
-                    intervalInMilliseconds: interval * 1000,
-                    cancelToken: cancelTokenSource.Token);
+            var schedulerTask = PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds: _interval * 1000, cancelToken: _cancelTokenSource.Token);
         }
 
         public override void InitializeSegment(string name)
         {
-            SelfRefreshingSegment segment;
-            segments.TryGetValue(name, out segment);
+            _segments.TryGetValue(name, out SelfRefreshingSegment segment);
+
             if (segment == null)
             {
-                segment = new SelfRefreshingSegment(name, segmentChangeFetcher, gates, segmentCache);
-                segments.TryAdd(name, segment);
+                segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _gates, _segmentCache);
+
+                _segments.TryAdd(name, segment);
+
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                if (Log.IsDebugEnabled)
+
+                if (_log.IsDebugEnabled)
                 {
-                    Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                    _log.Debug($"Segment queued: {segment.name}");
                 }
             }
         }
 
         private void AddSegmentsToQueue()
         {
-            foreach (SelfRefreshingSegment segment in segments.Values)
+            foreach (var segment in _segments.Values)
             {
                 SegmentTaskQueue.segmentsQueue.TryAdd(segment);
-                if (Log.IsDebugEnabled)
+
+                if (_log.IsDebugEnabled)
                 {
-                    Log.Debug(string.Format("Segment queued: {0}", segment.name));
+                    _log.Debug(string.Format("Segment queued: {0}", segment.name));
                 }
             }
+        }
+
+        private void StartWorker()
+        {
+            var workerTask = Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
     }
 }

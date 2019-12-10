@@ -31,16 +31,16 @@ namespace Splitio.Services.Client.Classes
         protected bool Destroyed;
         protected string ApiKey;
 
-        protected IListener<KeyImpression> impressionListener;
-        protected IListener<WrappedEvent> eventListener;
-        protected IMetricsLog metricsLog;
-        protected ISplitManager manager;
-        protected IMetricsCache metricsCache;
-        protected ISimpleCache<KeyImpression> impressionsCache;
-        protected ISimpleCache<WrappedEvent> eventsCache;
-        protected ISplitCache splitCache;
+        protected IAsynchronousListener<IList<KeyImpression>> _impressionListener;
+        protected IAsynchronousListener<WrappedEvent> _eventListener;
+        protected IMetricsLog _metricsLog;
+        protected ISplitManager _manager;
+        protected IMetricsCache _metricsCache;
+        protected ISimpleCache<KeyImpression> _impressionsCache;
+        protected ISimpleCache<WrappedEvent> _eventsCache;
+        protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
-        protected ISegmentCache segmentCache;
+        protected ISegmentCache _segmentCache;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
@@ -59,7 +59,7 @@ namespace Splitio.Services.Client.Classes
 
         public ISplitManager GetSplitManager()
         {
-            return manager;
+            return _manager;
         }
 
         #region Public Methods
@@ -148,7 +148,7 @@ namespace Splitio.Services.Client.Classes
                     properties = (Dictionary<string, object>)eventPropertiesResult.Value
                 };
 
-                eventListener.Log(new WrappedEvent
+                _eventListener.Notify(new WrappedEvent
                 {
                     Event = eventToLog,
                     Size = eventPropertiesResult.EventSize
@@ -184,17 +184,6 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Protected Methods
-        protected virtual void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            if (impressionListener != null)
-            {
-                foreach (var imp in impressionsQueue)
-                {
-                    impressionListener.Log(imp);
-                }
-            }
-        }
-
         protected bool IsClientReady(string methodName)
         {
             if (!_blockUntilReadyService.IsSdkReady())
@@ -214,7 +203,7 @@ namespace Splitio.Services.Client.Classes
 
         protected void BuildEvaluator(ISplitLogger log = null)
         {
-            _evaluator = new Evaluator.Evaluator(splitCache, _splitParser, log: log);
+            _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
         }
         #endregion
 
@@ -233,9 +222,9 @@ namespace Splitio.Services.Client.Classes
 
             var result = _evaluator.EvaluateFeature(key, feature, attributes);
 
-            if (metricsLog != null)
+            if (_metricsLog != null)
             {
-                metricsLog.Time(operation, result.ElapsedMilliseconds);
+                _metricsLog.Time(operation, result.ElapsedMilliseconds);
             }
 
             if (!Labels.SplitNotFound.Equals(result.Label))
@@ -281,9 +270,9 @@ namespace Splitio.Services.Client.Classes
                     }
                 }
 
-                if (metricsLog != null)
+                if (_metricsLog != null)
                 {
-                    metricsLog.Time(operation, results.ElapsedMilliseconds);
+                    _metricsLog.Time(operation, results.ElapsedMilliseconds);
                 }
 
                 ImpressionLog(ImpressionsQueue);
@@ -302,6 +291,14 @@ namespace Splitio.Services.Client.Classes
         private KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
         {
             return new KeyImpression { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
+        }
+
+        private void ImpressionLog(List<KeyImpression> impressionsQueue)
+        {
+            if (_impressionListener != null && impressionsQueue.Any())
+            {
+                _impressionListener.Notify(impressionsQueue);
+            }
         }
         #endregion
     }

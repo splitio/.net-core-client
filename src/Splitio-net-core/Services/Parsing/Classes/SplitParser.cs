@@ -12,8 +12,9 @@ namespace Splitio.Services.Parsing
 {
     public abstract class SplitParser : ISplitParser
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SplitParser));
-        protected ISegmentCache segmentsCache;
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SplitParser));
+
+        protected ISegmentCache _segmentsCache;
 
         public ParsedSplit Parse(Split split)
         {
@@ -37,7 +38,7 @@ namespace Splitio.Services.Parsing
                     trafficTypeName = split.trafficTypeName,
                     algo = split.algo == 0 || split.algo == null ? AlgorithmEnum.LegacyHash : (AlgorithmEnum)split.algo,
                     trafficAllocation = split.trafficAllocation,
-                    trafficAllocationSeed = split.trafficAllocationSeed.HasValue ? split.trafficAllocationSeed.Value : 0,
+                    trafficAllocationSeed = split.trafficAllocationSeed ?? 0,
                     configurations = split.configurations
                 };
 
@@ -45,7 +46,7 @@ namespace Splitio.Services.Parsing
             }
             catch (Exception e)
             {
-                Log.Error("Exception caught parsing split", e);
+                _log.Error("Exception caught parsing split", e);
                 return null;
             }
         }
@@ -56,8 +57,8 @@ namespace Splitio.Services.Parsing
         {
             foreach (var condition in split.conditions)
             {
-                ConditionType result;
-                var isValidCondition = Enum.TryParse(condition.conditionType, out result);
+                var isValidCondition = Enum.TryParse(condition.conditionType, out ConditionType result);
+
                 parsedSplit.conditions.Add(new ConditionWithLogic()
                 {
                     conditionType = isValidCondition ? result : ConditionType.WHITELIST,
@@ -66,6 +67,7 @@ namespace Splitio.Services.Parsing
                     label = condition.label
                 });
             }
+
             return parsedSplit;
         }
 
@@ -89,13 +91,14 @@ namespace Splitio.Services.Parsing
             {
                 throw new Exception("Missing matcher type value");
             }
+
             var matcherType = matcherDefinition.matcherType;
 
             IMatcher matcher = null;
             try
             {
-                MatcherTypeEnum result;
-                var isValidMatcherType = Enum.TryParse(matcherType, out result);
+                var isValidMatcherType = Enum.TryParse(matcherType, out MatcherTypeEnum result);
+
                 if (isValidMatcherType)
                 {
                     switch (result)
@@ -136,7 +139,7 @@ namespace Splitio.Services.Parsing
             }
             catch (Exception e)
             {
-                Log.Error("Error parsing matcher", e);
+                _log.Error("Error parsing matcher", e);
             }
 
             if (matcher == null)
@@ -256,8 +259,8 @@ namespace Splitio.Services.Parsing
 
         private CombinerEnum ParseCombiner(string combinerEnum)
         {
-            CombinerEnum result;
-            var isValidCombiner = Enum.TryParse(combinerEnum, out result);
+            var isValidCombiner = Enum.TryParse(combinerEnum, out CombinerEnum result);
+
             return result;
         }
     }

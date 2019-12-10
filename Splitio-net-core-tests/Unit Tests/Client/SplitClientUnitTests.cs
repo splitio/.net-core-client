@@ -13,9 +13,9 @@ namespace Splitio_Tests.Unit_Tests.Client
     public class SplitClientUnitTests
     {        
         private Mock<ISplitLogger> _logMock;
-        private Mock<IListener<WrappedEvent>> _eventListenerMock;
+        private Mock<IAsynchronousListener<WrappedEvent>> _eventListenerMock;
         private Mock<ISplitCache> _splitCacheMock;
-        private Mock<IListener<KeyImpression>> _impressionListenerMock;
+        private Mock<IAsynchronousListener<IList<KeyImpression>>> _impressionListenerMock;
         private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
@@ -28,8 +28,8 @@ namespace Splitio_Tests.Unit_Tests.Client
             _logMock = new Mock<ISplitLogger>();
             _splitCacheMock = new Mock<ISplitCache>();
             _combiningMatcher = new Mock<CombiningMatcher>();
-            _eventListenerMock = new Mock<IListener<WrappedEvent>>();
-            _impressionListenerMock = new Mock<IListener<KeyImpression>>();
+            _eventListenerMock = new Mock<IAsynchronousListener<WrappedEvent>>();
+            _impressionListenerMock = new Mock<IAsynchronousListener<IList<KeyImpression>>>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();
 
@@ -101,7 +101,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert
             Assert.AreEqual("control", result);
-            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionListenerMock.Verify(mock => mock.Notify(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -434,7 +434,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             // Assert
             Assert.AreEqual("control", result.Treatment);
             Assert.IsNull(result.Config);
-            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionListenerMock.Verify(mock => mock.Notify(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -587,7 +587,7 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Assert.IsNull(res.Value.Config);
             }
 
-            _impressionListenerMock.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Never);
+            _impressionListenerMock.Verify(mock => mock.Notify(It.IsAny<IList<KeyImpression>>()), Times.Never);
         }
         #endregion
 
@@ -677,7 +677,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties != null
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties != null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals("user")
@@ -699,7 +699,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals("user")
@@ -725,7 +725,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals(trafficType)
@@ -753,7 +753,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             // Assert.
             Assert.IsTrue(result);
-            _eventListenerMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null
+            _eventListenerMock.Verify(mock => mock.Notify(It.Is<WrappedEvent>(we => we.Event.properties == null
                                                                               && we.Event.key.Equals("key")
                                                                               && we.Event.eventTypeId.Equals("event_type")
                                                                               && we.Event.trafficTypeName.Equals(trafficType)

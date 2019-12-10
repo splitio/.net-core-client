@@ -6,17 +6,15 @@ using System.Collections.Concurrent;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class SegmentFetcher: ISegmentFetcher
+    public class SegmentFetcher : ISegmentFetcher
     {
-        protected ISegmentCache segmentCache;
+        protected ISegmentCache _segmentCache;
 
         public SegmentFetcher(ISegmentCache segmentCache)
         {
-            this.segmentCache = segmentCache ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+            _segmentCache = segmentCache ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
         }
 
-        public virtual void InitializeSegment(string name)
-        {
-        }
+        public virtual void InitializeSegment(string name) { }
     }
 }
