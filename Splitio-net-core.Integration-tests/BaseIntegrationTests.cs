@@ -887,6 +887,8 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
+            client.BlockUntilReady(10000);
+
             foreach (var _event in events)
             {
                 // Act.

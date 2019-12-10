@@ -16,6 +16,7 @@ namespace Splitio_Tests.Integration_Tests
         public void Initialization()
         {
             adapter = new RedisAdapter("localhost", "6379", "", 0, 1000, 5, 1000);
+            adapter.Connect();
             adapter.Flush();
         }
 
@@ -251,8 +252,7 @@ namespace Splitio_Tests.Integration_Tests
             var result = adapter.SIsMember("test_key_set", "test_value");
             var result2 = adapter.SIsMember("test_key_set", "test_value2");
             var result3 = adapter.SIsMember("test_key_set", "test_value3");
-
-
+            
             //Assert
             Assert.IsTrue(result);
             Assert.IsFalse(result2);

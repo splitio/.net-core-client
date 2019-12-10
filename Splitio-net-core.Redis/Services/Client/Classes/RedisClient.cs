@@ -11,8 +11,8 @@ using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
@@ -75,10 +75,7 @@ namespace Splitio.Redis.Services.Client.Classes
         {
             _redisAdapter = new RedisAdapter(RedisHost, RedisPort, RedisPassword, RedisDatabase, RedisConnectTimeout, RedisConnectRetry, RedisSyncTimeout);
 
-            if (!_redisAdapter.IsConnected())
-            {
-                throw new TimeoutException($"SDK was not ready. Could not connect to Redis");
-            }
+            Task.Factory.StartNew(() => _redisAdapter.Connect());
 
             _segmentCache = new RedisSegmentCache(_redisAdapter, RedisUserPrefix);
             BuildParser();

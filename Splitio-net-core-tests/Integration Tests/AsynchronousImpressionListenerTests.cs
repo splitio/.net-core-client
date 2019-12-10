@@ -47,10 +47,9 @@ namespace Splitio_Tests.Integration_Tests
             asyncListener.AddListener(listener1);
             asyncListener.AddListener(listenerMock2.Object);
 
-
             //Act
             asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             //Assert
             Assert.AreEqual(listener1.list.Count, 1);
