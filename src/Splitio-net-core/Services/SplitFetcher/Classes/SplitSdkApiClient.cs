@@ -12,7 +12,7 @@ namespace Splitio.Services.SplitFetcher.Classes
 {
     public class SplitSdkApiClient : SdkApiClient, ISplitSdkApiClient
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SplitSdkApiClient));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SplitSdkApiClient));
 
         private const string SplitChangesUrlTemplate = "/api/splitChanges";
         private const string UrlParameterSince = "?since=";
@@ -20,7 +20,12 @@ namespace Splitio.Services.SplitFetcher.Classes
         private const string SplitFetcherStatus = "splitChangeFetcher.status.{0}";
         private const string SplitFetcherException = "splitChangeFetcher.exception";
         
-        public SplitSdkApiClient(HTTPHeader header, string baseUrl, long connectionTimeOut, long readTimeout, IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog) { }
+        public SplitSdkApiClient(HTTPHeader header,
+            string baseUrl,
+            long connectionTimeOut,
+            long readTimeout,
+            IMetricsLog metricsLog = null) : base(header, baseUrl, connectionTimeOut, readTimeout, metricsLog)
+        { }
 
         public async Task<string> FetchSplitChanges(long since)
         {
@@ -34,21 +39,21 @@ namespace Splitio.Services.SplitFetcher.Classes
 
                 if ((int)response.statusCode >= (int)HttpStatusCode.OK && (int)response.statusCode < (int)HttpStatusCode.Ambiguous)
                 {
-                    if (metricsLog != null)
+                    if (_metricsLog != null)
                     {
-                        metricsLog.Time(SplitFetcherTime, clock.ElapsedMilliseconds);
-                        metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
+                        _metricsLog.Time(SplitFetcherTime, clock.ElapsedMilliseconds);
+                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
                     }
 
                     return response.content;
                 }
                 else
                 {
-                    Log.Error(string.Format("Http status executing FetchSplitChanges: {0} - {1}", response.statusCode.ToString(), response.content));
+                    _log.Error(string.Format("Http status executing FetchSplitChanges: {0} - {1}", response.statusCode.ToString(), response.content));
 
-                    if (metricsLog != null)
+                    if (_metricsLog != null)
                     {
-                        metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
+                        _metricsLog.Count(string.Format(SplitFetcherStatus, response.statusCode), 1);
                     }
 
                     return string.Empty;
@@ -56,11 +61,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             }
             catch (Exception e)
             {
-                Log.Error("Exception caught executing FetchSplitChanges", e);
+                _log.Error("Exception caught executing FetchSplitChanges", e);
 
-                if (metricsLog != null)
+                if (_metricsLog != null)
                 {
-                    metricsLog.Count(SplitFetcherException, 1);
+                    _metricsLog.Count(SplitFetcherException, 1);
                 }
 
                 return string.Empty;

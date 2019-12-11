@@ -10,7 +10,7 @@ namespace Splitio.Services.Shared.Classes
     public class AsynchronousListener<T> : IAsynchronousListener<T>
     {
         private readonly ISplitLogger _logger;
-        private readonly List<IListener<T>> _workers;
+        private readonly IList<IListener<T>> _workers;
 
         public AsynchronousListener(ISplitLogger logger)
         {
