@@ -18,14 +18,14 @@ namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
+        protected const string Control = "control";
+
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
-        protected readonly IWrapperAdapter _wrapperAdapter;
-
-        protected const string Control = "control";
+        protected readonly IWrapperAdapter _wrapperAdapter;        
 
         protected bool LabelsEnabled;
         protected bool Destroyed;
@@ -55,11 +55,6 @@ namespace Splitio.Services.Client.Classes
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _wrapperAdapter = new WrapperAdapter();
-        }
-
-        public ISplitManager GetSplitManager()
-        {
-            return _manager;
         }
 
         #region Public Methods
@@ -181,26 +176,14 @@ namespace Splitio.Services.Client.Classes
         {
             _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
+
+        public ISplitManager GetSplitManager()
+        {
+            return _manager;
+        }
         #endregion
 
         #region Protected Methods
-        protected bool IsClientReady(string methodName)
-        {
-            if (!_blockUntilReadyService.IsSdkReady())
-            {
-                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
-                return false;
-            }
-
-            if (Destroyed)
-            {
-                _log.Error("Client has already been destroyed - No calls possible");
-                return false;
-            }
-
-            return true;
-        }
-
         protected void BuildEvaluator(ISplitLogger log = null)
         {
             _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
@@ -299,6 +282,23 @@ namespace Splitio.Services.Client.Classes
             {
                 _impressionListener.Notify(impressionsQueue);
             }
+        }
+
+        private bool IsClientReady(string methodName)
+        {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
+                return false;
+            }
+
+            if (Destroyed)
+            {
+                _log.Error("Client has already been destroyed - No calls possible");
+                return false;
+            }
+
+            return true;
         }
         #endregion
     }

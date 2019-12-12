@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
-    public class SplitFactory
+    public class SplitFactory : ISplitFactory
     {
         private readonly IApiKeyValidator _apiKeyValidator;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
@@ -38,6 +38,18 @@ namespace Splitio.Services.Client.Classes
             }
 
             return _client;
+        }
+
+        public ISplitManager Manager()
+        {
+            if (_client == null)
+            {
+                BuildSplitClient();
+            }
+
+            _manager = _client.GetSplitManager();
+
+            return _manager;
         }
 
         private void BuildSplitClient()
@@ -95,18 +107,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             _factoryInstantiationsService.Increase(_apiKey);
-        }
-
-        public ISplitManager Manager()
-        {
-            if (_client == null)
-            {
-                BuildSplitClient();
-            }
-           
-            _manager = _client.GetSplitManager();
-
-            return _manager;
-        }
+        }        
     }
 }
