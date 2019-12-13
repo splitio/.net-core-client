@@ -1,7 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Classes;
-using System.Collections.Generic;
 
 namespace Splitio_net_core.Integration_tests.Resources
 {
@@ -14,17 +13,14 @@ namespace Splitio_net_core.Integration_tests.Resources
             queue = new BlockingQueue<KeyImpression>(size);
         }
 
-        public void Log(IList<KeyImpression> impressions)
+        public void Log(KeyImpression impression)
         {
             if (queue.HasReachedMaxSize())
             {
                 queue.Dequeue();
             }
 
-            foreach (var imp in impressions)
-            {
-                queue.Enqueue(imp);
-            }            
+            queue.Enqueue(impression);            
         }
 
         public BlockingQueue<KeyImpression> GetQueue()

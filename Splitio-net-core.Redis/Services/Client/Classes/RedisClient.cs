@@ -85,10 +85,7 @@ namespace Splitio.Redis.Services.Client.Classes
             _impressionListener = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListenerRedis"));
             _impressionListener.AddListener(treatmentLog);
 
-            if (config.ImpressionListener != null)
-            {                
-                _impressionListener.AddListener(config.ImpressionListener);
-            }
+            _customerImpressionListener = config.ImpressionListener;
         }
 
         private void BuildEventLog(ConfigurationOptions config)

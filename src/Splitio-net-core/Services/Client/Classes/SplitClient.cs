@@ -13,13 +13,14 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
         protected const string Control = "control";
-
+        
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
@@ -45,6 +46,7 @@ namespace Splitio.Services.Client.Classes
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
+        protected IListener<KeyImpression> _customerImpressionListener;
 
         public SplitClient(ISplitLogger log)
         {
@@ -188,6 +190,28 @@ namespace Splitio.Services.Client.Classes
         {
             _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
         }
+
+        protected virtual void ImpressionLog(List<KeyImpression> impressionsQueue)
+        {
+            if (impressionsQueue.Any())
+            {
+                if (_impressionListener != null)
+                {
+                    _impressionListener.Notify(impressionsQueue);
+                }
+
+                if (_customerImpressionListener != null)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        foreach (var imp in impressionsQueue)
+                        {
+                            _customerImpressionListener.Log(imp);
+                        }
+                    });
+                }
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -274,14 +298,6 @@ namespace Splitio.Services.Client.Classes
         private KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
         {
             return new KeyImpression { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
-        }
-
-        private void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            if (_impressionListener != null && impressionsQueue.Any())
-            {
-                _impressionListener.Notify(impressionsQueue);
-            }
         }
 
         private bool IsClientReady(string methodName)

@@ -154,10 +154,7 @@ namespace Splitio.Services.Client.Classes
             _impressionListener = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
             _impressionListener.AddListener(_treatmentLog);
 
-            if (config.ImpressionListener != null)
-            {
-                _impressionListener.AddListener(config.ImpressionListener);
-            }
+            _customerImpressionListener = config.ImpressionListener;
         }
 
         private void BuildEventLog(ConfigurationOptions config)
