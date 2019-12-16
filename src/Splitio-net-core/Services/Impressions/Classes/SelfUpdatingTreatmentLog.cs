@@ -5,51 +5,56 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class SelfUpdatingTreatmentLog : IListener<KeyImpression>
+    public class SelfUpdatingTreatmentLog : IListener<IList<KeyImpression>>
     {
-        private ITreatmentSdkApiClient apiClient;
-        private int interval;
-        private ISimpleProducerCache<KeyImpression> impressionsCache;
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private readonly int _interval;
+        private readonly ITreatmentSdkApiClient _apiClient;
+        private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
+        private readonly CancellationTokenSource _cancellationTokenSource;
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(SelfUpdatingTreatmentLog));
 
-        public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient, int interval, ISimpleCache<KeyImpression> impressionsCache, int maximumNumberOfKeysToCache = -1)
+        public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient,
+            int interval,
+            ISimpleCache<KeyImpression> impressionsCache,
+            int maximumNumberOfKeysToCache = -1)
         {
-            this.impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression> ) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));
-            this.apiClient = apiClient;
-            this.interval = interval;
+            _apiClient = apiClient;
+            _impressionsCache = (impressionsCache as ISimpleProducerCache<KeyImpression>) ?? new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(maximumNumberOfKeysToCache));            
+            _interval = interval;
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            PeriodicTaskFactory.Start(() => { SendBulkImpressions(); }, interval * 1000, cancellationTokenSource.Token);
+            PeriodicTaskFactory.Start(() => { SendBulkImpressions(); }, _interval * 1000, _cancellationTokenSource.Token);
         }
 
         public void Stop()
         {
-            cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
             SendBulkImpressions();
         }
 
         private void SendBulkImpressions()
         {
-            if (impressionsCache.HasReachedMaxSize())
+            if (_impressionsCache.HasReachedMaxSize())
             {
                 Logger.Warn("Split SDK impressions queue is full. Impressions may have been dropped. Consider increasing capacity.");
             }
 
-            var impressions = impressionsCache.FetchAllAndClear();
+            var impressions = _impressionsCache.FetchAllAndClear();
 
             if (impressions.Count > 0)
             {
                 try
                 {
-                    apiClient.SendBulkImpressions(impressions);
+                    _apiClient.SendBulkImpressions(impressions);
                 }
                 catch (Exception e)
                 {
@@ -58,9 +63,12 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public void Log(KeyImpression impression)
+        public void Log(IList<KeyImpression> impressions)
         {
-            impressionsCache.AddItem(impression);
+            foreach (var imp in impressions)
+            {
+                _impressionsCache.AddItem(imp);
+            }            
         }
     }
 }

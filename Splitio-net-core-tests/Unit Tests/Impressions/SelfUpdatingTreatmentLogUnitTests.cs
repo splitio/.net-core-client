@@ -30,8 +30,12 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void LogSuccessfully()
         {
             //Act
-            var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" };
-            _treatmentLog.Log(impression);
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
+            };
+
+            _treatmentLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -50,9 +54,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void LogSuccessfullyUsingBucketingKey()
         {
             //Act
-            Key key = new Key(bucketingKey : "a", matchingKey : "testkey");
-            var impression = new KeyImpression() { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey };
-            _treatmentLog.Log(impression);
+            Key key = new Key(bucketingKey: "a", matchingKey: "testkey");
+
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
+            };
+
+            _treatmentLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -71,10 +80,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestMethod]
         public void LogSuccessfullyAndSendImpressions()
         {
-            //Act
+            //Act            
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" }
+            };
+
             _treatmentLog.Start();
-            var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" };
-            _treatmentLog.Log(impression);
+            _treatmentLog.Log(impressions);
 
             //Assert
             Thread.Sleep(2000);

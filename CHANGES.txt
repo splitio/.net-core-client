@@ -1,5 +1,11 @@
 CHANGES
 
+6.0.1 (Coming soon)
+- Improved clients synchronization.
+- Improved IListener implementation.
+- Improved a few naming conventions.
+- Improved RedisClient constructor. We connect to server async now.
+
 6.0.0 (Nov 1, 2019)
 - BREAKING CHANGE: Changed our logging framework implementation for .NET Core sdk. We use Microsoft.Extensions.Logging now.
 - Improved the performance of the getTreatments() and getTreatmentsWithConfig() call, by minimizing the amount of calls to redis when fetching splits.

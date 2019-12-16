@@ -19,7 +19,8 @@ namespace Splitio_net_core.Integration_tests.Resources
             {
                 queue.Dequeue();
             }
-            queue.Enqueue(impression);
+
+            queue.Enqueue(impression);            
         }
 
         public BlockingQueue<KeyImpression> GetQueue()

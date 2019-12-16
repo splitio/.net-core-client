@@ -10,66 +10,60 @@ namespace Splitio.Redis.Services.Cache.Classes
     public class RedisAdapter : IRedisAdapter
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(RedisAdapter));
+               
+        private readonly string _host;
+        private readonly string _port;
+        private readonly string _password = "";
+        private readonly int _databaseNumber = 0;
+        private readonly int _connectTimeout = 0;
+        private readonly int _connectRetry = 0;
+        private readonly int _syncTimeout = 0;
 
-        private ConnectionMultiplexer redis;
-        private IDatabase database;
-        private IServer server;
+        private IConnectionMultiplexer _redis;
+        private IDatabase _database;
+        private IServer _server;
 
-        public RedisAdapter(string host, 
-            string port, 
-            string password = "", 
+        public RedisAdapter(string host,
+            string port,
+            string password = "",
             int databaseNumber = 0,
-            int connectTimeout = 0, 
-            int connectRetry = 0, 
+            int connectTimeout = 0,
+            int connectRetry = 0,
             int syncTimeout = 0)
+        {
+            _host = host;
+            _port = port;
+            _password = password;
+            _databaseNumber = databaseNumber;
+            _connectTimeout = connectTimeout;
+            _connectRetry = connectRetry;
+            _syncTimeout = syncTimeout;
+        }
+
+        public void Connect()
         {
             try
             {
-                var config = GetConfig(host, port, password, connectTimeout, connectRetry, syncTimeout);
-                redis = ConnectionMultiplexer.Connect(config);
-                database = redis.GetDatabase(databaseNumber);
-                server = redis.GetServer(string.Format("{0}:{1}", host, port));
+                _redis = ConnectionMultiplexer.Connect(GetConfig());
+                _database = _redis.GetDatabase(_databaseNumber);
+                _server = _redis.GetServer($"{_host}:{_port}");
             }
             catch (Exception e)
             {
-                _log.Error(string.Format("Exception caught building Redis Adapter '{0}:{1}': ", host, port), e);
+                _log.Error(string.Format("Exception caught building Redis Adapter '{0}:{1}': ", _host, _port), e);
             }
         }
 
         public bool IsConnected()
         {
-            return server?.IsConnected ?? false;
+            return _server?.IsConnected ?? false;
         }
-
-        private static string GetConfig(string host, string port, string password, int connectTimeout, int connectRetry, int syncTimeout)
-        {
-            var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", host, port, password);
-
-            if (connectTimeout > 0)
-            {
-                config += ", connectTimeout = " + connectTimeout;
-            }
-
-            if (connectRetry > 0)
-            {
-                config += ", connectRetry = " + connectRetry;
-            }
-
-            if (syncTimeout > 0)
-            {
-                config += ", syncTimeout = " + syncTimeout;
-            }
-
-            config += ", keepAlive = " + 1;
-
-            return config;
-        }
-
+        
         public bool Set(string key, string value)
         {
             try
             {
-                return database.StringSet(key, value);
+                return _database.StringSet(key, value);
             }
             catch (Exception e)
             {
@@ -82,7 +76,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringGet(key);
+                return _database.StringGet(key);
             }
             catch (Exception e)
             {
@@ -95,7 +89,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringGet(keys);
+                return _database.StringGet(keys);
             }
             catch (Exception e)
             {
@@ -108,7 +102,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                var keys = server.Keys(pattern: pattern);
+                var keys = _server.Keys(pattern: pattern);
                 return keys.ToArray();
             }
             catch (Exception e)
@@ -122,7 +116,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyDelete(key);
+                return _database.KeyDelete(key);
             }
             catch (Exception e)
             {
@@ -135,7 +129,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyDelete(keys);
+                return _database.KeyDelete(keys);
             }
             catch (Exception e)
             {
@@ -148,7 +142,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetAdd(key, value);
+                return _database.SetAdd(key, value);
             }
             catch (Exception e)
             {
@@ -161,7 +155,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetAdd(key, values);
+                return _database.SetAdd(key, values);
             }
             catch (Exception e)
             {
@@ -174,7 +168,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetRemove(key, values);
+                return _database.SetRemove(key, values);
             }
             catch (Exception e)
             {
@@ -187,7 +181,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetContains(key, value);
+                return _database.SetContains(key, value);
             }
             catch (Exception e)
             {
@@ -200,7 +194,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.SetMembers(key);
+                return _database.SetMembers(key);
             }
             catch (Exception e)
             {
@@ -213,7 +207,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.StringIncrement(key, value);
+                return _database.StringIncrement(key, value);
             }
             catch (Exception e)
             {
@@ -226,7 +220,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRightPush(key, value);
+                return _database.ListRightPush(key, value);
             }
             catch (Exception e)
             {
@@ -239,7 +233,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                server.FlushDatabase();
+                _server.FlushDatabase();
             }
             catch (Exception e)
             {
@@ -251,7 +245,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.KeyExpire(key, expiry);
+                return _database.KeyExpire(key, expiry);
             }
             catch (Exception e)
             {
@@ -264,7 +258,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRightPush(key, values);
+                return _database.ListRightPush(key, values);
             }
             catch (Exception e)
             {
@@ -277,13 +271,37 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                return database.ListRange(key, start, stop);
+                return _database.ListRange(key, start, stop);
             }
             catch (Exception e)
             {
                 _log.Error("Exception calling Redis Adapter ListRange", e);
                 return new RedisValue[0];
             }
+        }
+
+        private string GetConfig()
+        {
+            var config = string.Format("{0}:{1}, password = {2}, allowAdmin = true", _host, _port, _password);
+
+            if (_connectTimeout > 0)
+            {
+                config += ", connectTimeout = " + _connectTimeout;
+            }
+
+            if (_connectRetry > 0)
+            {
+                config += ", connectRetry = " + _connectRetry;
+            }
+
+            if (_syncTimeout > 0)
+            {
+                config += ", syncTimeout = " + _syncTimeout;
+            }
+
+            config += ", keepAlive = " + 1;
+
+            return config;
         }
     }
 }

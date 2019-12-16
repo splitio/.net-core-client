@@ -27,6 +27,7 @@ namespace Splitio_net_core.Integration_tests
         public RedisTests()
         {
             _redisAdapter = new RedisAdapter(Host, Port, Password, Database);
+            _redisAdapter.Connect();
 
             rootFilePath = string.Empty;
 

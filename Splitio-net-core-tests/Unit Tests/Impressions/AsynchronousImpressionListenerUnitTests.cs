@@ -31,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _asyncListener.AddListener(_listenerMock.Object);
 
             //Act
-            _asyncListener.Log(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            _asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             Thread.Sleep(1000);
 
             //Assert
@@ -48,7 +48,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
 
             //Act
-            _asyncListener.Log(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            _asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             // TODO: Adding Thread.Sleep is awful, we should create a LogAsync method that returns a task and wait for that task to finish 
             Thread.Sleep(2000);
 
@@ -68,7 +68,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
 
             //Act
-            _asyncListener.Log(new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
+            _asyncListener.Notify(new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000, treatment = "on", bucketingKey = "any" });
             Thread.Sleep(1000);
 
             //Assert

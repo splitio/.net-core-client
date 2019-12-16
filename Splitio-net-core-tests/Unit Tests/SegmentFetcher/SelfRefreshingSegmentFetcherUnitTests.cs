@@ -73,11 +73,10 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 
             //Act
             segmentFetcher.InitializeSegment("payed");
-            segmentFetcher.StartScheduler();
+            segmentFetcher.Start();
 
             //Assert
-            SelfRefreshingSegment segment;
-            Assert.IsTrue(SegmentTaskQueue.segmentsQueue.TryTake(out segment, -1));
+            Assert.IsTrue(SegmentTaskQueue.segmentsQueue.TryTake(out SelfRefreshingSegment segment, -1));
         }
     }
 }

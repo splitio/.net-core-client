@@ -576,8 +576,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yaml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yaml"
             };
 
             _blockUntilReadyService
@@ -616,8 +615,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yaml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yaml"
             };
 
             _blockUntilReadyService
@@ -657,8 +655,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yaml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yaml"
             };
 
             _blockUntilReadyService
@@ -706,8 +703,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yaml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yaml"
             };
 
             _blockUntilReadyService

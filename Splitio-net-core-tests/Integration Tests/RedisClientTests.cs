@@ -34,11 +34,14 @@ namespace Splitio_Tests.Integration_Tests
                 Database = DB
             };
 
-            config = new ConfigurationOptions();
-            config.CacheAdapterConfig = cacheAdapterConfig;
-            config.SdkMachineIP = "192.168.0.1";
+            config = new ConfigurationOptions
+            {
+                CacheAdapterConfig = cacheAdapterConfig,
+                SdkMachineIP = "192.168.0.1"
+            };
 
             _redisAdapter = new RedisAdapter(HOST, PORT, PASSWORD, DB);
+            _redisAdapter.Connect();
             LoadSplits();
         }
 
@@ -197,7 +200,7 @@ namespace Splitio_Tests.Integration_Tests
                 Assert.AreEqual("control", res.Value);
             }
 
-            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Never);
+            _logMock.Verify(mock => mock.Error($"GetTreatments: the SDK is not ready, the operation cannot be executed."), Times.Once);
         }
 
         [TestMethod]
