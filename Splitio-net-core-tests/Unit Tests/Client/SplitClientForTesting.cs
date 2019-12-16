@@ -13,15 +13,15 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         public SplitClientForTesting(ISplitLogger log, 
             ISplitCache splitCache,
-            IAsynchronousListener<WrappedEvent> eventListener,
-            IAsynchronousListener<IList<KeyImpression>> impressionListener,
+            //IAsynchronousListener<WrappedEvent> eventListener,
+            //IAsynchronousListener<IList<KeyImpression>> impressionListener,
             IBlockUntilReadyService blockUntilReadyService,
             IEvaluator evaluator)
             : base(log)
         {
             _splitCache = splitCache;
-            _eventListener = eventListener;
-            _impressionListener = impressionListener;
+            //_eventListener = eventListener;
+            //_impressionListener = impressionListener;
             _blockUntilReadyService = blockUntilReadyService;
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache, log);
             _evaluator = evaluator;

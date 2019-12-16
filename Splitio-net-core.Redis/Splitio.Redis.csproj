@@ -41,4 +41,8 @@
     <ProjectReference Include="..\src\Splitio-net-core\Splitio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Impressions\Classes\" />
+  </ItemGroup>
+
 </Project>

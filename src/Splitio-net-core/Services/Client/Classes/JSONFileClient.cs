@@ -20,9 +20,9 @@ namespace Splitio.Services.Client.Classes
             ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
-            IAsynchronousListener<IList<KeyImpression>> treatmentLogInstance = null,
+            //IAsynchronousListener<IList<KeyImpression>> treatmentLogInstance = null,
             bool isLabelsEnabled = true,
-            IAsynchronousListener<WrappedEvent> eventListener = null,
+            //IAsynchronousListener<WrappedEvent> eventListener = null,
             ITrafficTypeValidator trafficTypeValidator = null) : base(GetLogger(log))
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -43,10 +43,10 @@ namespace Splitio.Services.Client.Classes
             }
 
             _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-            _impressionListener = treatmentLogInstance;
+            //_impressionListener = treatmentLogInstance;
             LabelsEnabled = isLabelsEnabled;
 
-            _eventListener = eventListener;
+            //_eventListener = eventListener;
             _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new NoopBlockUntilReadyService();

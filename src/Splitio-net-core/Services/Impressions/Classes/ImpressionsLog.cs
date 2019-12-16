@@ -10,16 +10,16 @@ using System.Threading;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class SelfUpdatingTreatmentLog : IListener<IList<KeyImpression>>
+    public class ImpressionsLog : IImpressionsLog
     {
-        private readonly int _interval;
         private readonly ITreatmentSdkApiClient _apiClient;
         private readonly ISimpleProducerCache<KeyImpression> _impressionsCache;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly int _interval;
 
-        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(SelfUpdatingTreatmentLog));
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsLog));
 
-        public SelfUpdatingTreatmentLog(ITreatmentSdkApiClient apiClient,
+        public ImpressionsLog(ITreatmentSdkApiClient apiClient,
             int interval,
             ISimpleCache<KeyImpression> impressionsCache,
             int maximumNumberOfKeysToCache = -1)
@@ -39,6 +39,11 @@ namespace Splitio.Services.Impressions.Classes
         {
             _cancellationTokenSource.Cancel();
             SendBulkImpressions();
+        }
+
+        public void AddItems(IList<KeyImpression> impressions)
+        {
+            _impressionsCache.AddItems(impressions);
         }
 
         private void SendBulkImpressions()
@@ -61,14 +66,6 @@ namespace Splitio.Services.Impressions.Classes
                     Logger.Error("Exception caught updating impressions.", e);
                 }
             }
-        }
-
-        public void Log(IList<KeyImpression> impressions)
-        {
-            foreach (var imp in impressions)
-            {
-                _impressionsCache.AddItem(imp);
-            }            
         }
     }
 }
