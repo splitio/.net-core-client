@@ -67,7 +67,7 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void Start()
         {
-            _impressionLog.Start();
+            _impressionsLog.Start();
             _eventsLog.Start();
             _splitFetcher.Start();
         }
@@ -76,7 +76,7 @@ namespace Splitio.Services.Client.Classes
         {
             _splitFetcher.Stop(); // Stop + Clear
             _selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
-            _impressionLog.Stop(); //Stop + SendBulk + Clear
+            _impressionsLog.Stop(); //Stop + SendBulk + Clear
             _eventsLog.Stop(); //Stop + SendBulk + Clear
             _metricsLog.Clear(); //Clear
         }
@@ -146,7 +146,7 @@ namespace Splitio.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
-            _impressionLog = new ImpressionsLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
+            _impressionsLog = new ImpressionsLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
         }

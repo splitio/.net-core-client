@@ -3,7 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Shared.Interfaces;
 
-namespace Splitio.Redis.Services.Shared
+namespace Splitio.Redis.Services.Impressions.Classes
 {
     public class RedisImpressionLog : IImpressionsLog
     {
@@ -14,7 +14,7 @@ namespace Splitio.Redis.Services.Shared
             _impressionsCache = impressionsCache;
         }
 
-        public void AddItems(IList<KeyImpression> impressions)
+        public void Log(IList<KeyImpression> impressions)
         {
             _impressionsCache.AddItems(impressions);
         }

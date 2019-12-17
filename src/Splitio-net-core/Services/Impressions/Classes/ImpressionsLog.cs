@@ -41,7 +41,7 @@ namespace Splitio.Services.Impressions.Classes
             SendBulkImpressions();
         }
 
-        public void AddItems(IList<KeyImpression> impressions)
+        public void Log(IList<KeyImpression> impressions)
         {
             _impressionsCache.AddItems(impressions);
         }

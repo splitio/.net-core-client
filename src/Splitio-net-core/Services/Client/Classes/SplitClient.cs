@@ -37,7 +37,7 @@ namespace Splitio.Services.Client.Classes
         protected IMetricsLog _metricsLog;
         protected ISplitManager _manager;
         protected IMetricsCache _metricsCache;
-        protected IImpressionsLog _impressionLog; 
+        protected IImpressionsLog _impressionsLog;
         protected IEventsLog _eventsLog;
         protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
@@ -147,7 +147,7 @@ namespace Splitio.Services.Client.Classes
 
                 Task.Factory.StartNew(() =>
                 {
-                    _eventsLog.AddItem(new WrappedEvent
+                    _eventsLog.Log(new WrappedEvent
                     {
                         Event = eventToLog,
                         Size = eventPropertiesResult.EventSize
@@ -302,11 +302,11 @@ namespace Splitio.Services.Client.Classes
         {
             if (impressionsQueue.Any())
             {
-                if (_impressionLog != null)
+                if (_impressionsLog != null)
                 {
                     Task.Factory.StartNew(() =>
                     {
-                        _impressionLog.AddItems(impressionsQueue);
+                        _impressionsLog.Log(impressionsQueue);
                     });
                 }
 

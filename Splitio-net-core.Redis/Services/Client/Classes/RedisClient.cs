@@ -1,8 +1,8 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
+using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
@@ -73,7 +73,7 @@ namespace Splitio.Redis.Services.Client.Classes
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
             var impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
-            _impressionLog = new RedisImpressionLog(impressionsCache);
+            _impressionsLog = new RedisImpressionLog(impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
         }

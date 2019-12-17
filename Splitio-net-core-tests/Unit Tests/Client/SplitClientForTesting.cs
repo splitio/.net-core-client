@@ -1,11 +1,11 @@
-﻿using Splitio.Domain;
-using Splitio.Services.Cache.Interfaces;
+﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
-using System.Collections.Generic;
 
 namespace Splitio_Tests.Unit_Tests.Client
 {
@@ -13,15 +13,15 @@ namespace Splitio_Tests.Unit_Tests.Client
     {
         public SplitClientForTesting(ISplitLogger log, 
             ISplitCache splitCache,
-            //IAsynchronousListener<WrappedEvent> eventListener,
-            //IAsynchronousListener<IList<KeyImpression>> impressionListener,
+            IEventsLog eventsLog,
+            IImpressionsLog impressionsLog,
             IBlockUntilReadyService blockUntilReadyService,
             IEvaluator evaluator)
             : base(log)
         {
             _splitCache = splitCache;
-            //_eventListener = eventListener;
-            //_impressionListener = impressionListener;
+            _eventsLog = eventsLog;
+            _impressionsLog = impressionsLog;
             _blockUntilReadyService = blockUntilReadyService;
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache, log);
             _evaluator = evaluator;

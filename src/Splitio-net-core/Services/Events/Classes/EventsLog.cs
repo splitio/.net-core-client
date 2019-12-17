@@ -57,6 +57,18 @@ namespace Splitio.Services.Events.Classes
             SendBulkEvents();
         }
 
+        public void Log(WrappedEvent wrappedEvent)
+        {
+            _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
+
+            _acumulateSize += wrappedEvent.Size;
+
+            if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
+            {
+                SendBulkEvents();
+            }
+        }
+
         private void SendBulkEvents()
         {
             if (_wrappedEventsCache.HasReachedMaxSize())
@@ -82,18 +94,6 @@ namespace Splitio.Services.Events.Classes
                 {
                     Logger.Error("Exception caught updating events.", e);
                 }
-            }
-        }
-
-        public void AddItem(WrappedEvent wrappedEvent)
-        {
-            _wrappedEventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
-
-            _acumulateSize += wrappedEvent.Size;
-
-            if (_wrappedEventsCache.HasReachedMaxSize() || _acumulateSize >= MAX_SIZE_BYTES)
-            {
-                SendBulkEvents();
             }
         }
     }

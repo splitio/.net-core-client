@@ -6,6 +6,6 @@ namespace Splitio.Services.Events.Interfaces
     {
         void Start();
         void Stop();
-        void AddItem(WrappedEvent wrappedEvent);
+        void Log(WrappedEvent wrappedEvent);
     }
 }

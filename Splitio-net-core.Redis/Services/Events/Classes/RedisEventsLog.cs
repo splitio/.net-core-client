@@ -14,7 +14,7 @@ namespace Splitio.Redis.Services.Events.Classes
             _eventsCache = eventsCache;
         }
 
-        public void AddItem(WrappedEvent wrappedEvent)
+        public void Log(WrappedEvent wrappedEvent)
         {
             _eventsCache.AddItems(new List<WrappedEvent> { wrappedEvent });
         }

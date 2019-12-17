@@ -1,12 +1,13 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,9 +21,9 @@ namespace Splitio.Services.Client.Classes
             ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
-            //IAsynchronousListener<IList<KeyImpression>> treatmentLogInstance = null,
+            IImpressionsLog impressionsLog = null,
             bool isLabelsEnabled = true,
-            //IAsynchronousListener<WrappedEvent> eventListener = null,
+            IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null) : base(GetLogger(log))
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
@@ -43,10 +44,12 @@ namespace Splitio.Services.Client.Classes
             }
 
             _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-            //_impressionListener = treatmentLogInstance;
+
+            _impressionsLog = impressionsLog;
+
             LabelsEnabled = isLabelsEnabled;
 
-            //_eventListener = eventListener;
+            _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new NoopBlockUntilReadyService();
