@@ -3,6 +3,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -32,13 +34,11 @@ namespace Splitio.Services.Client.Classes
         protected bool Destroyed;
         protected string ApiKey;
 
-        protected IAsynchronousListener<IList<KeyImpression>> _impressionListener;
-        protected IAsynchronousListener<WrappedEvent> _eventListener;
         protected IMetricsLog _metricsLog;
         protected ISplitManager _manager;
         protected IMetricsCache _metricsCache;
-        protected ISimpleCache<KeyImpression> _impressionsCache;
-        protected ISimpleCache<WrappedEvent> _eventsCache;
+        protected IImpressionsLog _impressionsLog;
+        protected IEventsLog _eventsLog;
         protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
         protected ISegmentCache _segmentCache;
@@ -46,7 +46,7 @@ namespace Splitio.Services.Client.Classes
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
-        protected IListener<KeyImpression> _customerImpressionListener;
+        protected IImpressionListener _customerImpressionListener;
 
         public SplitClient(ISplitLogger log)
         {
@@ -145,12 +145,15 @@ namespace Splitio.Services.Client.Classes
                     properties = (Dictionary<string, object>)eventPropertiesResult.Value
                 };
 
-                _eventListener.Notify(new WrappedEvent
+                Task.Factory.StartNew(() =>
                 {
-                    Event = eventToLog,
-                    Size = eventPropertiesResult.EventSize
+                    _eventsLog.Log(new WrappedEvent
+                    {
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
+                    });
                 });
-
+                
                 return true;
             }
             catch (Exception e)
@@ -189,28 +192,6 @@ namespace Splitio.Services.Client.Classes
         protected void BuildEvaluator(ISplitLogger log = null)
         {
             _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
-        }
-
-        protected virtual void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            if (impressionsQueue.Any())
-            {
-                if (_impressionListener != null)
-                {
-                    _impressionListener.Notify(impressionsQueue);
-                }
-
-                if (_customerImpressionListener != null)
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        foreach (var imp in impressionsQueue)
-                        {
-                            _customerImpressionListener.Log(imp);
-                        }
-                    });
-                }
-            }
         }
         #endregion
 
@@ -315,6 +296,31 @@ namespace Splitio.Services.Client.Classes
             }
 
             return true;
+        }
+
+        private void ImpressionLog(List<KeyImpression> impressionsQueue)
+        {
+            if (impressionsQueue.Any())
+            {
+                if (_impressionsLog != null)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        _impressionsLog.Log(impressionsQueue);
+                    });
+                }
+
+                if (_customerImpressionListener != null)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        foreach (var imp in impressionsQueue)
+                        {
+                            _customerImpressionListener.Log(imp);
+                        }
+                    });
+                }
+            }
         }
         #endregion
     }

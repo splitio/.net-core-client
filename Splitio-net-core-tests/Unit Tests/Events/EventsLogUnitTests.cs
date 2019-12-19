@@ -11,12 +11,12 @@ using System.Threading;
 namespace Splitio_Tests.Unit_Tests.Events
 {
     [TestClass]
-    public class SelfUpdatingEventLogUnitTests
+    public class EventsLogUnitTests
     {
         private BlockingQueue<WrappedEvent> _queue;
         private InMemorySimpleCache<WrappedEvent> _eventsCache;
         private Mock<IEventSdkApiClient> _apiClientMock;
-        private SelfUpdatingEventLog _eventLog;
+        private EventsLog _eventLog;
 
         [TestInitialize]
         public void Initialize()
@@ -24,7 +24,8 @@ namespace Splitio_Tests.Unit_Tests.Events
             _queue = new BlockingQueue<WrappedEvent>(10);
             _eventsCache = new InMemorySimpleCache<WrappedEvent>(_queue);
             _apiClientMock = new Mock<IEventSdkApiClient>();
-            _eventLog = new SelfUpdatingEventLog(_apiClientMock.Object, 1, 1, _eventsCache, 10);
+
+            _eventLog = new EventsLog(_apiClientMock.Object, 1, 1, _eventsCache, 10);
         }
 
         [TestMethod]
@@ -124,7 +125,7 @@ namespace Splitio_Tests.Unit_Tests.Events
             var eventToLog1 = new Event { key = "Key1", eventTypeId = "testEventType1", trafficTypeName = "testTrafficType1", timestamp = 7000, value = 12.34 };
             var eventToLog2 = new Event { key = "Key2", eventTypeId = "testEventType2", trafficTypeName = "testTrafficType2", timestamp = 6000 };
             var eventToLog3 = new Event { key = "Key3", eventTypeId = "testEventType3", trafficTypeName = "testTrafficType3", timestamp = 5000, value = 15.56 };
-            var eventToLog4 = new Event { key = "Key4", eventTypeId = "testEventType4", trafficTypeName = "testTrafficType4", timestamp = 8000};
+            var eventToLog4 = new Event { key = "Key4", eventTypeId = "testEventType4", trafficTypeName = "testTrafficType4", timestamp = 8000 };
 
             // Act.
             _eventLog.Log(new WrappedEvent { Event = eventToLog1, Size = 1747627 });
@@ -134,7 +135,7 @@ namespace Splitio_Tests.Unit_Tests.Events
 
             // Assert.
             _apiClientMock.Verify(x => x.SendBulkEvents(It.Is<List<Event>>(list => list.Count == eventCountExpected
-                                                                                && list.Any(l => l.key.Equals(eventToLog1.key) 
+                                                                                && list.Any(l => l.key.Equals(eventToLog1.key)
                                                                                               && l.eventTypeId.Equals(eventToLog1.eventTypeId)
                                                                                               && l.trafficTypeName.Equals(eventToLog1.trafficTypeName)
                                                                                               && l.value == eventToLog1.value)

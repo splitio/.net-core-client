@@ -20,11 +20,11 @@ namespace Splitio_Tests.Unit_Tests.Cache
             var cache = new RedisImpressionsCache(redisAdapterMock.Object, "10.0.0.1", "net-1.0.2", "machine_name_test");
             var impressions = new List<KeyImpression>
             {
-                new KeyImpression() { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 }
+                new KeyImpression { feature = "test", changeNumber = 100, keyName = "date", label = "testdate", time = 10000000 }
             };
 
             //Act
-            cache.AddItem(impressions);
+            cache.AddItems(impressions);
 
             //Assert
             redisAdapterMock.Verify(mock => mock.ListRightPush(key, It.IsAny<RedisValue[]>()));

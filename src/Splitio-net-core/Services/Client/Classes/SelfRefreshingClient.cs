@@ -13,12 +13,10 @@ using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
@@ -43,8 +41,6 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private IMetricsSdkApiClient _metricsSdkApiClient;
         private ISplitFetcher _selfRefreshingSegmentFetcher;
-        private IListener<IList<KeyImpression>> _treatmentLog;
-        private IListener<WrappedEvent> _eventLog;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -71,8 +67,8 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void Start()
         {
-            ((SelfUpdatingTreatmentLog)_treatmentLog).Start();
-            ((SelfUpdatingEventLog)_eventLog).Start();
+            _impressionsLog.Start();
+            _eventsLog.Start();
             _splitFetcher.Start();
         }
 
@@ -80,8 +76,8 @@ namespace Splitio.Services.Client.Classes
         {
             _splitFetcher.Stop(); // Stop + Clear
             _selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
-            ((SelfUpdatingTreatmentLog)_treatmentLog).Stop(); //Stop + SendBulk + Clear
-            ((SelfUpdatingEventLog)_eventLog).Stop(); //Stop + SendBulk + Clear
+            _impressionsLog.Stop(); //Stop + SendBulk + Clear
+            _eventsLog.Stop(); //Stop + SendBulk + Clear
             _metricsLog.Clear(); //Clear
         }
 
@@ -149,20 +145,16 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            _impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
-            _treatmentLog = new SelfUpdatingTreatmentLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, _impressionsCache);
-            _impressionListener = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
-            _impressionListener.AddListener(_treatmentLog);
+            var impressionsCache = new InMemorySimpleCache<KeyImpression>(new BlockingQueue<KeyImpression>(_config.TreatmentLogSize));
+            _impressionsLog = new ImpressionsLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
         }
 
         private void BuildEventLog(ConfigurationOptions config)
         {
-            _eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
-            _eventLog = new SelfUpdatingEventLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, _eventsCache);
-            _eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
-            _eventListener.AddListener(_eventLog);
+            var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
+            _eventsLog = new EventsLog(_eventSdkApiClient, _config.EventsFirstPushWindow, _config.EventLogRefreshRate, eventsCache);
         }
         
         private void BuildMetricsLog()

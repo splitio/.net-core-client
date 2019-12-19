@@ -557,14 +557,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);            
 
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });

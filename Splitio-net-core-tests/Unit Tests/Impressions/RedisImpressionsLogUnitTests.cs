@@ -3,6 +3,7 @@ using Moq;
 using Splitio.Domain;
 using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Services.Shared.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,19 +11,18 @@ using System.Threading;
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
     [TestClass]
-    public class RedisTreatmentLogUnitTests
+    public class RedisImpressionsLogUnitTests
     {
-        private Mock<ISimpleCache<IList<KeyImpression>>> _impressionsCache;
-        private RedisTreatmentLog _redisTreatmentLog;
+        private Mock<ISimpleCache<KeyImpression>> _impressionsCache;
+        private RedisImpressionLog _redisImpressionLog;
 
         [TestInitialize]
         public void Initialization()
         {
-            _impressionsCache = new Mock<ISimpleCache<IList<KeyImpression>>>();
+            _impressionsCache = new Mock<ISimpleCache<KeyImpression>>();
 
-            _redisTreatmentLog = new RedisTreatmentLog(_impressionsCache.Object);
+            _redisImpressionLog = new RedisImpressionLog(_impressionsCache.Object);
         }
-
 
         [TestMethod]
         public void LogSuccessfully()
@@ -34,18 +34,17 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            _redisTreatmentLog.Log(impressions);
+            _redisImpressionLog.Log(impressions);
 
             //Assert
-            Thread.Sleep(1000);
-            _impressionsCache.Verify(mock => mock.AddItem(It.IsAny<IList<KeyImpression>>()), Times.Once());
+            _impressionsCache.Verify(mock => mock.AddItems(It.IsAny<IList<KeyImpression>>()), Times.Once());
         }
 
         [TestMethod]
         public void LogSuccessfullyUsingBucketingKey()
         {
             //Arrange
-            Key key = new Key(bucketingKey: "a", matchingKey: "testkey");
+            var key = new Key(bucketingKey: "a", matchingKey: "testkey");
 
             var impressions = new List<KeyImpression>
             {
@@ -53,18 +52,33 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             };
 
             //Act
-            _redisTreatmentLog.Log(impressions);
+            _redisImpressionLog.Log(impressions);
 
             //Assert
-            Thread.Sleep(1000);
             _impressionsCache
-                .Verify(mock => mock.AddItem(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
+                .Verify(mock => mock.AddItems(It.Is<IList<KeyImpression>>(v => v.Any(ki => ki.keyName == key.matchingKey
                                                                                        && ki.feature == "test"
                                                                                        && ki.treatment == "on"
                                                                                        && ki.time == 7000
                                                                                        && ki.changeNumber == 1
                                                                                        && ki.label == "test-label"
                                                                                        && ki.bucketingKey == key.bucketingKey))), Times.Once());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void Start_ReturnsException()
+        {
+            //Act
+            _redisImpressionLog.Start();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void Stop_ReturnsException()
+        {
+            //Act
+            _redisImpressionLog.Stop();
         }
     }
 }

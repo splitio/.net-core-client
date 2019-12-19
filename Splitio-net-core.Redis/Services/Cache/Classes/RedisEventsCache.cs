@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using Splitio.Domain;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Services.Shared.Interfaces;
@@ -22,15 +23,18 @@ namespace Splitio.Redis.Services.Cache.Classes
             _sdkVersion = sdkVersion;
         }
 
-        public void AddItem(WrappedEvent item)
+        public void AddItems(IList<WrappedEvent> items)
         {
-            var eventJson = JsonConvert.SerializeObject(new
+            foreach (var item in items)
             {
-                m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
-                e = item.Event
-            });
+                var eventJson = JsonConvert.SerializeObject(new
+                {
+                    m = new { s = _sdkVersion, i = _machineIP, n = _machineName },
+                    e = item.Event
+                });
 
-            _redisAdapter.ListRightPush($"{RedisKeyPrefix}events", eventJson);
+                _redisAdapter.ListRightPush($"{RedisKeyPrefix}events", eventJson);
+            }
         }
     }
 }

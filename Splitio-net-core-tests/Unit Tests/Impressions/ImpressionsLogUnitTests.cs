@@ -10,12 +10,12 @@ using System.Threading;
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
     [TestClass]
-    public class SelfUpdatingTreatmentLogUnitTests
+    public class ImpressionsLogUnitTests
     {
         private Mock<ITreatmentSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
-        private SelfUpdatingTreatmentLog _treatmentLog;
+        private ImpressionsLog _impressionsLog;
 
         [TestInitialize]
         public void Initialize()
@@ -23,7 +23,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _apiClientMock = new Mock<ITreatmentSdkApiClient>();
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
-            _treatmentLog = new SelfUpdatingTreatmentLog(_apiClientMock.Object, 1, _impressionsCache, 10);
+
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, 10);
         }
 
         [TestMethod]
@@ -35,7 +36,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
             };
 
-            _treatmentLog.Log(impressions);
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -61,7 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
             };
 
-            _treatmentLog.Log(impressions);
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -86,8 +87,8 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" }
             };
 
-            _treatmentLog.Start();
-            _treatmentLog.Log(impressions);
+            _impressionsLog.Start();
+            _impressionsLog.Log(impressions);
 
             //Assert
             Thread.Sleep(2000);
