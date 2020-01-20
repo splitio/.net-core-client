@@ -40,5 +40,7 @@ namespace Splitio.Redis.Services.Cache.Interfaces
         bool KeyExpire(string key, TimeSpan expiry);
 
         RedisValue[] ListRange(RedisKey key, long start = 0, long stop = -1);
+
+        void Connect();
     }
 }

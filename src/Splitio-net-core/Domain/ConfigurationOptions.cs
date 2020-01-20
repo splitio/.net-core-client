@@ -18,7 +18,6 @@ namespace Splitio.Services.Client.Classes
         public int? EventsQueueSize { get; set; }
         public long? ConnectionTimeout { get; set; } 
         public long? ReadTimeout { get; set; } 
-        public int? Ready { get; set; }  
         public int? MaxMetricsCountCallsBeforeFlush { get; set; } 
         public int? MetricsRefreshRate { get; set; } 
         public int? SplitsStorageConcurrencyLevel { get; set; }

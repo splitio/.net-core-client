@@ -6,29 +6,32 @@ namespace Splitio.Services.Shared.Classes
 {
     public class InMemorySimpleCache<T> : ISimpleProducerCache<T>
     {
-        private BlockingQueue<T> queue;
+        private readonly BlockingQueue<T> _queue;
 
         public InMemorySimpleCache(BlockingQueue<T> queue)
         {
-            this.queue = queue;
+            _queue = queue;
         }
 
-        public void AddItem(T item)
+        public void AddItems(IList<T> items)
         {
-            if (queue != null)
+            if (_queue != null)
             {
-                queue.Enqueue(item);
+                foreach (var item in items)
+                {
+                    _queue.Enqueue(item);
+                }
             }
         }
 
         public List<T> FetchAllAndClear()
         {
-            return queue != null ? queue.FetchAllAndClear().ToList() : null;
+            return _queue != null ? _queue.FetchAllAndClear().ToList() : null;
         }
 
         public bool HasReachedMaxSize()
         {
-            return queue != null ? queue.HasReachedMaxSize() : false;
+            return _queue != null ? _queue.HasReachedMaxSize() : false;
         }
     }
 }

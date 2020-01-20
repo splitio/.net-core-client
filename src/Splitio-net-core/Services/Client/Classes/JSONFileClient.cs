@@ -1,12 +1,13 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Classes;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,13 +21,14 @@ namespace Splitio.Services.Client.Classes
             ISplitLogger log = null,
             ISegmentCache segmentCacheInstance = null,
             ISplitCache splitCacheInstance = null,
-            IListener<KeyImpression> treatmentLogInstance = null,
+            IImpressionsLog impressionsLog = null,
             bool isLabelsEnabled = true,
-            IListener<WrappedEvent> _eventListener = null,
+            IEventsLog eventsLog = null,
             ITrafficTypeValidator trafficTypeValidator = null) : base(GetLogger(log))
         {
-            segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, segmentCache);            
+            _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
+
+            var segmentFetcher = new JSONFileSegmentFetcher(segmentsFilePath, _segmentCache);
             var splitChangeFetcher = new JSONFileSplitChangeFetcher(splitsFilePath);
             var task = splitChangeFetcher.Fetch(-1);
             task.Wait();
@@ -34,22 +36,24 @@ namespace Splitio.Services.Client.Classes
             var splitChangesResult = task.Result;
             var parsedSplits = new ConcurrentDictionary<string, ParsedSplit>();
 
-            _splitParser = new InMemorySplitParser(segmentFetcher, segmentCache);
+            _splitParser = new InMemorySplitParser(segmentFetcher, _segmentCache);
 
             foreach (var split in splitChangesResult.splits)
             {
                 parsedSplits.TryAdd(split.name, _splitParser.Parse(split));
             }
 
-            splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
-            impressionListener = treatmentLogInstance;
+            _splitCache = splitCacheInstance ?? new InMemorySplitCache(new ConcurrentDictionary<string, ParsedSplit>(parsedSplits));
+
+            _impressionsLog = impressionsLog;
+
             LabelsEnabled = isLabelsEnabled;
 
-            eventListener = _eventListener;
+            _eventsLog = eventsLog;
             _trafficTypeValidator = trafficTypeValidator;
             
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            manager = new SplitManager(splitCache, _blockUntilReadyService, log);
+            _manager = new SplitManager(_splitCache, _blockUntilReadyService, log);
 
             ApiKey = "localhost";
 
@@ -59,20 +63,20 @@ namespace Splitio.Services.Client.Classes
         #region Public Methods
         public void RemoveSplitFromCache(string splitName)
         {
-            splitCache.RemoveSplit(splitName);
+            _splitCache.RemoveSplit(splitName);
         }
 
         public void RemoveKeyFromSegmentCache(string segmentName, List<string> keys)
         {
-            segmentCache.RemoveFromSegment(segmentName, keys);
+            _segmentCache.RemoveFromSegment(segmentName, keys);
         }
 
         public override void Destroy()
         {
             if (!Destroyed)
             {
-                splitCache.Clear();
-                segmentCache.Clear();
+                _splitCache.Clear();
+                _segmentCache.Clear();
                 base.Destroy();
             }
         }

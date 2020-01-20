@@ -1,43 +1,30 @@
-﻿using Splitio.Domain;
-using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Redis.Services.Cache.Classes;
+using Splitio.Redis.Services.Cache.Interfaces;
+using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
 using Splitio.Redis.Services.Impressions.Classes;
 using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
+using Splitio.Redis.Services.Shared;
 using Splitio.Services.Client.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.Shared.Interfaces;
-using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Splitio.Redis.Services.Client.Classes
 {
     public class RedisClient : SplitClient
     {
-        private RedisAdapter redisAdapter;
-        private IListener<IList<KeyImpression>> impressionListenerRedis;
-        private ISimpleCache<IList<KeyImpression>> impressionsCacheRedis;
-        
-        private static string SdkVersion;
-        private static string SdkSpecVersion;
-        private static string SdkMachineName;
-        private static string SdkMachineIP;
-        private static string RedisHost;
-        private static string RedisPort;
-        private static string RedisPassword;
-        private static int RedisDatabase;
-        private static int RedisConnectTimeout;
-        private static int RedisConnectRetry;
-        private static int RedisSyncTimeout;
-        private static string RedisUserPrefix;
-        private static int BlockMilisecondsUntilReady;
+        private readonly RedisConfig _config;
+
+        private IRedisAdapter _redisAdapter;
 
         public RedisClient(ConfigurationOptions config,
             string apiKey,
             ISplitLogger log = null) : base(GetLogger(log))
         {
+            _config = new RedisConfig();
             ApiKey = apiKey;
 
             ReadConfig(config);
@@ -47,101 +34,69 @@ namespace Splitio.Redis.Services.Client.Classes
             BuildMetricsLog();            
             BuildBlockUntilReadyService();
             BuildManager();
-            BuildParser();
             BuildEvaluator();
         }
-
-        #region Protected Methods
-        protected override void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            base.ImpressionLog(impressionsQueue);
-
-            if (impressionListenerRedis != null)
-            {
-                impressionListenerRedis.Log(impressionsQueue);
-            }
-        }
-        #endregion
 
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
         {
             var data = _wrapperAdapter.ReadConfig(config, _log);
-            SdkVersion = data.SdkVersion;
-            SdkSpecVersion = data.SdkSpecVersion;
-            SdkMachineName = data.SdkMachineName;
-            SdkMachineIP = data.SdkMachineIP;
+            _config.SdkVersion = data.SdkVersion;
+            _config.SdkSpecVersion = data.SdkSpecVersion;
+            _config.SdkMachineName = data.SdkMachineName;
+            _config.SdkMachineIP = data.SdkMachineIP;
 
-            RedisHost = config.CacheAdapterConfig.Host;
-            RedisPort = config.CacheAdapterConfig.Port;
-            RedisPassword = config.CacheAdapterConfig.Password;
-            RedisDatabase = config.CacheAdapterConfig.Database ?? 0;
-            RedisConnectTimeout = config.CacheAdapterConfig.ConnectTimeout ?? 0;
-            RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
-            RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
-            RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
+            _config.RedisHost = config.CacheAdapterConfig.Host;
+            _config.RedisPort = config.CacheAdapterConfig.Port;
+            _config.RedisPassword = config.CacheAdapterConfig.Password;
+            _config.RedisDatabase = config.CacheAdapterConfig.Database ?? 0;
+            _config.RedisConnectTimeout = config.CacheAdapterConfig.ConnectTimeout ?? 0;
+            _config.RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
+            _config.RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
+            _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
             LabelsEnabled = config.LabelsEnabled ?? true;
-            BlockMilisecondsUntilReady = config.Ready ?? 0;
         }
 
         private void BuildRedisCache()
         {
-            redisAdapter = new RedisAdapter(RedisHost, RedisPort, RedisPassword, RedisDatabase, RedisConnectTimeout, RedisConnectRetry, RedisSyncTimeout);
+            _redisAdapter = new RedisAdapter(_config.RedisHost, _config.RedisPort, _config.RedisPassword, _config.RedisDatabase, _config.RedisConnectTimeout, _config.RedisConnectRetry, _config.RedisSyncTimeout);
 
-            if (BlockMilisecondsUntilReady > 0 && !redisAdapter.IsConnected())
-            {
-                throw new TimeoutException($"SDK was not ready in {BlockMilisecondsUntilReady} miliseconds. Could not connect to Redis");
-            }
+            Task.Factory.StartNew(() => _redisAdapter.Connect());
 
-            segmentCache = new RedisSegmentCache(redisAdapter, RedisUserPrefix);
-            BuildParser();
-            splitCache = new RedisSplitCache(redisAdapter, _splitParser, RedisUserPrefix);
-            
-            metricsCache = new RedisMetricsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
-            impressionsCacheRedis = new RedisImpressionsCache(redisAdapter, SdkMachineIP, SdkVersion, SdkMachineName, RedisUserPrefix);
-            eventsCache = new RedisEventsCache(redisAdapter, SdkMachineName, SdkMachineIP, SdkVersion, RedisUserPrefix);
-
-            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
+            _segmentCache = new RedisSegmentCache(_redisAdapter, _config.RedisUserPrefix);
+            _splitParser = new RedisSplitParser(_segmentCache);
+            _splitCache = new RedisSplitCache(_redisAdapter, _splitParser, _config.RedisUserPrefix);
+            _metricsCache = new RedisMetricsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
         }
 
         private void BuildTreatmentLog(ConfigurationOptions config)
         {
-            var treatmentLog = new RedisTreatmentLog(impressionsCacheRedis);
-            impressionListenerRedis = new AsynchronousListener<IList<KeyImpression>>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
-            ((AsynchronousListener<IList<KeyImpression>>)impressionListenerRedis).AddListener(treatmentLog);
+            var impressionsCache = new RedisImpressionsCache(_redisAdapter, _config.SdkMachineIP, _config.SdkVersion, _config.SdkMachineName, _config.RedisUserPrefix);
+            _impressionsLog = new RedisImpressionLog(impressionsCache);
 
-            if (config.ImpressionListener != null)
-            {
-                impressionListener = new AsynchronousListener<KeyImpression>(WrapperAdapter.GetLogger("AsynchronousImpressionListener"));
-                ((AsynchronousListener<KeyImpression>)impressionListener).AddListener(config.ImpressionListener);
-            }
+            _customerImpressionListener = config.ImpressionListener;
         }
 
         private void BuildEventLog(ConfigurationOptions config)
         {
-            var eventLog = new RedisEventLog(eventsCache);
-            eventListener = new AsynchronousListener<WrappedEvent>(WrapperAdapter.GetLogger("AsynchronousEventListener"));
-            ((AsynchronousListener<WrappedEvent>)eventListener).AddListener(eventLog);
+            var eventsCache = new RedisEventsCache(_redisAdapter, _config.SdkMachineName, _config.SdkMachineIP, _config.SdkVersion, _config.RedisUserPrefix);
+            _eventsLog = new RedisEvenstLog(eventsCache);
         }
 
         private void BuildMetricsLog()
         {
-            metricsLog = new RedisMetricsLog(metricsCache);
+            _metricsLog = new RedisMetricsLog(_metricsCache);
         }
         
         private void BuildManager()
         {
-            manager = new SplitManager(splitCache, _blockUntilReadyService);
-        }
-
-        private void BuildParser()
-        {
-            _splitParser = new RedisSplitParser(segmentCache);
+            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
         }
 
         private void BuildBlockUntilReadyService()
         {
-            _blockUntilReadyService = new NoopBlockUntilReadyService();
+            _blockUntilReadyService = new RedisBlockUntilReadyService(_redisAdapter);
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

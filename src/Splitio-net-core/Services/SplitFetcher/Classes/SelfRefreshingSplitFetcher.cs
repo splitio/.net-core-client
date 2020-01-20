@@ -9,21 +9,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
-    public class SelfRefreshingSplitFetcher
+    public class SelfRefreshingSplitFetcher : ISplitFetcher
     {
-        private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSplitFetcher));
+        private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSplitFetcher));
 
-        private readonly ISplitChangeFetcher splitChangeFetcher;
-        private readonly ISplitParser splitParser;
-        private readonly IReadinessGatesCache gates;
-        private readonly CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-        private readonly int interval;
-
-        protected ISplitCache splitCache;
+        private readonly ISplitChangeFetcher _splitChangeFetcher;
+        private readonly ISplitParser _splitParser;
+        private readonly IReadinessGatesCache _gates;
+        private readonly ISplitCache _splitCache;
+        private readonly CancellationTokenSource _cancelTokenSource;
+        private readonly int _interval;        
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser, 
@@ -31,47 +29,49 @@ namespace Splitio.Services.SplitFetcher.Classes
             int interval, 
             ISplitCache splitCache = null)
         {
-            this.splitChangeFetcher = splitChangeFetcher;
-            this.splitParser = splitParser;
-            this.gates = gates;
-            this.interval = interval;
-            this.splitCache = splitCache;
+            _cancelTokenSource = new CancellationTokenSource();
+
+            _splitChangeFetcher = splitChangeFetcher;
+            _splitParser = splitParser;
+            _gates = gates;
+            _interval = interval;
+            _splitCache = splitCache;
         }
 
         public void Start()
         {
-            Task periodicTask = PeriodicTaskFactory.Start(() =>
-                                {
-                                    RefreshSplits();
-                                },
-                                intervalInMilliseconds: interval * 1000,
-                                cancelToken: cancelTokenSource.Token);
+            var periodicTask = PeriodicTaskFactory.Start(() =>
+            {
+                RefreshSplits();
+            },
+            intervalInMilliseconds: _interval * 1000,
+            cancelToken: _cancelTokenSource.Token);
         }
 
         public void Stop()
         {
-            cancelTokenSource.Cancel();
-            splitCache.Clear();
+            _cancelTokenSource.Cancel();
+            _splitCache.Clear();
         }
 
         private void UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
         {
-            List<Split> addedSplits = new List<Split>();
-            List<Split> removedSplits = new List<Split>();
+            var addedSplits = new List<Split>();
+            var removedSplits = new List<Split>();
 
             foreach (Split split in splitChanges)
             {
                 //If not active --> Remove Split
-                StatusEnum result;
-                var isValidStatus = Enum.TryParse(split.status, out result);
+                var isValidStatus = Enum.TryParse(split.status, out StatusEnum result);
+
                 if (!isValidStatus || result != StatusEnum.ACTIVE)
                 {
-                    splitCache.RemoveSplit(split.name);
+                    _splitCache.RemoveSplit(split.name);
                     removedSplits.Add(split);
                 }
                 else
                 {
-                    var isUpdated = splitCache.AddOrUpdate(split.name, splitParser.Parse(split));
+                    var isUpdated = _splitCache.AddOrUpdate(split.name, _splitParser.Parse(split));
 
                     if (!isUpdated)
                     {
@@ -83,18 +83,25 @@ namespace Splitio.Services.SplitFetcher.Classes
 
             if (addedSplits.Count() > 0)
             {
-                var addedFeatureNames = addedSplits.Select(x => x.name).ToList();
-                if (Log.IsDebugEnabled)
+                var addedFeatureNames = addedSplits
+                    .Select(x => x.name)
+                    .ToList();
+
+                if (_log.IsDebugEnabled)
                 {
-                    Log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
+                    _log.Debug(string.Format("Added features: {0}", string.Join(" - ", addedFeatureNames)));
                 }
             }
+
             if (removedSplits.Count() > 0)
             {
-                var removedFeatureNames = removedSplits.Select(x => x.name).ToList();
-                if (Log.IsDebugEnabled)
+                var removedFeatureNames = removedSplits
+                    .Select(x => x.name)
+                    .ToList();
+
+                if (_log.IsDebugEnabled)
                 {
-                    Log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
+                    _log.Debug(string.Format("Deleted features: {0}", string.Join(" - ", removedFeatureNames)));
                 }
             }
         }
@@ -103,36 +110,40 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             while (true)
             {
-                var changeNumber = splitCache.GetChangeNumber();
+                var changeNumber = _splitCache.GetChangeNumber();
+
                 try
                 {
-                    var result = await splitChangeFetcher.Fetch(changeNumber);
+                    var result = await _splitChangeFetcher.Fetch(changeNumber);
+
                     if (result == null)
                     {
                         break;
                     }
+
                     if (changeNumber >= result.till)
                     {
-                        gates.SplitsAreReady();
+                        _gates.SplitsAreReady();
                         //There are no new split changes
                         break;
                     }
+
                     if (result.splits != null && result.splits.Count > 0)
                     {
                         UpdateSplitsFromChangeFetcherResponse(result.splits);
-                        splitCache.SetChangeNumber(result.till);
+                        _splitCache.SetChangeNumber(result.till);
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Exception caught refreshing splits", e);
+                    _log.Error("Exception caught refreshing splits", e);
                     Stop();
                 }
                 finally
                 {
-                    if (Log.IsDebugEnabled)
+                    if (_log.IsDebugEnabled)
                     {
-                        Log.Debug(string.Format("split fetch before: {0}, after: {1}", changeNumber, splitCache.GetChangeNumber()));
+                        _log.Debug(string.Format("split fetch before: {0}, after: {1}", changeNumber, _splitCache.GetChangeNumber()));
                     }
                 }
             }

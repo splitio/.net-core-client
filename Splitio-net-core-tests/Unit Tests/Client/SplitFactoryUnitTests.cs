@@ -27,7 +27,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientShouldReturnClientDestroyed()
         {
             //Arrange            
-            var options = new ConfigurationOptions() { Ready = 1 };
+            var options = new ConfigurationOptions();
             var factory = new SplitFactory("any", options);
 
             //Act         
@@ -51,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildSplitClientWithLocalhostApiKeyShouldReturnLocalhostClient()
         {
             //Arrange
-            var options = new ConfigurationOptions() { LocalhostFilePath = $"{rootFilePath}test.splits" };
+            var options = new ConfigurationOptions { LocalhostFilePath = $"{rootFilePath}test.splits" };
             var factory = new SplitFactory("localhost", options);
 
             //Act         
@@ -83,9 +83,10 @@ namespace Splitio_Tests.Unit_Tests.Client
                 Mode = Mode.Consumer,
                 CacheAdapterConfig = new CacheAdapterConfigurationOptions
                 {
-                    Host = "local",
-                    Port = "1234",
-                    Password = "test"
+                    Host = "localhost",
+                    Port = "6379",
+                    Password = "",
+                    UserPrefix = "build_client_test"
                 }
             };
 
@@ -102,11 +103,12 @@ namespace Splitio_Tests.Unit_Tests.Client
         [ExpectedException(typeof(Exception), "Redis Host, Port and Password should be set to initialize Split SDK in Redis Mode.")]
         public void BuildRedisSplitClientWithoutAllRequiredConfigsShouldReturnException()
         {
-            //Arrange
-            var configurationOptions = new ConfigurationOptions();
-            configurationOptions.Mode = Mode.Consumer;
-            configurationOptions.CacheAdapterConfig = new CacheAdapterConfigurationOptions();
-            configurationOptions.CacheAdapterConfig.Host = "local";
+            //Arrange           
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer,
+                CacheAdapterConfig = new CacheAdapterConfigurationOptions { Host = "local" }
+            };
 
             var factory = new SplitFactory("any", configurationOptions);
 
@@ -119,14 +121,15 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildRedisSplitClientAsConsumerWithNullRedisConfigShouldReturnException()
         {
             //Arrange
-            var configurationOptions = new ConfigurationOptions();
-            configurationOptions.Mode = Mode.Consumer;
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Consumer
+            };
 
             var factory = new SplitFactory("any", configurationOptions);
 
             //Act         
             var client = factory.Client();
-
         }
 
         [TestMethod]
@@ -134,8 +137,10 @@ namespace Splitio_Tests.Unit_Tests.Client
         public void BuildRedisSplitClientAsProducerShouldReturnException()
         {
             //Arrange
-            var configurationOptions = new ConfigurationOptions();
-            configurationOptions.Mode = Mode.Producer;
+            var configurationOptions = new ConfigurationOptions
+            {
+                Mode = Mode.Producer
+            };
 
             var factory = new SplitFactory("any", configurationOptions);
 
@@ -158,8 +163,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yaml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yaml"
             };
 
             var factory = new SplitFactory("localhost", configurationOptions);
@@ -197,8 +201,7 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             var configurationOptions = new ConfigurationOptions
             {
-                LocalhostFilePath = $"{rootFilePath}split.yml",
-                Ready = 500
+                LocalhostFilePath = $"{rootFilePath}split.yml"
             };
 
             var factory = new SplitFactory("localhost", configurationOptions);

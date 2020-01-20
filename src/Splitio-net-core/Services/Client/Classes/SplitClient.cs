@@ -3,6 +3,8 @@ using Splitio.Domain;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Client.Interfaces;
 using Splitio.Services.Evaluator;
+using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -13,38 +15,38 @@ using Splitio.Services.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
     public abstract class SplitClient : ISplitClient
     {
+        protected const string Control = "control";
+        
         protected readonly ISplitLogger _log;
         protected readonly IKeyValidator _keyValidator;
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
-        protected readonly IWrapperAdapter _wrapperAdapter;
-
-        protected const string Control = "control";
+        protected readonly IWrapperAdapter _wrapperAdapter;        
 
         protected bool LabelsEnabled;
         protected bool Destroyed;
         protected string ApiKey;
 
-        protected IListener<KeyImpression> impressionListener;
-        protected IListener<WrappedEvent> eventListener;
-        protected IMetricsLog metricsLog;
-        protected ISplitManager manager;
-        protected IMetricsCache metricsCache;
-        protected ISimpleCache<KeyImpression> impressionsCache;
-        protected ISimpleCache<WrappedEvent> eventsCache;
-        protected ISplitCache splitCache;
+        protected IMetricsLog _metricsLog;
+        protected ISplitManager _manager;
+        protected IMetricsCache _metricsCache;
+        protected IImpressionsLog _impressionsLog;
+        protected IEventsLog _eventsLog;
+        protected ISplitCache _splitCache;
         protected ITrafficTypeValidator _trafficTypeValidator;
-        protected ISegmentCache segmentCache;
+        protected ISegmentCache _segmentCache;
         protected IBlockUntilReadyService _blockUntilReadyService;
         protected IFactoryInstantiationsService _factoryInstantiationsService;
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
+        protected IImpressionListener _customerImpressionListener;
 
         public SplitClient(ISplitLogger log)
         {
@@ -55,11 +57,6 @@ namespace Splitio.Services.Client.Classes
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _wrapperAdapter = new WrapperAdapter();
-        }
-
-        public ISplitManager GetSplitManager()
-        {
-            return manager;
         }
 
         #region Public Methods
@@ -148,12 +145,15 @@ namespace Splitio.Services.Client.Classes
                     properties = (Dictionary<string, object>)eventPropertiesResult.Value
                 };
 
-                eventListener.Log(new WrappedEvent
+                Task.Factory.StartNew(() =>
                 {
-                    Event = eventToLog,
-                    Size = eventPropertiesResult.EventSize
+                    _eventsLog.Log(new WrappedEvent
+                    {
+                        Event = eventToLog,
+                        Size = eventPropertiesResult.EventSize
+                    });
                 });
-
+                
                 return true;
             }
             catch (Exception e)
@@ -181,40 +181,17 @@ namespace Splitio.Services.Client.Classes
         {
             _blockUntilReadyService.BlockUntilReady(blockMilisecondsUntilReady);
         }
+
+        public ISplitManager GetSplitManager()
+        {
+            return _manager;
+        }
         #endregion
 
         #region Protected Methods
-        protected virtual void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            if (impressionListener != null)
-            {
-                foreach (var imp in impressionsQueue)
-                {
-                    impressionListener.Log(imp);
-                }
-            }
-        }
-
-        protected bool IsClientReady(string methodName)
-        {
-            if (!_blockUntilReadyService.IsSdkReady())
-            {
-                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
-                return false;
-            }
-
-            if (Destroyed)
-            {
-                _log.Error("Client has already been destroyed - No calls possible");
-                return false;
-            }
-
-            return true;
-        }
-
         protected void BuildEvaluator(ISplitLogger log = null)
         {
-            _evaluator = new Evaluator.Evaluator(splitCache, _splitParser, log: log);
+            _evaluator = new Evaluator.Evaluator(_splitCache, _splitParser, log: log);
         }
         #endregion
 
@@ -233,9 +210,9 @@ namespace Splitio.Services.Client.Classes
 
             var result = _evaluator.EvaluateFeature(key, feature, attributes);
 
-            if (metricsLog != null)
+            if (_metricsLog != null)
             {
-                metricsLog.Time(operation, result.ElapsedMilliseconds);
+                _metricsLog.Time(operation, result.ElapsedMilliseconds);
             }
 
             if (!Labels.SplitNotFound.Equals(result.Label))
@@ -281,9 +258,9 @@ namespace Splitio.Services.Client.Classes
                     }
                 }
 
-                if (metricsLog != null)
+                if (_metricsLog != null)
                 {
-                    metricsLog.Time(operation, results.ElapsedMilliseconds);
+                    _metricsLog.Time(operation, results.ElapsedMilliseconds);
                 }
 
                 ImpressionLog(ImpressionsQueue);
@@ -302,6 +279,48 @@ namespace Splitio.Services.Client.Classes
         private KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
         {
             return new KeyImpression { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
+        }
+
+        private bool IsClientReady(string methodName)
+        {
+            if (!_blockUntilReadyService.IsSdkReady())
+            {
+                _log.Error($"{methodName}: the SDK is not ready, the operation cannot be executed.");
+                return false;
+            }
+
+            if (Destroyed)
+            {
+                _log.Error("Client has already been destroyed - No calls possible");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ImpressionLog(List<KeyImpression> impressionsQueue)
+        {
+            if (impressionsQueue.Any())
+            {
+                if (_impressionsLog != null)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        _impressionsLog.Log(impressionsQueue);
+                    });
+                }
+
+                if (_customerImpressionListener != null)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        foreach (var imp in impressionsQueue)
+                        {
+                            _customerImpressionListener.Log(imp);
+                        }
+                    });
+                }
+            }
         }
         #endregion
     }

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Splitio.Redis.Services.Cache.Classes
 {
-    public class RedisImpressionsCache : RedisCacheBase, ISimpleCache<IList<KeyImpression>>
+    public class RedisImpressionsCache : RedisCacheBase, ISimpleCache<KeyImpression>
     {
         public RedisImpressionsCache(IRedisAdapter redisAdapter, 
             string machineIP, 
@@ -18,7 +18,7 @@ namespace Splitio.Redis.Services.Cache.Classes
             string userPrefix = null) : base(redisAdapter, machineIP, sdkVersion, machineName, userPrefix) 
         { }
 
-        public void AddItem(IList<KeyImpression> items)
+        public void AddItems(IList<KeyImpression> items)
         {
             var key = string.Format("{0}SPLITIO.impressions", string.IsNullOrEmpty(UserPrefix) ? string.Empty : $"{UserPrefix}.");
 

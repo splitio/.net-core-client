@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Splitio.Services.Client.Classes
 {
-    public class SplitFactory
+    public class SplitFactory : ISplitFactory
     {
         private readonly IApiKeyValidator _apiKeyValidator;
         private readonly IFactoryInstantiationsService _factoryInstantiationsService;
@@ -26,6 +26,8 @@ namespace Splitio.Services.Client.Classes
 
             _apiKeyValidator = new ApiKeyValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
+
+            Client();
         }
 
         public ISplitClient Client()
@@ -36,6 +38,18 @@ namespace Splitio.Services.Client.Classes
             }
 
             return _client;
+        }
+
+        public ISplitManager Manager()
+        {
+            if (_client == null)
+            {
+                BuildSplitClient();
+            }
+
+            _manager = _client.GetSplitManager();
+
+            return _manager;
         }
 
         private void BuildSplitClient()
@@ -70,7 +84,7 @@ namespace Splitio.Services.Client.Classes
                                 throw new Exception("Redis Host and Port should be set to initialize Split SDK in Redis Mode.");
                             }
 
-                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio-net-core.Redis"));
+                            var redisAssembly = Assembly.Load(new AssemblyName("Splitio.Redis"));
                             var redisType = redisAssembly.GetType("Splitio.Redis.Services.Client.Classes.RedisClient");
 
                             _client = (ISplitClient)Activator.CreateInstance(redisType, new object[] { _options, _apiKey, null });
@@ -93,18 +107,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             _factoryInstantiationsService.Increase(_apiKey);
-        }
-
-        public ISplitManager Manager()
-        {
-            if (_client == null)
-            {
-                BuildSplitClient();
-            }
-           
-            _manager = _client.GetSplitManager();
-
-            return _manager;
-        }
+        }        
     }
 }

@@ -20,14 +20,14 @@ namespace Splitio.Services.Client.Classes
         private ILocalhostFileService _localhostFileService;
 
         private readonly FileSystemWatcher _watcher;
-        private readonly string FullPath;
+        private readonly string _fullPath;
 
         public LocalhostClient(string filePath, 
             ISplitLogger log = null) : base(GetLogger(log))
         {
-            FullPath = LookupFilePath(filePath);
+            _fullPath = LookupFilePath(filePath);
 
-            if (FullPath.ToLower().EndsWith(SplitFileYaml) || FullPath.ToLower().EndsWith(SplitFileYml))
+            if (_fullPath.ToLower().EndsWith(SplitFileYaml) || _fullPath.ToLower().EndsWith(SplitFileYml))
             {
                 _localhostFileService = new YamlLocalhostFileService();
             }
@@ -38,24 +38,27 @@ namespace Splitio.Services.Client.Classes
                 _localhostFileService = new LocalhostFileService();
             }
 
-            var directoryPath = Path.GetDirectoryName(FullPath);
+            var directoryPath = Path.GetDirectoryName(_fullPath);
 
-            _watcher = new FileSystemWatcher(directoryPath != string.Empty ? directoryPath : Directory.GetCurrentDirectory(), Path.GetFileName(FullPath));
-            _watcher.NotifyFilter = NotifyFilters.LastWrite;
+            _watcher = new FileSystemWatcher(directoryPath != string.Empty ? directoryPath : Directory.GetCurrentDirectory(), Path.GetFileName(_fullPath))
+            {
+                NotifyFilter = NotifyFilters.LastWrite
+            };
+
             _watcher.Changed += new FileSystemEventHandler(OnFileChanged);
             _watcher.EnableRaisingEvents = true;
 
-            var splits = ParseSplitFile(FullPath);
-            splitCache = new InMemorySplitCache(splits);
+            var splits = ParseSplitFile(_fullPath);
+            _splitCache = new InMemorySplitCache(splits);
 
             _blockUntilReadyService = new NoopBlockUntilReadyService();
-            manager = new SplitManager(splitCache, _blockUntilReadyService);
+            _manager = new SplitManager(_splitCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
 
             Destroyed = false;
 
-            _trafficTypeValidator = new TrafficTypeValidator(splitCache);
+            _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
 
             BuildEvaluator();
         }
@@ -71,7 +74,7 @@ namespace Splitio.Services.Client.Classes
             if (!Destroyed)
             {
                 _watcher.Dispose();
-                splitCache.Clear();
+                _splitCache.Clear();
                 base.Destroy();
             }
         }
@@ -80,15 +83,15 @@ namespace Splitio.Services.Client.Classes
         #region Private Methods
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            var splits = ParseSplitFile(FullPath);
+            var splits = ParseSplitFile(_fullPath);
 
-            splitCache.Clear();
+            _splitCache.Clear();
 
             foreach (var split in splits)
             {
                 if (split.Value != null)
                 {
-                    splitCache.AddSplit(split.Key, split.Value);
+                    _splitCache.AddSplit(split.Key, split.Value);
                 }
             }
         }

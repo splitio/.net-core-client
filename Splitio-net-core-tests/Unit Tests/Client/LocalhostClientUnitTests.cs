@@ -62,7 +62,6 @@ namespace Splitio_Tests.Unit_Tests.Client
 
             //Assert
             Assert.AreEqual(true, result);
-            Assert.IsNull(splitClient.GetEventListener());
         }
 
         [TestMethod]

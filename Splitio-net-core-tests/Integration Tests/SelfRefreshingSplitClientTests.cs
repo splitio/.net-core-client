@@ -118,14 +118,15 @@ namespace Splitio_Tests.Integration_Tests
         {
             var apikey = "API_KEY";
 
-            var configurations = new ConfigurationOptions();
-            configurations.Ready = 60000;
-            configurations.FeaturesRefreshRate = 30;
-            configurations.SegmentsRefreshRate = 30;
-            configurations.Endpoint = "https://sdk.split-stage.io";
-            configurations.EventsEndpoint = "https://events.split-stage.io";
-            configurations.ReadTimeout = 20000;
-            configurations.ConnectionTimeout = 20000;
+            var configurations = new ConfigurationOptions
+            {
+                FeaturesRefreshRate = 30,
+                SegmentsRefreshRate = 30,
+                Endpoint = "https://sdk.split-stage.io",
+                EventsEndpoint = "https://events.split-stage.io",
+                ReadTimeout = 20000,
+                ConnectionTimeout = 20000
+            };
 
             var factory = new SplitFactory(apikey, configurations);
             return factory.Client();

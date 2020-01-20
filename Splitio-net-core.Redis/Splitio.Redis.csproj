@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
-    <AssemblyName>Splitio-net-core.Redis</AssemblyName>
-    <PackageId>Splitio-net-core.Redis</PackageId>
+    <AssemblyName>Splitio.Redis</AssemblyName>
+    <PackageId>Splitio.Redis</PackageId>
     <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
       $(PackageTargetFallback);dnxcore50
     </PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.0.0</Version>
+    <Version>6.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">

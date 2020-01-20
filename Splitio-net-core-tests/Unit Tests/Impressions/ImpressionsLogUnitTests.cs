@@ -10,12 +10,12 @@ using System.Threading;
 namespace Splitio_Tests.Unit_Tests.Impressions
 {
     [TestClass]
-    public class SelfUpdatingTreatmentLogUnitTests
+    public class ImpressionsLogUnitTests
     {
         private Mock<ITreatmentSdkApiClient> _apiClientMock;
         private BlockingQueue<KeyImpression> _queue;
         private InMemorySimpleCache<KeyImpression> _impressionsCache;
-        private SelfUpdatingTreatmentLog _treatmentLog;
+        private ImpressionsLog _impressionsLog;
 
         [TestInitialize]
         public void Initialize()
@@ -23,15 +23,20 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             _apiClientMock = new Mock<ITreatmentSdkApiClient>();
             _queue = new BlockingQueue<KeyImpression>(10);
             _impressionsCache = new InMemorySimpleCache<KeyImpression>(_queue);
-            _treatmentLog = new SelfUpdatingTreatmentLog(_apiClientMock.Object, 1, _impressionsCache, 10);
+
+            _impressionsLog = new ImpressionsLog(_apiClientMock.Object, 1, _impressionsCache, 10);
         }
 
         [TestMethod]
         public void LogSuccessfully()
         {
             //Act
-            var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" };
-            _treatmentLog.Log(impression);
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test" }
+            };
+
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -50,9 +55,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         public void LogSuccessfullyUsingBucketingKey()
         {
             //Act
-            Key key = new Key(bucketingKey : "a", matchingKey : "testkey");
-            var impression = new KeyImpression() { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey };
-            _treatmentLog.Log(impression);
+            Key key = new Key(bucketingKey: "a", matchingKey: "testkey");
+
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression { keyName = key.matchingKey, feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label", bucketingKey = key.bucketingKey }
+            };
+
+            _impressionsLog.Log(impressions);
 
             //Assert
             KeyImpression element = null;
@@ -71,10 +81,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         [TestMethod]
         public void LogSuccessfullyAndSendImpressions()
         {
-            //Act
-            _treatmentLog.Start();
-            var impression = new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" };
-            _treatmentLog.Log(impression);
+            //Act            
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression() { keyName = "GetTreatment", feature = "test", treatment = "on", time = 7000, changeNumber = 1, label = "test-label" }
+            };
+
+            _impressionsLog.Start();
+            _impressionsLog.Log(impressions);
 
             //Assert
             Thread.Sleep(2000);
