@@ -1,6 +1,6 @@
 CHANGES
 
-6.0.1 (Coming soon)
+6.0.1 (Jan 20, 2020)
 - Improved clients synchronization.
 - Improved IListener implementation.
 - Improved a few naming conventions.
