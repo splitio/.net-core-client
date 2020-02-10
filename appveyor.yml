@@ -62,4 +62,3 @@ deploy:
    name: NugetNetCorePublish
    on:
     branch: master
-    
