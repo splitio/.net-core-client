@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -10,6 +12,7 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
+        private readonly ISplitLogger _log;
         private readonly Uri _uri;
         private readonly int _readTimeout;
 
@@ -20,10 +23,12 @@ namespace Splitio.Services.EventSource
         private CancellationTokenSource _cancellationTokenSource;
 
         public EventSourceClient(Uri uri,
-            int readTimeout = 300000)
+            int readTimeout = 300000,
+            ISplitLogger log = null)
         {
             _uri = uri;
             _readTimeout = readTimeout;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
 
             Task.Factory.StartNew(() => ConnectAsync());
         }
@@ -42,12 +47,16 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect()
         {
+            _log.Debug($"Disconnecting from {_uri}");
+
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _httpClient.CancelPendingRequests();
             _httpClient.Dispose();
 
             UpdateStatus(EventSource.Status.Disconnected);
+
+            _log.Info($"Disconnected from {_uri}");
         }
         #endregion
 
@@ -59,6 +68,7 @@ namespace Splitio.Services.EventSource
                 _httpClient = new HttpClient();
                 _cancellationTokenSource = new CancellationTokenSource();
 
+                _log.Info($"Connecting to {_uri}");
                 UpdateStatus(EventSource.Status.Connecting);
 
                 var request = new HttpRequestMessage(HttpMethod.Get, _uri);
@@ -68,6 +78,7 @@ namespace Splitio.Services.EventSource
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
                         stream.ReadTimeout = _readTimeout;
+                        _log.Info($"Connected to {_uri}");
                         UpdateStatus(EventSource.Status.Connected);
                         await ReadStreamAsync(stream);
                     }
@@ -84,6 +95,8 @@ namespace Splitio.Services.EventSource
         {
             var encoder = new UTF8Encoding();
 
+            _log.Debug($"Reading stream ....");
+
             while (!_cancellationTokenSource.IsCancellationRequested)
             {
                 if (stream.CanRead)
@@ -95,6 +108,7 @@ namespace Splitio.Services.EventSource
                     if (len > 0 && Status() == EventSource.Status.Connected)
                     {
                         var text = encoder.GetString(buffer, 0, len);
+                        _log.Debug($"Read stream encoder buffer: {text}");
 
                         if (text.Contains("event"))
                         {
@@ -102,8 +116,7 @@ namespace Splitio.Services.EventSource
                             {
                                 var ssevent = JsonConvert.DeserializeObject<Event>(text);
 
-                                if (ssevent.Data == null || string.IsNullOrEmpty(ssevent.Type))
-                                    throw new Exception("Invalid format.");
+                                if (ssevent.Data == null || string.IsNullOrEmpty(ssevent.Type)) throw new Exception("Invalid format.");
 
                                 DispatchEvent(ssevent);
                             }
@@ -115,15 +128,19 @@ namespace Splitio.Services.EventSource
                     }
                 }
             }
+
+            _log.Debug($"Stop read stream");
         }
 
         private void DispatchEvent(Event ssEvent)
         {
+            _log.Debug($"DispatchEvent: {ssEvent}");
             OnEvent(new EventReceivedEventArgs(ssEvent));
         }
 
         private void DispatchError(string message)
         {
+            _log.Debug($"DispatchError: {message}");
             OnError(new ErrorReceivedEventArgs(message));
         }
 
