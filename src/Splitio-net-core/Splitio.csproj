@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
-    <AssemblyName>Splitio</AssemblyName>
-    <PackageId>Splitio</PackageId>
+    <AssemblyName>Splitio-net-core</AssemblyName>
+    <PackageId>Splitio-net-core</PackageId>
     <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
       $(PackageTargetFallback);dnxcore50
     </PackageTargetFallback>
@@ -36,7 +36,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />    
@@ -46,7 +46,7 @@
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />    
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
-    <PackageReference Include="Newtonsoft.Json" version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" version="10.0.3" />
     <PackageReference Include="YamlDotNet" version="6.0.0" />
     <PackageReference Include="YamlDotNet.Signed" version="6.0.0" />
   </ItemGroup>  
