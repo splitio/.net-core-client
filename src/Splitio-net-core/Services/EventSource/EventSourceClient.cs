@@ -10,49 +10,66 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly Uri _uri;
+        private readonly int _readTimeout;
 
         private readonly object _statusLock = new object();
         private Status _status;
 
-        public EventSourceClient(Uri uri)
-        {
-            _httpClient = new HttpClient();
-            _cancellationTokenSource = new CancellationTokenSource();
+        private HttpClient _httpClient;
+        private CancellationTokenSource _cancellationTokenSource;
 
-            Task.Factory.StartNew(() => Connect(uri));
+        public EventSourceClient(Uri uri,
+            int readTimeout = 300000)
+        {
+            _uri = uri;
+            _readTimeout = readTimeout;
+
+            Task.Factory.StartNew(() => ConnectAsync());
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
         public event EventHandler<ErrorReceivedEventArgs> ErrorReceived;
 
+        #region Public Methods
         public Status Status()
         {
-            return _status;
+            lock (_statusLock)
+            {
+                return _status;
+            }
         }
 
-        public void Close()
+        public void Disconnect()
         {
             _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _httpClient.CancelPendingRequests();
             _httpClient.Dispose();
+
             UpdateStatus(EventSource.Status.Disconnected);
         }
+        #endregion
 
-        private async Task Connect(Uri uri)
+        #region Private Methods
+        private async Task ConnectAsync()
         {
             try
             {
+                _httpClient = new HttpClient();
+                _cancellationTokenSource = new CancellationTokenSource();
+
                 UpdateStatus(EventSource.Status.Connecting);
 
-                var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                var request = new HttpRequestMessage(HttpMethod.Get, _uri);
 
                 using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
+                        stream.ReadTimeout = _readTimeout;
                         UpdateStatus(EventSource.Status.Connected);
-                        await ReadStream(stream);
+                        await ReadStreamAsync(stream);
                     }
                 }
             }
@@ -63,7 +80,7 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        private async Task ReadStream(Stream stream)
+        private async Task ReadStreamAsync(Stream stream)
         {
             var encoder = new UTF8Encoding();
 
@@ -75,15 +92,25 @@ namespace Splitio.Services.EventSource
 
                     int len = await stream.ReadAsync(buffer, 0, 2048, _cancellationTokenSource.Token);
 
-                    if (len > 0)
+                    if (len > 0 && Status() == EventSource.Status.Connected)
                     {
                         var text = encoder.GetString(buffer, 0, len);
 
                         if (text.Contains("event"))
                         {
-                            var ssevent = JsonConvert.DeserializeObject<Event>(text);
+                            try
+                            {
+                                var ssevent = JsonConvert.DeserializeObject<Event>(text);
 
-                            DispatchEvent(ssevent);
+                                if (ssevent.Data == null || string.IsNullOrEmpty(ssevent.Type))
+                                    throw new Exception("Invalid format.");
+
+                                DispatchEvent(ssevent);
+                            }
+                            catch (Exception ex)
+                            {
+                                DispatchError(ex.Message);
+                            }
                         }
                     }
                 }
@@ -117,5 +144,6 @@ namespace Splitio.Services.EventSource
                 _status = status;
             }
         }
+        #endregion
     }
 }

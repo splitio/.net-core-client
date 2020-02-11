@@ -25,7 +25,7 @@ namespace Splitio_net_core.Integration_tests
             _mockServer = FluentMockServer.Start();
         }
 
-        #region SplitChanges        
+        #region SplitChanges
         public void SplitChangesOk(string fileName, string since)
         {
             var jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
@@ -112,6 +112,21 @@ namespace Splitio_net_core.Integration_tests
                     Response.Create()
                     .WithStatusCode((int)statusCode)
                     .WithBody(body));
+        }
+        #endregion
+
+        #region SSE
+        public void SSE_Channels_Response(string bodyExpected)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(200)
+                    .WithBody(bodyExpected));
         }
         #endregion
 
