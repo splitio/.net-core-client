@@ -22,11 +22,11 @@ namespace Splitio.Services.EventSource
         private HttpClient _httpClient;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public EventSourceClient(Uri uri,
+        public EventSourceClient(string url,
             int readTimeout = 300000,
             ISplitLogger log = null)
         {
-            _uri = uri;
+            _uri = new Uri(url);
             _readTimeout = readTimeout;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
 

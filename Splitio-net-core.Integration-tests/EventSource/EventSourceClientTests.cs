@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -18,11 +17,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
             var httpClientMock = new HttpClientMock();
             httpClientMock.SSE_Channels_Response("{\"event\":\"message\",\"data\":{\"id\":\"1\",\"channel\":\"mauroc\",\"data\":\"data-test\",\"name\":\"name-test\"}}\n");
 
-            var uri = new Uri($"http://localhost:{httpClientMock.GetPort()}");
+            var url = $"http://localhost:{httpClientMock.GetPort()}";
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
-            var eventSourceClient = new EventSourceClient(uri, 10000);
+            var eventSourceClient = new EventSourceClient(url, 10000);
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
@@ -44,11 +43,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
             var httpClientMock = new HttpClientMock();
             httpClientMock.SSE_Channels_Response("{\"event\":\"control\",\"data\":{\"id\":\"2\",\"channel\":\"mauroc\",\"data\":\"data-control-test\",\"name\":\"name-control-test\"}}\n");
 
-            var uri = new Uri($"http://localhost:{httpClientMock.GetPort()}");
+            var url = $"http://localhost:{httpClientMock.GetPort()}";
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
-            var eventSourceClient = new EventSourceClient(uri, 10000);
+            var eventSourceClient = new EventSourceClient(url, 10000);
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
@@ -70,11 +69,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
             var httpClientMock = new HttpClientMock();
             httpClientMock.SSE_Channels_Response("{\"event\":\"control\",\"info\":{\"id\":\"2\",\"channel\":\"mauroc\",\"data\":\"data-control-test\",\"name\":\"name-control-test\"}}\n");
 
-            var uri = new Uri($"http://localhost:{httpClientMock.GetPort()}");
+            var url = $"http://localhost:{httpClientMock.GetPort()}";
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
-            var eventSourceClient = new EventSourceClient(uri, 10000);
+            var eventSourceClient = new EventSourceClient(url, 10000);
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
