@@ -117,25 +117,27 @@ namespace Splitio.Services.EventSource
                             try
                             {
                                 var notification = JsonConvert.DeserializeObject<Notification>(text);
-                                var notiDataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
-                                var notiData = JsonConvert.DeserializeObject<EventData>(notiDataJsonString);
+                                var dataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
+                                var data = JsonConvert.DeserializeObject<EventData>(dataJsonString);
 
                                 EventData eventData = null;
 
-                                switch (notiData.Type)
+                                switch (data.Type)
                                 {
                                     case NotificationType.SPLIT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(notiDataJsonString);
+                                        eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(dataJsonString);
                                         break;
                                     case NotificationType.SPLIT_KILL:
-                                        eventData = JsonConvert.DeserializeObject<SplitKillEventData>(notiDataJsonString);
+                                        eventData = JsonConvert.DeserializeObject<SplitKillEventData>(dataJsonString);
                                         break;
                                     case NotificationType.SEGMENT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(notiDataJsonString);
+                                        eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(dataJsonString);
                                         break;
                                     case NotificationType.CONTROL:
-                                        eventData = JsonConvert.DeserializeObject<ControlEventData>(notiDataJsonString);
+                                        eventData = JsonConvert.DeserializeObject<ControlEventData>(dataJsonString);
                                         break;
+                                    default:
+                                        throw new Exception("Unexpected type received from EventSource");
                                 }
 
                                 if (eventData == null) throw new Exception("Incorrect format.");
