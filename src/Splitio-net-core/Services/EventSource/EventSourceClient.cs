@@ -110,21 +110,38 @@ namespace Splitio.Services.EventSource
                         var text = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {text}");
 
-                        if (text.Contains("event"))
+                        try
                         {
-                            try
-                            {
-                                var ssevent = JsonConvert.DeserializeObject<Event>(text);
+                            var notification = JsonConvert.DeserializeObject<Notification>(text);
+                            var notiDataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
+                            var notiData = JsonConvert.DeserializeObject<EventData>(notiDataJsonString);
 
-                                if (ssevent.Data == null || string.IsNullOrEmpty(ssevent.Type)) throw new Exception("Invalid format.");
+                            EventData eventData = null;
 
-                                DispatchEvent(ssevent);
-                            }
-                            catch (Exception ex)
+                            switch (notiData.Type)
                             {
-                                DispatchError(ex.Message);
+                                case NotificationType.SPLIT_UPDATE:
+                                    eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(notiDataJsonString);
+                                    break;
+                                case NotificationType.SPLIT_KILL:
+                                    eventData = JsonConvert.DeserializeObject<SplitKillEventData>(notiDataJsonString);
+                                    break;
+                                case NotificationType.SEGMENT_UPDATE:
+                                    eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(notiDataJsonString);
+                                    break;
+                                case NotificationType.CONTROL:
+                                    eventData = JsonConvert.DeserializeObject<ControlEventData>(notiDataJsonString);
+                                    break;
                             }
+
+                            if (eventData == null) throw new Exception("Incorrect format.");
+
+                            DispatchEvent(eventData);
                         }
+                        catch (Exception ex)
+                        {
+                            DispatchError(ex.Message);
+                        }                        
                     }
                 }
             }
@@ -132,10 +149,10 @@ namespace Splitio.Services.EventSource
             _log.Debug($"Stop read stream");
         }
 
-        private void DispatchEvent(Event ssEvent)
+        private void DispatchEvent(EventData eventData)
         {
-            _log.Debug($"DispatchEvent: {ssEvent}");
-            OnEvent(new EventReceivedEventArgs(ssEvent));
+            _log.Debug($"DispatchEvent: {eventData}");
+            OnEvent(new EventReceivedEventArgs(eventData));
         }
 
         private void DispatchError(string message)

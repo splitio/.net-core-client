@@ -1,4 +1,5 @@
 ﻿using Splitio_net_core.Integration_tests.Resources;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using WireMock.Server;
 
 namespace Splitio_net_core.Integration_tests
 {
-    public class HttpClientMock
+    public class HttpClientMock : IDisposable
     {
         private readonly FluentMockServer _mockServer;
         private readonly string rootFilePath;
@@ -159,6 +160,11 @@ namespace Splitio_net_core.Integration_tests
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
                 .ToList();
+        }
+
+        public void Dispose()
+        {
+            _mockServer.Stop();
         }
     }
 }

@@ -4,9 +4,9 @@ namespace Splitio.Services.EventSource
 {
     public class EventReceivedEventArgs : EventArgs
     {
-        public Event Event { get; }
+        public EventData Event { get; }
 
-        public EventReceivedEventArgs(Event eventReceived)
+        public EventReceivedEventArgs(EventData eventReceived)
         {
             Event = eventReceived;
         }
