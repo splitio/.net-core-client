@@ -12,6 +12,8 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
+        private const string KeepAliveResponse = "\n";
+
         private readonly ISplitLogger _log;
         private readonly Uri _uri;
         private readonly int _readTimeout;
@@ -110,38 +112,41 @@ namespace Splitio.Services.EventSource
                         var text = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {text}");
 
-                        try
+                        if (text != KeepAliveResponse)
                         {
-                            var notification = JsonConvert.DeserializeObject<Notification>(text);
-                            var notiDataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
-                            var notiData = JsonConvert.DeserializeObject<EventData>(notiDataJsonString);
-
-                            EventData eventData = null;
-
-                            switch (notiData.Type)
+                            try
                             {
-                                case NotificationType.SPLIT_UPDATE:
-                                    eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(notiDataJsonString);
-                                    break;
-                                case NotificationType.SPLIT_KILL:
-                                    eventData = JsonConvert.DeserializeObject<SplitKillEventData>(notiDataJsonString);
-                                    break;
-                                case NotificationType.SEGMENT_UPDATE:
-                                    eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(notiDataJsonString);
-                                    break;
-                                case NotificationType.CONTROL:
-                                    eventData = JsonConvert.DeserializeObject<ControlEventData>(notiDataJsonString);
-                                    break;
+                                var notification = JsonConvert.DeserializeObject<Notification>(text);
+                                var notiDataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
+                                var notiData = JsonConvert.DeserializeObject<EventData>(notiDataJsonString);
+
+                                EventData eventData = null;
+
+                                switch (notiData.Type)
+                                {
+                                    case NotificationType.SPLIT_UPDATE:
+                                        eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(notiDataJsonString);
+                                        break;
+                                    case NotificationType.SPLIT_KILL:
+                                        eventData = JsonConvert.DeserializeObject<SplitKillEventData>(notiDataJsonString);
+                                        break;
+                                    case NotificationType.SEGMENT_UPDATE:
+                                        eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(notiDataJsonString);
+                                        break;
+                                    case NotificationType.CONTROL:
+                                        eventData = JsonConvert.DeserializeObject<ControlEventData>(notiDataJsonString);
+                                        break;
+                                }
+
+                                if (eventData == null) throw new Exception("Incorrect format.");
+
+                                DispatchEvent(eventData);
                             }
-
-                            if (eventData == null) throw new Exception("Incorrect format.");
-
-                            DispatchEvent(eventData);
+                            catch (Exception ex)
+                            {
+                                DispatchError(ex.Message);
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            DispatchError(ex.Message);
-                        }                        
                     }
                 }
             }

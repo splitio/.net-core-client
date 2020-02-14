@@ -194,6 +194,28 @@ namespace Splitio_net_core.Integration_tests.EventSource
             }
         }
 
+        [TestMethod]
+        public void EventSourceClient_KeepAliveResponse()
+        {
+            using (var httpClientMock = new HttpClientMock())
+            {
+                httpClientMock.SSE_Channels_Response("\n");
+
+                var url = $"http://localhost:{httpClientMock.GetPort()}";
+                _eventsReceived = new Queue<EventReceivedEventArgs>();
+                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+
+                var eventSourceClient = new EventSourceClient(url, 10000);
+                eventSourceClient.EventReceived += EventReceived;
+                eventSourceClient.ErrorReceived += ErrorReceived;
+
+                Thread.Sleep(5000);
+
+                Assert.AreEqual(0, _errorsReceived.Count);
+                Assert.AreEqual(0, _eventsReceived.Count);
+            }
+        }
+
         #region Private Method
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
