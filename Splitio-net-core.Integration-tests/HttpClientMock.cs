@@ -1,4 +1,5 @@
 ﻿using Splitio_net_core.Integration_tests.Resources;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using WireMock.Server;
 
 namespace Splitio_net_core.Integration_tests
 {
-    public class HttpClientMock
+    public class HttpClientMock : IDisposable
     {
         private readonly FluentMockServer _mockServer;
         private readonly string rootFilePath;
@@ -25,7 +26,7 @@ namespace Splitio_net_core.Integration_tests
             _mockServer = FluentMockServer.Start();
         }
 
-        #region SplitChanges        
+        #region SplitChanges
         public void SplitChangesOk(string fileName, string since)
         {
             var jsonBody = File.ReadAllText($"{rootFilePath}{fileName}");
@@ -115,6 +116,21 @@ namespace Splitio_net_core.Integration_tests
         }
         #endregion
 
+        #region SSE
+        public void SSE_Channels_Response(string bodyExpected)
+        {
+            _mockServer
+                .Given(
+                    Request.Create()
+                    .UsingGet()
+                )
+                .RespondWith(
+                    Response.Create()
+                    .WithStatusCode(200)
+                    .WithBody(bodyExpected));
+        }
+        #endregion
+
         public void ShutdownServer()
         {
             _mockServer.Stop();
@@ -144,6 +160,11 @@ namespace Splitio_net_core.Integration_tests
                 .LogEntries
                 .Where(l => l.RequestMessage.AbsolutePath.Contains("api/events/bulk"))
                 .ToList();
+        }
+
+        public void Dispose()
+        {
+            _mockServer.Stop();
         }
     }
 }
