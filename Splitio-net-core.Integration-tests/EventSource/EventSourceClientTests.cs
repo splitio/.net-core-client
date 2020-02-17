@@ -36,7 +36,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.AreEqual(0, _errorsReceived.Count);
             Assert.AreEqual(1, _eventsReceived.Count);
@@ -74,7 +74,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.AreEqual(0, _errorsReceived.Count);
             Assert.AreEqual(1, _eventsReceived.Count);
@@ -113,7 +113,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.AreEqual(0, _errorsReceived.Count);
             Assert.AreEqual(1, _eventsReceived.Count);
@@ -150,7 +150,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.AreEqual(0, _errorsReceived.Count);
             Assert.AreEqual(1, _eventsReceived.Count);
@@ -186,7 +186,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3500);
 
             Assert.AreEqual(1, _errorsReceived.Count);
             Assert.AreEqual(0, _eventsReceived.Count);
@@ -208,7 +208,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             eventSourceClient.EventReceived += EventReceived;
             eventSourceClient.ErrorReceived += ErrorReceived;
 
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
 
             Assert.AreEqual(0, _errorsReceived.Count);
             Assert.AreEqual(0, _eventsReceived.Count);
