@@ -38,7 +38,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
             Thread.Sleep(3000);
 
-            Assert.AreEqual(0, _errorsReceived.Count);
+            Assert.AreEqual(1, _errorsReceived.Count);
             Assert.AreEqual(1, _eventsReceived.Count);
             var ev = _eventsReceived.Dequeue();
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
