@@ -164,7 +164,7 @@ namespace Splitio_net_core.Integration_tests
 
         public void Dispose()
         {
-            _mockServer.Stop();
+            ShutdownServer();
         }
     }
 }
