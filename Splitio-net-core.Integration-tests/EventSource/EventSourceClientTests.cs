@@ -28,7 +28,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                     }
                     }");
 
-            var url = $"http://localhost:{httpClientMock.GetPort()}";
+            var url = httpClientMock.GetUrl();
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
@@ -66,7 +66,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                     }
                     }");
 
-            var url = $"http://localhost:{httpClientMock.GetPort()}";
+            var url = httpClientMock.GetUrl();
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
@@ -105,7 +105,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                         }
                     }");
 
-            var url = $"http://localhost:{httpClientMock.GetPort()}";
+            var url = httpClientMock.GetUrl();
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
@@ -142,7 +142,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                         }
                     }");
 
-            var url = $"http://localhost:{httpClientMock.GetPort()}";
+            var url = httpClientMock.GetUrl();
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 
@@ -200,7 +200,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
             var httpClientMock = new HttpClientMock();            
             httpClientMock.SSE_Channels_Response("\n");
 
-            var url = $"http://localhost:{httpClientMock.GetPort()}";
+            var url = httpClientMock.GetUrl();
             _eventsReceived = new Queue<EventReceivedEventArgs>();
             _errorsReceived = new Queue<ErrorReceivedEventArgs>();
 

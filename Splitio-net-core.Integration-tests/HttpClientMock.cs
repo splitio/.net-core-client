@@ -136,6 +136,11 @@ namespace Splitio_net_core.Integration_tests
             _mockServer.Stop();
         }
 
+        public string GetUrl()
+        {
+            return _mockServer.Urls.FirstOrDefault();
+        }
+
         public int GetPort()
         {
             return _mockServer.Ports.First();
