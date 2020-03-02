@@ -11,6 +11,7 @@ dotnet_csproj:
 configuration: Release
 
 before_build:
+ - choco install "sonarscanner-msbuild-net46" -y
  - choco install redis-64
  - redis-server --service-install
  - redis-server --service-start
@@ -18,8 +19,10 @@ before_build:
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
+ - SonarScanner.MSBuild.exe begin /k:".net-core-client" /d:"sonar.host.url=https://sonarqube.split-internal.com" /d:sonar.login=%SONAR_LOGIN%
  - dotnet build --configuration Release
- 
+ - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
+
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
  - redis-server --service-stop
@@ -46,7 +49,7 @@ after_build:
  - redis-server --service-stop
  - redis-server --service-start
  - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework net451
- - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release 
+ - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
  - dotnet pack .\Splitio.TestSupport --configuration Release
