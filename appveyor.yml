@@ -19,9 +19,9 @@ before_build:
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
- - SonarScanner.MSBuild.exe begin /k:".net-core-client" /d:"sonar.host.url=https://sonarqube.split-internal.com" /d:"sonar.login=%SONAR_LOGIN%"
+ - SonarScanner.MSBuild.exe begin /k:".net-core-client" /d:"sonar.host.url=https://sonarqube.split-internal.com" /d:sonar.login=%SONAR_LOGIN%
  - dotnet build --configuration Release
- - SonarScanner.MSBuild.exe end /d:"sonar.login=%SONAR_LOGIN%"
+ - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
