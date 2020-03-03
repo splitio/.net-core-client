@@ -1,4 +1,5 @@
-@ECHO OFF
+@echo off
+setlocal EnableDelayedExpansion
 
 IF NOT "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
   echo Pull Request number %APPVEYOR_PULL_REQUEST_NUMBER%
@@ -15,8 +16,10 @@ IF NOT "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
         /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%
       ) ELSE (
           IF "%APPVEYOR_REPO_BRANCH%"=="development" (
+            echo "Development branch."
             SET "TARGET_BRANCH=master"
             ) ELSE (
+                echo "Feature branch."
                 SET "TARGET_BRANCH=development"
               )
         echo "Not a pull request or long lived branch."
