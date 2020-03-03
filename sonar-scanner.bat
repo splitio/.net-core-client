@@ -15,16 +15,16 @@ IF NOT "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
         /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%
       ) ELSE (
           IF "%APPVEYOR_REPO_BRANCH%"=="development" (
-            SET TARGET_BRANCH="master"
+            SET "TARGET_BRANCH=master"
             ) ELSE (
-                SET TARGET_BRANCH="development"
+                SET "TARGET_BRANCH=development"
               )
         echo "Not a pull request or long lived branch."
         echo Branch Name is %APPVEYOR_REPO_BRANCH%
         echo Target Branch is %TARGET_BRANCH%
         CALL :sonar_scanner ^
-          /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%,^
-          /d:sonar.branch.target=%TARGET_BRANCH%
+          "/d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%",^
+          "/d:sonar.branch.target=%TARGET_BRANCH%"
         )
   )
 
