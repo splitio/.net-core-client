@@ -6,7 +6,6 @@ SonarScanner.MSBuild.exe begin ^
   /d:"sonar.host.url=https://sonarqube.split-internal.com" ^
   /d:sonar.login=%SONAR_LOGIN% ^
   /d:sonar.ws.timeout="300" ^
-  /d:sonar.sources="." ^
   /d:sonar.links.ci="https://travis-ci.com/splitio/.net-core-client" ^
   /d:sonar.links.scm="https://github.com/splitio/.net-core-client" ^
   %*
