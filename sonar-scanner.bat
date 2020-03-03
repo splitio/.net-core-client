@@ -1,18 +1,4 @@
-REM @echo off
-
-:sonar_scanner
-echo First parameter is %~1
-echo Second parameter is %~2
-SonarScanner.MSBuild.exe begin ^
-  /n:".net-core-client" ^
-  /k:"net-core-client" ^
-  /d:sonar.host.url="https://sonarqube.split-internal.com" ^
-  /d:sonar.login=%SONAR_LOGIN% ^
-  /d:sonar.ws.timeout="300" ^
-  /d:sonar.links.ci="https://travis-ci.com/splitio/.net-core-client" ^
-  /d:sonar.links.scm="https://github.com/splitio/.net-core-client" ^
-  %*
-EXIT /B 0
+@ECHO OFF
 
 IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
   echo Pull Request number %APPVEYOR_PULL_REQUEST_NUMBER%
@@ -41,3 +27,19 @@ IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
             /d:sonar.branch.target=%TARGET_BRANCH%
           )
     )
+
+:: Functions
+
+:sonar_scanner
+echo First parameter is %~1
+echo Second parameter is %~2
+SonarScanner.MSBuild.exe begin ^
+  /n:".net-core-client" ^
+  /k:"net-core-client" ^
+  /d:sonar.host.url="https://sonarqube.split-internal.com" ^
+  /d:sonar.login=%SONAR_LOGIN% ^
+  /d:sonar.ws.timeout="300" ^
+  /d:sonar.links.ci="https://travis-ci.com/splitio/.net-core-client" ^
+  /d:sonar.links.scm="https://github.com/splitio/.net-core-client" ^
+  %*
+EXIT /B 0
