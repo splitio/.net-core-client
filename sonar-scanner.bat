@@ -15,6 +15,7 @@ SonarScanner.MSBuild.exe begin ^
 EXIT /B 0
 
 IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
+  echo Pull Request number %APPVEYOR_PULL_REQUEST_NUMBER%
   CALL :sonar_scanner ^
     /d:sonar.pullrequest.provider="GitHub", ^
     /d:sonar.pullrequest.github.repository="splitio/.net-core-client", ^
@@ -23,6 +24,7 @@ IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
     /d:sonar.pullrequest.base=%APPVEYOR_REPO_BRANCH%
   ) ELSE (
       IF %APPVEYOR_REPO_BRANCH%="master" (
+        echo "Master branch."
         CALL :sonar_scanner ^
           /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%
         ) ELSE (
@@ -31,10 +33,10 @@ IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
               ) ELSE (
                   SET TARGET_BRANCH="development"
                 )
+          echo "Not a pull request or long lived branch."
+          echo Branch Name is %APPVEYOR_REPO_BRANCH%
+          echo Target Branch is %TARGET_BRANCH%
           CALL :sonar_scanner ^
-            echo "Not a pull request or long lived branch, calling function..."
-            echo Branch Name is %APPVEYOR_REPO_BRANCH%
-            echo Target Branch is %TARGET_BRANCH%
             /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%,^
             /d:sonar.branch.target=%TARGET_BRANCH%
           )
