@@ -2,9 +2,9 @@
 
 :sonar_scanner
 SonarScanner.MSBuild.exe begin ^
-  /n:sonar.projectName=".net-core-client" ^
+  /n:".net-core-client" ^
   /k:"net-core-client" ^
-  /d:"sonar.host.url=https://sonarqube.split-internal.com" ^
+  /d:sonar.host.url="https://sonarqube.split-internal.com" ^
   /d:sonar.login=%SONAR_LOGIN% ^
   /d:sonar.ws.timeout="300" ^
   /d:sonar.links.ci="https://travis-ci.com/splitio/.net-core-client" ^
