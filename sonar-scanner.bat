@@ -21,10 +21,10 @@ IF NOT "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
               )
         echo "Not a pull request or long lived branch."
         echo Branch Name is %APPVEYOR_REPO_BRANCH%
-        echo Target Branch is %TARGET_BRANCH%
+        echo Target Branch is !TARGET_BRANCH!
         CALL :sonar_scanner ^
-          "/d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%",^
-          "/d:sonar.branch.target=%TARGET_BRANCH%"
+          "/d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%", ^
+          "/d:sonar.branch.target=!TARGET_BRANCH!"
         )
   )
 
