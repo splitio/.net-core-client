@@ -1,6 +1,6 @@
 @ECHO OFF
 
-IF NOT DEFINED %APPVEYOR_PULL_REQUEST_NUMBER% (
+IF NOT "%APPVEYOR_PULL_REQUEST_NUMBER%"=="" (
   echo Pull Request number %APPVEYOR_PULL_REQUEST_NUMBER%
   CALL :sonar_scanner ^
     /d:sonar.pullrequest.provider="GitHub", ^
@@ -9,12 +9,12 @@ IF NOT DEFINED %APPVEYOR_PULL_REQUEST_NUMBER% (
     /d:sonar.pullrequest.branch=%APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH%, ^
     /d:sonar.pullrequest.base=%APPVEYOR_REPO_BRANCH%
 ) ELSE (
-    IF %APPVEYOR_REPO_BRANCH%=="master" (
+    IF "%APPVEYOR_REPO_BRANCH%"=="master" (
       echo "Master branch."
       CALL :sonar_scanner ^
         /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%
       ) ELSE (
-          IF %APPVEYOR_REPO_BRANCH%=="development" (
+          IF "%APPVEYOR_REPO_BRANCH%"=="development" (
             SET TARGET_BRANCH="master"
             ) ELSE (
                 SET TARGET_BRANCH="development"
