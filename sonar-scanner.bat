@@ -1,6 +1,8 @@
-@echo off
+REM @echo off
 
 :sonar_scanner
+echo First parameter is %~1
+echo Second parameter is %~2
 SonarScanner.MSBuild.exe begin ^
   /n:".net-core-client" ^
   /k:"net-core-client" ^
@@ -30,6 +32,9 @@ IF NOT %APPVEYOR_PULL_REQUEST_NUMBER%="" (
                   SET TARGET_BRANCH="development"
                 )
           CALL :sonar_scanner ^
+            echo "Not a pull request or long lived branch, calling function..."
+            echo Branch Name is %APPVEYOR_REPO_BRANCH%
+            echo Target Branch is %TARGET_BRANCH%
             /d:sonar.branch.name=%APPVEYOR_REPO_BRANCH%,^
             /d:sonar.branch.target=%TARGET_BRANCH%
           )
