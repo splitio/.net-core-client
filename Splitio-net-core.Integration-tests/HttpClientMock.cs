@@ -131,6 +131,11 @@ namespace Splitio_net_core.Integration_tests
         }
         #endregion
 
+        public string GetUrl()
+        {
+            return _mockServer.Urls.FirstOrDefault();
+        }
+
         public void ShutdownServer()
         {
             _mockServer.Stop();
