@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.IO;
@@ -15,6 +14,7 @@ namespace Splitio.Services.EventSource
         private const string KeepAliveResponse = "\n";
 
         private readonly ISplitLogger _log;
+        private readonly INotificationParser _notificationParser;
         private readonly Uri _uri;
         private readonly int _readTimeout;
 
@@ -26,11 +26,13 @@ namespace Splitio.Services.EventSource
 
         public EventSourceClient(string url,
             int readTimeout = 300000,
-            ISplitLogger log = null)
+            ISplitLogger log = null,
+            INotificationParser notificationParser = null)
         {
             _uri = new Uri(url);
             _readTimeout = readTimeout;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
+            _notificationParser = notificationParser ?? new NotificationParser();
 
             Task.Factory.StartNew(() => ConnectAsync());
         }
@@ -116,31 +118,7 @@ namespace Splitio.Services.EventSource
                         {
                             try
                             {
-                                var notification = JsonConvert.DeserializeObject<Notification>(text);
-                                var dataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
-                                var data = JsonConvert.DeserializeObject<EventData>(dataJsonString);
-
-                                EventData eventData = null;
-
-                                switch (data.Type)
-                                {
-                                    case NotificationType.SPLIT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.SPLIT_KILL:
-                                        eventData = JsonConvert.DeserializeObject<SplitKillEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.SEGMENT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.CONTROL:
-                                        eventData = JsonConvert.DeserializeObject<ControlEventData>(dataJsonString);
-                                        break;
-                                    default:
-                                        throw new Exception("Unexpected type received from EventSource");
-                                }
-
-                                if (eventData == null) throw new Exception("Incorrect format.");
+                                var eventData = _notificationParser.Parse(text);
 
                                 DispatchEvent(eventData);
                             }
