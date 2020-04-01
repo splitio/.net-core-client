@@ -5,7 +5,6 @@ using System.Threading;
 
 namespace Splitio_net_core.Integration_tests.EventSource
 {
-    [Ignore]
     [TestClass]
     public class EventSourceClientTests
     {

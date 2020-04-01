@@ -29,7 +29,6 @@ namespace Splitio_Tests.Integration_Tests
         [TestMethod]
         [DeploymentItem(@"Resources\splits_staging.json")]
         [DeploymentItem(@"Resources\segment_payed.json")]
-
         public void ExecuteGetSuccessfulWithResultsFromJSONFile()
         {
             //Arrange
