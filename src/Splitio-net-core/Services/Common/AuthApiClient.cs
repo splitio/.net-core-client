@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -79,15 +81,13 @@ namespace Splitio.Services.Common
 
         private string GetChannels(Jwt token)
         {
-            var channelsArray = token
-                .Capability
-                .Replace("{", string.Empty)
-                .Replace("}", string.Empty)
-                .Replace(":[\"subscribe\"]", "")
-                .Replace("\"", "")
-                .Split(',');
+            var capability = (JObject)JsonConvert.DeserializeObject(token.Capability);
+            var channelsList = capability
+                .Children()
+                .Select(c => c.First.Path)
+                .ToList();
 
-            return string.Join(",", channelsArray);
+            return string.Join(",", channelsList);
         }
 
         private double GetExpiration(Jwt token)
