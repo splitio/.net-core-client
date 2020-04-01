@@ -69,7 +69,7 @@ namespace Splitio.Services.Common
                 var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
                 authResponse.Channels = GetChannels(token);
-                authResponse.Exp = GetExpiration(token);
+                authResponse.Expiration = GetExpiration(token);
             }
 
             authResponse.Retry = false;
@@ -92,7 +92,7 @@ namespace Splitio.Services.Common
 
         private double GetExpiration(Jwt token)
         {
-            return (token.Exp - ExpirationRate) - DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            return (token.Expiration - ExpirationRate) - GetUnixTimeSeconds();
         }
 
         private string DecodeJwt(string token)
@@ -108,6 +108,12 @@ namespace Splitio.Services.Common
 
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedBody);
             return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+
+        // Returns the number of seconds that have elapsed since 1970-01-01T00:00:00Z.
+        private double GetUnixTimeSeconds()
+        {
+            return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         }
 #endregion
     }

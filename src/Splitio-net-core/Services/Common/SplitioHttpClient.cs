@@ -1,4 +1,5 @@
 ﻿using Splitio.CommonLibraries;
+using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -19,14 +20,14 @@ namespace Splitio.Services.Common
             long connectionTimeOut)
         {
 #if NET40 || NET45
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 #endif
             _log = WrapperAdapter.GetLogger(typeof(SplitioHttpClient));
             _httpClient = new HttpClient()
             {
                 Timeout = TimeSpan.FromMilliseconds(connectionTimeOut)
             };
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Constans.Bearer, apiKey);
         }
 
         public async Task<HTTPResult> GetAsync(string url)
