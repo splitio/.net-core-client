@@ -6,6 +6,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -14,6 +15,11 @@ namespace Splitio.Services.Common
     {
         private readonly ISplitLogger _log;
         private readonly HttpClient _httpClient;
+
+        public SplitioHttpClient()
+        {
+            _httpClient = new HttpClient();
+        }
 
         public SplitioHttpClient(
             string apiKey,
@@ -49,5 +55,16 @@ namespace Splitio.Services.Common
 
             return result;
         }
+
+        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
+        {
+            return _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            _httpClient.CancelPendingRequests();
+            _httpClient.Dispose();
+        }        
     }
 }

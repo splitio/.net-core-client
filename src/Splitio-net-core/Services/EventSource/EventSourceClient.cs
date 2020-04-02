@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Exceptions;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
@@ -19,10 +20,10 @@ namespace Splitio.Services.EventSource
         private readonly Uri _uri;
         private readonly int _readTimeout;
 
-        private readonly object _statusLock = new object();
-        private Status _status;
+        private readonly object _connectedLock = new object();
+        private bool _connected;
 
-        private HttpClient _httpClient;
+        private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
 
         public EventSourceClient(string url,
@@ -33,33 +34,37 @@ namespace Splitio.Services.EventSource
             _uri = new Uri(url);
             _readTimeout = readTimeout;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
-            _notificationParser = notificationParser ?? new NotificationParser();
-
-            Task.Factory.StartNew(() => ConnectAsync());
+            _notificationParser = notificationParser ?? new NotificationParser();   
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
-        public event EventHandler<ErrorReceivedEventArgs> ErrorReceived;
+        public event EventHandler<EventArgs> ConnectedEvent;
+        public event EventHandler<EventArgs> DisconnectEvent;
 
         #region Public Methods
-        public Status Status()
+        public void Connect()
         {
-            lock (_statusLock)
+            Task.Factory.StartNew(() => ConnectAsync());
+        }
+
+        public bool IsConnected()
+        {
+            lock (_connectedLock)
             {
-                return _status;
+                return _connected;
             }
         }
 
         public void Disconnect()
         {
-            _log.Debug($"Disconnecting from {_uri}");
-
+            if (_cancellationTokenSource.IsCancellationRequested) return;
+            
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            _httpClient.CancelPendingRequests();
-            _httpClient.Dispose();
+            _splitHttpClient.Dispose();
 
-            UpdateStatus(EventSource.Status.Disconnected);
+            UpdateStatus(connected: false);
+            DispatchDisconnect();
 
             _log.Info($"Disconnected from {_uri}");
         }
@@ -70,29 +75,30 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                _httpClient = new HttpClient();
+                _splitHttpClient = new SplitioHttpClient();
                 _cancellationTokenSource = new CancellationTokenSource();
 
                 _log.Info($"Connecting to {_uri}");
-                UpdateStatus(EventSource.Status.Connecting);
 
                 var request = new HttpRequestMessage(HttpMethod.Get, _uri);
 
-                using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
+                using (var response = await _splitHttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
                         stream.ReadTimeout = _readTimeout;
                         _log.Info($"Connected to {_uri}");
-                        UpdateStatus(EventSource.Status.Connected);
+                        UpdateStatus(connected: true);
+                        DispatchConnected();
                         await ReadStreamAsync(stream);
                     }
                 }
             }
             catch (Exception ex)
             {
-                DispatchError(ex.Message);
-                UpdateStatus(EventSource.Status.Disconnected);
+                _log.Debug($"Error connecting to {_uri}: {ex.Message}");                
+
+                Disconnect();
             }
         }
 
@@ -102,7 +108,7 @@ namespace Splitio.Services.EventSource
 
             _log.Debug($"Reading stream ....");
 
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            while (!_cancellationTokenSource.IsCancellationRequested && IsConnected())
             {
                 if (stream.CanRead)
                 {
@@ -110,7 +116,7 @@ namespace Splitio.Services.EventSource
 
                     int len = await stream.ReadAsync(buffer, 0, 2048, _cancellationTokenSource.Token);
 
-                    if (len > 0 && Status() == EventSource.Status.Connected)
+                    if (len > 0 && IsConnected())
                     {
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
@@ -129,7 +135,7 @@ namespace Splitio.Services.EventSource
                             }
                             catch (Exception ex)
                             {
-                                DispatchError(ex.Message);
+                                _log.Debug($"Error during event parse: {ex.Message}");
                             }
                         }
                     }
@@ -145,10 +151,14 @@ namespace Splitio.Services.EventSource
             OnEvent(new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchError(string message)
+        private void DispatchDisconnect()
         {
-            _log.Debug($"DispatchError: {message}");
-            OnError(new ErrorReceivedEventArgs(message));
+            OnDisconnect(EventArgs.Empty);
+        }
+
+        private void DispatchConnected()
+        {
+            OnConnected(EventArgs.Empty);
         }
 
         private void OnEvent(EventReceivedEventArgs e)
@@ -156,16 +166,21 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, e);
         }
 
-        private void OnError(ErrorReceivedEventArgs e)
+        private void OnConnected(EventArgs e)
         {
-            ErrorReceived?.Invoke(this, e);
+            ConnectedEvent?.Invoke(this, e);
         }
 
-        private void UpdateStatus(Status status)
+        private void OnDisconnect(EventArgs e)
         {
-            lock (_statusLock)
+            DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void UpdateStatus(bool connected)
+        {
+            lock (_connectedLock)
             {
-                _status = status;
+                _connected = connected;
             }
         }
         #endregion
