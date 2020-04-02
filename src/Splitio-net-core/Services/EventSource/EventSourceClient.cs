@@ -134,10 +134,10 @@ namespace Splitio.Services.EventSource
             _log.Debug($"Stop read stream");
         }
 
-        private void DispatchEvent(EventData eventData)
+        private void DispatchEvent(IncomingNotification incomingNotification)
         {
-            _log.Debug($"DispatchEvent: {eventData}");
-            OnEvent(new EventReceivedEventArgs(eventData));
+            _log.Debug($"DispatchEvent: {incomingNotification}");
+            OnEvent(new EventReceivedEventArgs(incomingNotification));
         }
 
         private void DispatchError(string message)

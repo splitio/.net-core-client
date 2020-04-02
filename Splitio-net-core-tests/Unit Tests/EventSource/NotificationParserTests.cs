@@ -18,23 +18,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_SlitUpdate_ShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = @"{ 'event': 'message', 
-                        'data': {
-                            'id':'1',
-                            'channel':'mauroc',
-                            'data': {
-                                'type': 'SPLIT_UPDATE', 
-                                'changeNumber': 1254564
-                            },
-                            'name':'name-test'
-                        }
-                       }";
+            var text = "{\"id\":\"234234432\",\"event\":\"message\",\"data\":{\"id\":\"KXLEfWv-l4:0:0\",\"clientId\":\"3233424\",\"timestamp\":1585867724988,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1585867723838}\"}}\n";
 
             // Act.
             var result = _notificationParser.Parse(text);
 
             // Assert.
-            Assert.AreEqual(1254564, ((SplitUpdateEventData)result).ChangeNumber);
+            Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)result).ChangeNumber);
             Assert.AreEqual(NotificationType.SPLIT_UPDATE, result.Type);
         }
 
@@ -42,27 +32,15 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_SlitKill_ShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = @"{ 'event': 'message', 
-                        'data': {
-                            'id':'1',
-                            'channel':'mauroc',
-                            'data': {
-                                'type': 'SPLIT_KILL', 
-                                'changeNumber': 1254564,
-                                'defaultTreatment':'off',
-                                'splitName': 'test-split'
-                            },
-                            'name':'name-test'
-                        }
-                       }";
+            var text = "{\"id\":\"23423432\",\"event\":\"message\",\"data\":{\"id\":\"vJ0EW4_EZa:0:0\",\"clientId\":\"332432324\",\"timestamp\":1585868247781,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_KILL\\\",\\\"changeNumber\\\":1585868246622,\\\"defaultTreatment\\\":\\\"off\\\",\\\"splitName\\\":\\\"test-split\\\"}\"}}\n";
 
             // Act.
             var result = _notificationParser.Parse(text);
 
             // Assert.
-            Assert.AreEqual(1254564, ((SplitKillEventData)result).ChangeNumber);
-            Assert.AreEqual("off", ((SplitKillEventData)result).DefaultTreatment);
-            Assert.AreEqual("test-split", ((SplitKillEventData)result).SplitName);
+            Assert.AreEqual(1585868246622, ((SplitKillNotification)result).ChangeNumber);
+            Assert.AreEqual("off", ((SplitKillNotification)result).DefaultTreatment);
+            Assert.AreEqual("test-split", ((SplitKillNotification)result).SplitName);
             Assert.AreEqual(NotificationType.SPLIT_KILL, result.Type);
         }
 
@@ -70,25 +48,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_SegmentUpdate_ShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = @"{ 'event': 'message', 
-                        'data': {
-                            'id':'1',
-                            'channel':'mauroc',
-                            'data': {
-                                'type': 'SEGMENT_UPDATE', 
-                                'changeNumber': 1254564,
-                                'segmentName': 'test-segment'
-                            },
-                            'name':'name-test'
-                         }
-                        }";
+            var text = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_segments\",\"data\":\"{\\\"type\\\":\\\"SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1585868933303,\\\"segmentName\\\":\\\"test-segment\\\"}\"}}\n";
 
             // Act.
             var result = _notificationParser.Parse(text);
 
             // Assert.
-            Assert.AreEqual(1254564, ((SegmentUpdateEventData)result).ChangeNumber);
-            Assert.AreEqual("test-segment", ((SegmentUpdateEventData)result).SegmentName);
+            Assert.AreEqual(1585868933303, ((SegmentChangeNotification)result).ChangeNumber);
+            Assert.AreEqual("test-segment", ((SegmentChangeNotification)result).SegmentName);
             Assert.AreEqual(NotificationType.SEGMENT_UPDATE, result.Type);
         }
 
