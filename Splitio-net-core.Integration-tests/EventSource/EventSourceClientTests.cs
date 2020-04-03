@@ -204,16 +204,19 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(0, _eventsReceived.Count);
+                Assert.AreEqual(1, _disconnectEvent.Count);
             }
         }
 

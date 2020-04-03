@@ -129,9 +129,10 @@ namespace Splitio.Services.EventSource
 
                                 DispatchEvent(eventData);
                             }
-                            catch (NotificationErrorException nee)
+                            catch (NotificationErrorException ex)
                             {
-                                // Dispatch Disconnect
+                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
+                                DispatchDisconnect();
                             }
                             catch (Exception ex)
                             {
