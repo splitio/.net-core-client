@@ -17,7 +17,7 @@ namespace Splitio.Services.EventSource
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
-        private readonly Uri _uri;
+        private readonly string _url;
         private readonly int _readTimeout;
 
         private readonly object _connectedLock = new object();
@@ -31,7 +31,7 @@ namespace Splitio.Services.EventSource
             ISplitLogger log = null,
             INotificationParser notificationParser = null)
         {
-            _uri = new Uri(url);
+            _url = url;
             _readTimeout = readTimeout;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();   
@@ -66,7 +66,7 @@ namespace Splitio.Services.EventSource
             UpdateStatus(connected: false);
             DispatchDisconnect();
 
-            _log.Info($"Disconnected from {_uri}");
+            _log.Info($"Disconnected from {_url}");
         }
         #endregion
 
@@ -78,16 +78,14 @@ namespace Splitio.Services.EventSource
                 _splitHttpClient = new SplitioHttpClient();
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                _log.Info($"Connecting to {_uri}");
+                _log.Info($"Connecting to {_url}");
 
-                var request = new HttpRequestMessage(HttpMethod.Get, _uri);
-
-                using (var response = await _splitHttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
+                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
                         stream.ReadTimeout = _readTimeout;
-                        _log.Info($"Connected to {_uri}");
+                        _log.Info($"Connected to {_url}");
                         UpdateStatus(connected: true);
                         DispatchConnected();
                         await ReadStreamAsync(stream);
@@ -96,7 +94,7 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                _log.Debug($"Error connecting to {_uri}: {ex.Message}");                
+                _log.Debug($"Error connecting to {_url}: {ex.Message}");                
 
                 Disconnect();
             }

@@ -9,6 +9,6 @@ namespace Splitio.Services.Common
     public interface ISplitioHttpClient : IDisposable
     {
         Task<HTTPResult> GetAsync(string url);
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken);
+        Task<HttpResponseMessage> GetAsync(string url, HttpCompletionOption completionOption, CancellationToken cancellationToken);
     }
 }
