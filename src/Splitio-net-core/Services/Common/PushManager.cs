@@ -1,5 +1,4 @@
-﻿using Splitio.CommonLibraries;
-using Splitio.Services.Logger;
+﻿using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -39,7 +38,7 @@ namespace Splitio.Services.Common
                 if (response.PushEnabled.Value)
                 {
                     // sseHandler.Start(response.Token, response.Channels);
-                    ScheduleNextTokenRefresh(response.Exp.Value);
+                    ScheduleNextTokenRefresh(response.Expiration.Value);
                 }
                 else
                 {
