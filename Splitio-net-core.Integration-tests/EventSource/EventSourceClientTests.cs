@@ -152,6 +152,29 @@ namespace Splitio_net_core.Integration_tests.EventSource
         }
 
         [TestMethod]
+        public void EventSourceClient_NotificationError_ShouldReceiveError()
+        {
+            using (var httpClientMock = new HttpClientMock())
+            {
+                var notification = "{\n\t\"error\":{\n\t\t\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\n\t\t\"code\":40142,\n\t\t\"statusCode\":401,\n\t\t\"href\":\"https://help.ably.io/error/40142\",\n\t\t\"serverId\":\"123123\"\n\t}\n}";
+                httpClientMock.SSE_Channels_Response(notification);
+
+                var url = httpClientMock.GetUrl();
+                _eventsReceived = new Queue<EventReceivedEventArgs>();
+                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+
+                var eventSourceClient = new EventSourceClient(url, 10000);
+                eventSourceClient.EventReceived += EventReceived;
+                eventSourceClient.ErrorReceived += ErrorReceived;
+
+                Thread.Sleep(5000);
+
+                Assert.AreEqual(0, _errorsReceived.Count);
+                Assert.AreEqual(0, _eventsReceived.Count);
+            }
+        }
+
+        [TestMethod]
         public void EventSourceClient_KeepAliveResponse()
         {
             using (var httpClientMock = new HttpClientMock())

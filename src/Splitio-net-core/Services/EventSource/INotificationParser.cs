@@ -2,6 +2,6 @@
 {
     public interface INotificationParser
     {
-        IncomingNotification Parse(string text);
+        IncomingNotification Parse(string notificationString);
     }
 }

@@ -14,6 +14,17 @@
         public string Data { get; set; }
     }
 
+    public class NotificationError
+    {
+        public ErrorData Error { get; set; }
+    }
+
+    public class ErrorData
+    {
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+    }
+
     public enum NotificationType
     {
         SPLIT_UPDATE,

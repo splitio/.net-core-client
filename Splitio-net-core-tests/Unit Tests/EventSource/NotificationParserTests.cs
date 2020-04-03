@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
+using Splitio.Services.Exceptions;
 using System;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
@@ -75,6 +76,17 @@ namespace Splitio_Tests.Unit_Tests.EventSource
                             'name':'name-test'
                          }
                         }";
+
+            // Act.
+            var result = _notificationParser.Parse(text);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotificationErrorException))]
+        public void Parse_NotificationError_ShouldReturnException()
+        {
+            // Arrange.
+            var text = "{\n\t\"error\":{\n\t\t\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\n\t\t\"code\":40142,\n\t\t\"statusCode\":401,\n\t\t\"href\":\"https://help.ably.io/error/40142\",\n\t\t\"serverId\":\"123123\"\n\t}\n}";
 
             // Act.
             var result = _notificationParser.Parse(text);

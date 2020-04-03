@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Services.Exceptions;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.IO;
@@ -111,16 +112,20 @@ namespace Splitio.Services.EventSource
 
                     if (len > 0 && Status() == EventSource.Status.Connected)
                     {
-                        var text = encoder.GetString(buffer, 0, len);
-                        _log.Debug($"Read stream encoder buffer: {text}");
+                        var notificationString = encoder.GetString(buffer, 0, len);
+                        _log.Debug($"Read stream encoder buffer: {notificationString}");
 
-                        if (text != KeepAliveResponse)
+                        if (notificationString != KeepAliveResponse)
                         {
                             try
                             {
-                                var eventData = _notificationParser.Parse(text);
+                                var eventData = _notificationParser.Parse(notificationString);
 
                                 DispatchEvent(eventData);
+                            }
+                            catch (NotificationErrorException nee)
+                            {
+                                // Dispatch Disconnect
                             }
                             catch (Exception ex)
                             {
