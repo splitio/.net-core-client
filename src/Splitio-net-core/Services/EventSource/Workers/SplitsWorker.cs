@@ -13,8 +13,8 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISplitLogger _log;
         private readonly ISplitFetcher _splitFetcher;
         private readonly ISplitCache _splitCache;
-        private readonly BlockingCollection<long> _queue;
 
+        private BlockingCollection<long> _queue;
         private CancellationTokenSource _cancellationTokenSource;
 
         public SplitsWorker(ISplitFetcher splitFetcher,
@@ -24,23 +24,29 @@ namespace Splitio.Services.EventSource.Workers
             _splitFetcher = splitFetcher;
             _splitCache = splitCache;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
-            _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
         }
 
         #region Public Methods
         public void AddToQueue(long changeNumber)
         {
-            _queue.TryAdd(changeNumber);
+            if (_queue != null)
+            {
+                _queue.TryAdd(changeNumber);
+            }
         }
 
         public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
         {
-            _splitCache.Kill(changeNumber, splitName, defaultTreatment);
-            AddToQueue(changeNumber);
+            if (_queue != null)
+            {
+                _splitCache.Kill(changeNumber, splitName, defaultTreatment);
+                AddToQueue(changeNumber);
+            }
         }
 
         public void Start()
         {
+            _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
             _cancellationTokenSource = new CancellationTokenSource();
             Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
         }
@@ -48,13 +54,16 @@ namespace Splitio.Services.EventSource.Workers
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _queue.Dispose();
+            _queue = null;
         }
         #endregion
 
         #region Private Mthods
         private void Execute()
         {
-            while (true)
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
                 //Wait indefinitely until a segment is queued
                 if (_queue.TryTake(out long changeNumber, -1))
