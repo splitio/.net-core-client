@@ -151,6 +151,11 @@ namespace Splitio.Redis.Services.Cache.Classes
                 .Where(s => s != null)
                 .ToList();
         }
+
+        public void Kill(long changeNumber, string splitName, string defaultTreatment)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
  

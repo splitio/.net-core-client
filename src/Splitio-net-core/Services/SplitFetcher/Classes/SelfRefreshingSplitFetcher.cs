@@ -38,11 +38,12 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache = splitCache;
         }
 
+        #region Public Methods
         public void Start()
         {
             var periodicTask = PeriodicTaskFactory.Start(() =>
             {
-                RefreshSplits();
+                Fetch();
             },
             intervalInMilliseconds: _interval * 1000,
             cancelToken: _cancelTokenSource.Token);
@@ -54,6 +55,56 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
+        public async void Fetch()
+        {
+            while (true)
+            {
+                var changeNumber = _splitCache.GetChangeNumber();
+
+                try
+                {
+                    var result = await _splitChangeFetcher.Fetch(changeNumber);
+
+                    if (result == null)
+                    {
+                        break;
+                    }
+
+                    if (changeNumber >= result.till)
+                    {
+                        _gates.SplitsAreReady();
+                        //There are no new split changes
+                        break;
+                    }
+
+                    if (result.splits != null && result.splits.Count > 0)
+                    {
+                        UpdateSplitsFromChangeFetcherResponse(result.splits);
+                        _splitCache.SetChangeNumber(result.till);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Error("Exception caught refreshing splits", e);
+                    Stop();
+                }
+                finally
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.Debug(string.Format("split fetch before: {0}, after: {1}", changeNumber, _splitCache.GetChangeNumber()));
+                    }
+                }
+            }
+        }
+
+        public long GetChangeNumber()
+        {
+            return _splitCache.GetChangeNumber();
+        }
+        #endregion
+
+        #region Private Methods
         private void UpdateSplitsFromChangeFetcherResponse(List<Split> splitChanges)
         {
             var addedSplits = new List<Split>();
@@ -105,48 +156,6 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
             }
         }
-
-        private async void RefreshSplits()
-        {
-            while (true)
-            {
-                var changeNumber = _splitCache.GetChangeNumber();
-
-                try
-                {
-                    var result = await _splitChangeFetcher.Fetch(changeNumber);
-
-                    if (result == null)
-                    {
-                        break;
-                    }
-
-                    if (changeNumber >= result.till)
-                    {
-                        _gates.SplitsAreReady();
-                        //There are no new split changes
-                        break;
-                    }
-
-                    if (result.splits != null && result.splits.Count > 0)
-                    {
-                        UpdateSplitsFromChangeFetcherResponse(result.splits);
-                        _splitCache.SetChangeNumber(result.till);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _log.Error("Exception caught refreshing splits", e);
-                    Stop();
-                }
-                finally
-                {
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.Debug(string.Format("split fetch before: {0}, after: {1}", changeNumber, _splitCache.GetChangeNumber()));
-                    }
-                }
-            }
-        }
+        #endregion
     }
 }

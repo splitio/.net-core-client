@@ -67,4 +67,8 @@
     <Compile Remove="Services\Impressions\Classes\AsynchronousImpressionListener.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\EventSource\Queues\" />
+  </ItemGroup>
+
 </Project>

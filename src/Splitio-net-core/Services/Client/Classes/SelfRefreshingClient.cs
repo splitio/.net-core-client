@@ -12,6 +12,7 @@ using Splitio.Services.Metrics.Classes;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.Parsing.Classes;
 using Splitio.Services.SegmentFetcher.Classes;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
@@ -40,7 +41,7 @@ namespace Splitio.Services.Client.Classes
         private ITreatmentSdkApiClient _treatmentSdkApiClient;
         private IEventSdkApiClient _eventSdkApiClient;
         private IMetricsSdkApiClient _metricsSdkApiClient;
-        private ISplitFetcher _selfRefreshingSegmentFetcher;
+        private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
