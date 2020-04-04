@@ -5,6 +5,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource.Workers
 {
@@ -15,22 +16,22 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISegmentChangeFetcher _segmentChangeFetcher;
         private readonly IReadinessGatesCache _gates;
         private readonly BlockingCollection<SegmentQueueDto> _queue;
-        private readonly CancellationTokenSource _cancellationTokenSource;
+
+        private CancellationTokenSource _cancellationTokenSource;
 
         public SegmentsWorker(ISegmentCache segmentCache,
             ISegmentChangeFetcher segmentChangeFetcher,
             IReadinessGatesCache gates,
-            CancellationTokenSource cancellationTokenSource,
             ISplitLogger log = null)
         {
             _segmentCache = segmentCache;
             _segmentChangeFetcher = segmentChangeFetcher;
             _gates = gates;
-            _cancellationTokenSource = cancellationTokenSource;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));
             _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
         }
 
+        #region Public Methods
         public void AddToQueue(long changeNumber, string segmentName)
         {
             _queue.TryAdd(new SegmentQueueDto
@@ -41,6 +42,19 @@ namespace Splitio.Services.EventSource.Workers
         }
 
         public void Start()
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+        }
+
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+        #endregion
+
+        #region Private Methods
+        public void Execute()
         {
             while (true)
             {
@@ -58,10 +72,6 @@ namespace Splitio.Services.EventSource.Workers
                 }
             }
         }
-
-        public void Stop()
-        {
-            _cancellationTokenSource.Cancel();
-        }
+        #endregion
     }
 }
