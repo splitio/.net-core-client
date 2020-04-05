@@ -61,7 +61,7 @@ namespace Splitio.Services.EventSource
 
         public void StopWorkers()
         {
-            _splitsWorker.Start();
+            _splitsWorker.Stop();
             _segmentsWorker.Stop();
         }
         #endregion
