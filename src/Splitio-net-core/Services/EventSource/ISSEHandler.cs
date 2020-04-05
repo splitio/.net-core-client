@@ -2,7 +2,7 @@
 {
     public interface ISSEHandler
     {
-        void Start();
+        void Start(string token, string channels);
         void Stop();
         void StartWorkers();
         void StopWorkers();
