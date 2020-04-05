@@ -2,7 +2,6 @@
 {
     public interface INotificationPorcessor
     {
-        void StartClient();
-        void StopClient();
+        void Proccess(IncomingNotification notification);
     }
 }
