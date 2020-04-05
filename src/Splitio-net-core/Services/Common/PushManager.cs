@@ -15,20 +15,16 @@ namespace Splitio.Services.Common
         private readonly ISSEHandler _sseHandler;
         private readonly int _authRetryBackOffBase;
 
-        public PushManager(string url,
-            string apiKey,
-            long connectionTimeOut,
-            int authRetryBackOffBase,
+        public PushManager(int authRetryBackOffBase,
             ISSEHandler sseHandler,
-            IAuthApiClient authApiClient = null,
+            IAuthApiClient authApiClient,
             ISplitLogger log = null,
             IWrapperAdapter wrapperAdapter = null)
-        {            
-            _authApiClient = authApiClient ?? new AuthApiClient(url, apiKey, connectionTimeOut);
+        {
+            _sseHandler = sseHandler;
+            _authApiClient = authApiClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(PushManager));
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
-            _sseHandler = sseHandler;
-
             _authRetryBackOffBase = authRetryBackOffBase;
         }
 
