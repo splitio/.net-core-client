@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Services.EventSource.Workers;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 
@@ -8,14 +9,23 @@ namespace Splitio.Services.EventSource
     {
         private readonly ISplitLogger _log;
         private readonly IEventSourceClient _eventSourceClient;
+        private readonly ISplitsWorker _splitsWorker;
+        private readonly ISegmentsWorker _segmentsWorker;
+        private readonly INotificationPorcessor _notificationPorcessor;
 
         public event EventHandler<EventArgs> ConnectedEvent;
         public event EventHandler<EventArgs> DisconnectEvent;
 
         public SSEHandler(string sseUrl,
-            ISplitLogger log,
+            ISplitsWorker splitsWorker,
+            ISegmentsWorker segmentsWorker,
+            INotificationPorcessor notificationPorcessor,
+            ISplitLogger log = null,
             IEventSourceClient eventSourceClient = null)
         {
+            _splitsWorker = splitsWorker;
+            _segmentsWorker = segmentsWorker;
+            _notificationPorcessor = notificationPorcessor;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SSEHandler));
             _eventSourceClient = eventSourceClient ?? new EventSourceClient(sseUrl);
         }
@@ -36,19 +46,21 @@ namespace Splitio.Services.EventSource
 
         public void StartWorkers()
         {
-            throw new System.NotImplementedException();
+            _splitsWorker.Start();
+            _segmentsWorker.Start();
         }
 
         public void StopWorkers()
         {
-            throw new System.NotImplementedException();
+            _splitsWorker.Start();
+            _segmentsWorker.Stop();
         }
         #endregion
 
         #region Private Methods
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
-            
+            _notificationPorcessor.Proccess(e.Event);
         }
 
         private void OnConnected(object sender, EventArgs e)
