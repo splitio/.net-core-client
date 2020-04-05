@@ -70,7 +70,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug($"Segment queued: {segment.name}");
+                    _log.Debug($"Segment queued: {segment.Name}");
                 }
             }
         }
@@ -83,7 +83,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug(string.Format("Segment queued: {0}", segment.name));
+                    _log.Debug(string.Format("Segment queued: {0}", segment.Name));
                 }
             }
         }

@@ -1,6 +1,5 @@
 ﻿using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Logger;
-using Splitio.Services.SegmentFetcher.Classes;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
@@ -13,36 +12,32 @@ namespace Splitio.Services.EventSource.Workers
     {
         private readonly ISplitLogger _log;
         private readonly ISegmentCache _segmentCache;
-        private readonly ISegmentChangeFetcher _segmentChangeFetcher;
-        private readonly IReadinessGatesCache _gates;
-        private readonly BlockingCollection<SegmentQueueDto> _queue;
+        private readonly ISelfRefreshingSegment _selfRefreshingSegment;
 
+        private BlockingCollection<SegmentQueueDto> _queue;
         private CancellationTokenSource _cancellationTokenSource;
 
         public SegmentsWorker(ISegmentCache segmentCache,
-            ISegmentChangeFetcher segmentChangeFetcher,
-            IReadinessGatesCache gates,
+            ISelfRefreshingSegment selfRefreshingSegment,
             ISplitLogger log = null)
         {
             _segmentCache = segmentCache;
-            _segmentChangeFetcher = segmentChangeFetcher;
-            _gates = gates;
-            _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));
-            _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
+            _selfRefreshingSegment = selfRefreshingSegment;
+            _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));            
         }
 
         #region Public Methods
         public void AddToQueue(long changeNumber, string segmentName)
         {
-            _queue.TryAdd(new SegmentQueueDto
+            if (_queue != null)
             {
-                ChangeNumber = changeNumber,
-                SegmentName = segmentName
-            });
+                _queue.TryAdd(new SegmentQueueDto { ChangeNumber = changeNumber, SegmentName = segmentName });
+            }
         }
 
         public void Start()
         {
+            _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
             _cancellationTokenSource = new CancellationTokenSource();
             Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
         }
@@ -50,13 +45,16 @@ namespace Splitio.Services.EventSource.Workers
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _queue.Dispose();
+            _queue = null;
         }
         #endregion
 
         #region Private Methods
         public void Execute()
         {
-            while (true)
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
                 //Wait indefinitely until a segment is queued
                 if (_queue.TryTake(out SegmentQueueDto segment, -1))
@@ -66,8 +64,7 @@ namespace Splitio.Services.EventSource.Workers
                     if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
                     {
                         // TODO: change this after synchronizer implementation.
-                        var selfRefreshingSegment = new SelfRefreshingSegment(segment.SegmentName, _segmentChangeFetcher, _gates, _segmentCache);
-                        selfRefreshingSegment.RefreshSegment();
+                        _selfRefreshingSegment.FetchSegment(segment.SegmentName);
                     }
                 }
             }
