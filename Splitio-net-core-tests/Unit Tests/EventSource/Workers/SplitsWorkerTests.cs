@@ -6,7 +6,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading;
 
-namespace Splitio_Tests.Unit_Tests.Events.Workers
+namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 {
     [TestClass]
     public class SplitsWorkerTests
@@ -71,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests.Events.Workers
         }
 
         [TestMethod]
-        public void Kill_asd_ShouldTriggerFethc()
+        public void Kill_ShouldTriggerFethc()
         {
             // Arrange.            
             var changeNumber = 1585956698457;
@@ -92,6 +92,30 @@ namespace Splitio_Tests.Unit_Tests.Events.Workers
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
             _splitFetcher.Verify(mock => mock.Fetch(), Times.Once);
+        }
+
+        [TestMethod]
+        public void Kill_ShouldNotTriggerFethc()
+        {
+            // Arrange.            
+            var changeNumber = 1585956698457;
+            var splitName = "split-test";
+            var defaultTreatment = "off";
+
+            _splitCache
+                .Setup(mock => mock.GetChangeNumber())
+                .Returns(1585956698467);
+
+            _splitsWorker.Start();
+
+            // Act.            
+            _splitsWorker.KillSplit(changeNumber, splitName, defaultTreatment);
+            Thread.Sleep(500);
+
+            // Assert.
+            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
+            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
+            _splitFetcher.Verify(mock => mock.Fetch(), Times.Never);
         }
     }
 }
