@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Services.EventSource;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
@@ -11,21 +12,24 @@ namespace Splitio.Services.Common
         private readonly IAuthApiClient _authApiClient;
         private readonly ISplitLogger _log;
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly ISSEHandler _sseHandler;
         private readonly int _authRetryBackOffBase;
 
         public PushManager(string url,
             string apiKey,
             long connectionTimeOut,
             int authRetryBackOffBase,
+            ISSEHandler sseHandler,
             IAuthApiClient authApiClient = null,
             ISplitLogger log = null,
             IWrapperAdapter wrapperAdapter = null)
-        {
-            _authRetryBackOffBase = authRetryBackOffBase;
-
+        {            
             _authApiClient = authApiClient ?? new AuthApiClient(url, apiKey, connectionTimeOut);
             _log = log ?? WrapperAdapter.GetLogger(typeof(PushManager));
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+            _sseHandler = sseHandler;
+
+            _authRetryBackOffBase = authRetryBackOffBase;
         }
 
         #region Public Methods
@@ -37,12 +41,12 @@ namespace Splitio.Services.Common
 
                 if (response.PushEnabled.Value)
                 {
-                    // sseHandler.Start(response.Token, response.Channels);
+                    _sseHandler.Start(response.Token, response.Channels);
                     ScheduleNextTokenRefresh(response.Expiration.Value);
                 }
                 else
                 {
-                    // sseHandler.Stop()
+                    StopSse();
                 }
 
                 if (response.Retry.Value)
@@ -54,6 +58,11 @@ namespace Splitio.Services.Common
             {
                 _log.Error(ex.Message);
             }
+        }
+
+        public void StopSse()
+        {
+            _sseHandler.Stop();
         }
         #endregion
 

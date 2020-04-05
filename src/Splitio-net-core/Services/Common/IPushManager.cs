@@ -3,5 +3,6 @@
     public interface IPushManager
     {
         void StartSse();
+        void StopSse();
     }
 }
