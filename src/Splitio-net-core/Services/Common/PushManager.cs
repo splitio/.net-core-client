@@ -3,7 +3,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -65,12 +64,10 @@ namespace Splitio.Services.Common
         #region Private Methods
         private void ScheduleNextTokenRefresh(double time)
         {
-            Task
-                .Factory
-                .StartNew(() => 
+            _wrapperAdapter
+                .TaskDelay(Convert.ToInt32(time))
+                .ContinueWith((t) =>
                 {
-                    _wrapperAdapter.TaskDelay(Convert.ToInt32(time)).Wait();
-
                     StartSse();
                 });
         }

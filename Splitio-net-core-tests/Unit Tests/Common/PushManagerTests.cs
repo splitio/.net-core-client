@@ -4,16 +4,17 @@ using Splitio.Domain;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
-using Splitio.Services.Shared.Interfaces;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
     [TestClass]
     public class PushManagerTests
     {
+        private const int AuthRetryBackOffBase = 1000;
+
         private readonly Mock<IAuthApiClient> _authApiClient;
         private readonly Mock<ISplitLogger> _log;
-        private readonly Mock<IWrapperAdapter> _wrapperAdapter;
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly IPushManager _pushManager;
 
@@ -21,10 +22,9 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             _authApiClient = new Mock<IAuthApiClient>();
             _log = new Mock<ISplitLogger>();
-            _wrapperAdapter = new Mock<IWrapperAdapter>();
             _sseHandler = new Mock<ISSEHandler>();
 
-            _pushManager = new PushManager(5, _sseHandler.Object, _authApiClient.Object, _log.Object, _wrapperAdapter.Object);
+            _pushManager = new PushManager(AuthRetryBackOffBase, _sseHandler.Object, _authApiClient.Object, _log.Object);
         }
 
         [TestMethod]
@@ -37,12 +37,22 @@ namespace Splitio_Tests.Unit_Tests.Common
                 Channels = "channel-test",
                 Token = "token-test",
                 Retry = false,
-                Expiration = 6000
+                Expiration = 1000
+            };
+
+            var response2 = new AuthenticationResponse
+            {
+                PushEnabled = true,
+                Channels = "channel-test-2",
+                Token = "token-test-2",
+                Retry = false,
+                Expiration = 1000
             };
 
             _authApiClient
-                .Setup(mock => mock.AuthenticateAsync())
-                .ReturnsAsync(response);
+                .SetupSequence(mock => mock.AuthenticateAsync())
+                .ReturnsAsync(response)
+                .ReturnsAsync(response2);
 
             // Act.
             _pushManager.StartSse();
@@ -51,7 +61,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
             _sseHandler.Verify(mock => mock.Start(response.Token, response.Channels), Times.Once);
 
-            // TODO: validate ScheduleNextTokenRefresh
+            Thread.Sleep(1100);
+            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Exactly(2));
+            _sseHandler.Verify(mock => mock.Start(response2.Token, response2.Channels), Times.Once);
         }
 
         [TestMethod]
@@ -76,7 +88,10 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _sseHandler.Verify(mock => mock.Stop(), Times.Once);
 
-            // TODO: validate ScheduleNextTokenRefresh
+            Thread.Sleep(1100);
+            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Once);
+            _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _sseHandler.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]
@@ -89,9 +104,19 @@ namespace Splitio_Tests.Unit_Tests.Common
                 Retry = true
             };
 
+            var response2 = new AuthenticationResponse
+            {
+                PushEnabled = true,
+                Channels = "channel-test-2",
+                Token = "token-test-2",
+                Retry = false,
+                Expiration = 1000
+            };
+
             _authApiClient
-                .Setup(mock => mock.AuthenticateAsync())
-                .ReturnsAsync(response);
+                .SetupSequence(mock => mock.AuthenticateAsync())
+                .ReturnsAsync(response)
+                .ReturnsAsync(response2);
 
             // Act.
             _pushManager.StartSse();
@@ -101,7 +126,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _sseHandler.Verify(mock => mock.Stop(), Times.Once);
 
-            // TODO: validate ScheduleNextTokenRefresh
+            Thread.Sleep(1100);
+            _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Exactly(2));
+            _sseHandler.Verify(mock => mock.Start(response2.Token, response2.Channels), Times.Once);
         }
     }
 }
