@@ -40,20 +40,21 @@ namespace Splitio.Services.SegmentFetcher.Classes
             StartWorker();
         }
 
-        public void Stop()
-        {
-            _cancelTokenSource.Cancel();
-            SegmentTaskQueue.segmentsQueue.Dispose();
-            _segments.Clear();
-            _segmentCache.Clear();
-        }
-
+        #region Public Methods
         public void Start()
         {
             //Delay first execution until expected time has passed
             _wrappedAdapter.TaskDelay(_interval * 1000).Wait();
 
             var schedulerTask = PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds: _interval * 1000, cancelToken: _cancelTokenSource.Token);
+        }
+
+        public void Stop()
+        {
+            _cancelTokenSource.Cancel();
+            SegmentTaskQueue.segmentsQueue.Dispose();
+            _segments.Clear();
+            _segmentCache.Clear();
         }
 
         public override void InitializeSegment(string name)
@@ -75,6 +76,24 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
+        public void FetchSegments()
+        {
+            foreach (var segment in _segments.Values)
+            {
+                segment.FetchSegment();
+
+                _log.Debug(string.Format("Segment fetched: {0}", segment.Name));
+            }
+        }
+
+        public void FetchSegment(string segmentName)
+        {
+            var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
+            refreshingSegment.FetchSegment();
+        }
+        #endregion
+
+        #region Private Methods
         private void AddSegmentsToQueue()
         {
             foreach (var segment in _segments.Values)
@@ -92,5 +111,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             var workerTask = Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
+        #endregion
     }
 }

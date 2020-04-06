@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     public class SplitsWorkerTests
     {
         private readonly Mock<ISplitLogger> _log;
-        private readonly Mock<ISplitFetcher> _splitFetcher;
+        private readonly Mock<ISynchronizer> _synchronizer;
         private readonly Mock<ISplitCache> _splitCache;
 
         private readonly ISplitsWorker _splitsWorker;
@@ -20,10 +20,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         public SplitsWorkerTests()
         {
             _log = new Mock<ISplitLogger>();
-            _splitFetcher = new Mock<ISplitFetcher>();
+            _synchronizer = new Mock<ISynchronizer>();
             _splitCache = new Mock<ISplitCache>();
 
-            _splitsWorker = new SplitsWorker(_splitFetcher.Object, _splitCache.Object, _log.Object);
+            _splitsWorker = new SplitsWorker(_splitCache.Object, _synchronizer.Object, _log.Object);
         }
 
         [TestMethod]
@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(4));
-            _splitFetcher.Verify(mock => mock.Fetch(), Times.Exactly(3));
+            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Exactly(3));
         }
 
         [TestMethod]
@@ -67,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Never);
-            _splitFetcher.Verify(mock => mock.Fetch(), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Never);
         }
 
         [TestMethod]
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _splitFetcher.Verify(mock => mock.Fetch(), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Once);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _splitFetcher.Verify(mock => mock.Fetch(), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Never);
         }
     }
 }

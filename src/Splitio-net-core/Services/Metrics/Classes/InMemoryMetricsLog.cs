@@ -199,5 +199,10 @@ namespace Splitio.Services.Metrics.Classes
             SendGaugeMetrics();
             SendTimeMetrics();
         }
+
+        public void Start()
+        {
+            return;
+        }
     }
 }

@@ -71,6 +71,7 @@ namespace Splitio.Services.Client.Classes
             _impressionsLog.Start();
             _eventsLog.Start();
             _splitFetcher.Start();
+            _metricsLog.Start();
         }
 
         public void Stop()

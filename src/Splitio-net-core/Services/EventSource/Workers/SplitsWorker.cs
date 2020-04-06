@@ -1,7 +1,7 @@
 ﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,18 +11,18 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : ISplitsWorker
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitFetcher _splitFetcher;
         private readonly ISplitCache _splitCache;
+        private readonly ISynchronizer _synchronizer;
 
         private BlockingCollection<long> _queue;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public SplitsWorker(ISplitFetcher splitFetcher,
-            ISplitCache splitCache,
+        public SplitsWorker(ISplitCache splitCache,
+            ISynchronizer synchronizer,
             ISplitLogger log = null)
         {
-            _splitFetcher = splitFetcher;
             _splitCache = splitCache;
+            _synchronizer = synchronizer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
         }
 
@@ -72,8 +72,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     if (changeNumber > _splitCache.GetChangeNumber())
                     {
-                        // TODO: change this after synchronizer implementation.
-                        _splitFetcher.Fetch();
+                        _synchronizer.SynchorizeSplits();
                     }
                 }
             }

@@ -1,6 +1,6 @@
 ﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
-using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -12,17 +12,17 @@ namespace Splitio.Services.EventSource.Workers
     {
         private readonly ISplitLogger _log;
         private readonly ISegmentCache _segmentCache;
-        private readonly ISelfRefreshingSegment _selfRefreshingSegment;
+        private readonly ISynchronizer _synchronizer;
 
         private BlockingCollection<SegmentQueueDto> _queue;
         private CancellationTokenSource _cancellationTokenSource;
 
         public SegmentsWorker(ISegmentCache segmentCache,
-            ISelfRefreshingSegment selfRefreshingSegment,
+            ISynchronizer synchronizer,
             ISplitLogger log = null)
         {
             _segmentCache = segmentCache;
-            _selfRefreshingSegment = selfRefreshingSegment;
+            _synchronizer = synchronizer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SegmentsWorker));            
         }
 
@@ -63,8 +63,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
                     {
-                        // TODO: change this after synchronizer implementation.
-                        _selfRefreshingSegment.FetchSegment(segment.SegmentName);
+                        _synchronizer.SynchorizeSegment(segment.SegmentName);
                     }
                 }
             }

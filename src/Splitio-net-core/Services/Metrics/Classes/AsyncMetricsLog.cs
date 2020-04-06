@@ -9,13 +9,29 @@ namespace Splitio.Services.Metrics.Classes
 {
     public class AsyncMetricsLog : IMetricsLog
     {
+        private readonly IMetricsSdkApiClient _metricsSdkApiClient;
+        private readonly IMetricsCache _metricsCache;
+        private readonly int _maxCountCalls;
+        private readonly int _maxTimeBetweenCalls;
+
         IMetricsLog worker;
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(AsyncMetricsLog));
 
-        public AsyncMetricsLog(IMetricsSdkApiClient apiClient, IMetricsCache metricsCache, int maxCountCalls = -1, int maxTimeBetweenCalls = -1)
+        public AsyncMetricsLog(IMetricsSdkApiClient metricsSdkApiClient,
+            IMetricsCache metricsCache,
+            int maxCountCalls = -1,
+            int maxTimeBetweenCalls = -1)
         {
-            worker = new InMemoryMetricsLog(apiClient, metricsCache, maxCountCalls, maxTimeBetweenCalls);
+            _metricsSdkApiClient = metricsSdkApiClient;
+            _metricsCache = metricsCache;
+            _maxCountCalls = maxCountCalls;
+            _maxTimeBetweenCalls = maxTimeBetweenCalls;
+        }
+
+        public void Start()
+        {
+            worker = new InMemoryMetricsLog(_metricsSdkApiClient, _metricsCache, _maxCountCalls, _maxTimeBetweenCalls);
         }
 
         public void Count(string counter, long delta)

@@ -43,7 +43,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         {
             var periodicTask = PeriodicTaskFactory.Start(() =>
             {
-                Fetch();
+                FetchSplits();
             },
             intervalInMilliseconds: _interval * 1000,
             cancelToken: _cancelTokenSource.Token);
@@ -55,7 +55,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async void Fetch()
+        public async void FetchSplits()
         {
             while (true)
             {
