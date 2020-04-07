@@ -4,14 +4,13 @@ using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISplitFetcher
+    public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISelfRefreshingSegmentFetcher
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
@@ -71,7 +70,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug($"Segment queued: {segment.name}");
+                    _log.Debug($"Segment queued: {segment.Name}");
                 }
             }
         }
@@ -84,7 +83,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug(string.Format("Segment queued: {0}", segment.name));
+                    _log.Debug(string.Format("Segment queued: {0}", segment.Name));
                 }
             }
         }

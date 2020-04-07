@@ -24,5 +24,7 @@ namespace Splitio.Services.Cache.Interfaces
         bool TrafficTypeExists(string trafficType);
 
         List<ParsedSplit> FetchMany(List<string> splitNames);
+
+        void Kill(long changeNumber, string splitName, string defaultTreatment);
     }
 }
