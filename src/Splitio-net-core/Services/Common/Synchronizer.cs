@@ -41,6 +41,7 @@ namespace Splitio.Services.Common
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
 
+        #region Public Methods
         public void StartPeriodicDataRecording()
         {
             _impressionsLog.Start();
@@ -89,6 +90,7 @@ namespace Splitio.Services.Common
             _splitFetcher.FetchSplits();
             _log.Debug("Splits fetched...");
         }
+        #endregion
 
         #region Private Methods
         private void StartFetchSegmentsTask()
