@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
-    public class SynchronizerManager : ISynchronizerManager
+    public class SyncManager : ISyncManager
     {
         private readonly ISynchronizer _synchronizer;
         private readonly IPushManager _pushManager;
         private readonly ISplitLogger _log;
 
-        public SynchronizerManager(ISynchronizer synchronizer,
+        public SyncManager(ISynchronizer synchronizer,
             IPushManager pushManager,
             ISplitLogger log = null)
         {

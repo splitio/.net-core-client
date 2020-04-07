@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Services.Common
 {
-    public interface ISynchronizerManager
+    public interface ISyncManager
     {
         void Start();
         void Shutdown();
