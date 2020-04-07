@@ -2,5 +2,7 @@
 {
     public interface ISynchronizerManager
     {
+        void Start();
+        void Shutdown();
     }
 }

@@ -4,7 +4,5 @@
     {
         void Start(string token, string channels);
         void Stop();
-        void StartWorkers();
-        void StopWorkers();
     }
 }

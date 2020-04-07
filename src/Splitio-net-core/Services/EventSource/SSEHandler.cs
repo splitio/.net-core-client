@@ -43,6 +43,8 @@ namespace Splitio.Services.EventSource
             _eventSourceClient.ConnectedEvent += OnConnected;
             _eventSourceClient.DisconnectEvent += OnDisconnect;
             _eventSourceClient.Connect();
+
+            StartWorkers();
         }
 
         public void Stop()
@@ -50,19 +52,9 @@ namespace Splitio.Services.EventSource
             if (_eventSourceClient != null)
             {
                 _eventSourceClient.Disconnect();
+
+                StopWorkers();
             }
-        }
-
-        public void StartWorkers()
-        {
-            _splitsWorker.Start();
-            _segmentsWorker.Start();
-        }
-
-        public void StopWorkers()
-        {
-            _splitsWorker.Stop();
-            _segmentsWorker.Stop();
         }
         #endregion
 
@@ -80,6 +72,18 @@ namespace Splitio.Services.EventSource
         private void OnDisconnect(object sender, EventArgs e)
         {
             DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void StartWorkers()
+        {
+            _splitsWorker.Start();
+            _segmentsWorker.Start();
+        }
+
+        private void StopWorkers()
+        {
+            _splitsWorker.Stop();
+            _segmentsWorker.Stop();
         }
         #endregion
     }

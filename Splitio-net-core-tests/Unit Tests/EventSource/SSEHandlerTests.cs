@@ -39,6 +39,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Assert.
             _eventSourceClient.Verify(mock => mock.Connect(), Times.Once);
+            _splitsWorker.Verify(mock => mock.Start(), Times.Once);
+            _segmentsWorker.Verify(mock => mock.Start(), Times.Once);
         }
 
         [TestMethod]
@@ -49,26 +51,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Assert.
             _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
-        }
-
-        [TestMethod]
-        public void StartWorkers_ShouldStartWorkers()
-        {
-            // Act.
-            _sseHandler.StartWorkers();
-
-            // Assert.
-            _splitsWorker.Verify(mock => mock.Start(), Times.Once);
-            _segmentsWorker.Verify(mock => mock.Start(), Times.Once);
-        }
-
-        [TestMethod]
-        public void StopWorkers_ShouldStopWorkers()
-        {
-            // Act.
-            _sseHandler.StopWorkers();
-
-            // Assert.
             _splitsWorker.Verify(mock => mock.Stop(), Times.Once);
             _segmentsWorker.Verify(mock => mock.Stop(), Times.Once);
         }
