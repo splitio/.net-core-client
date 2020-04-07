@@ -17,20 +17,21 @@ namespace Splitio.Services.EventSource
         private const int ReadTimeout = 70;
 
         private readonly ISplitLogger _log;
-        private readonly INotificationParser _notificationParser;
-        private readonly string _url;
+        private readonly INotificationParser _notificationParser;        
         
         private readonly object _connectedLock = new object();
         private bool _connected;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
+        private string _url;
 
         public EventSourceClient(string url,
             ISplitLogger log = null,
             INotificationParser notificationParser = null)
         {
             _url = url;
+
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();   
         }
