@@ -97,11 +97,6 @@ namespace Splitio.Services.SplitFetcher.Classes
                 }
             }
         }
-
-        public long GetChangeNumber()
-        {
-            return _splitCache.GetChangeNumber();
-        }
         #endregion
 
         #region Private Methods
