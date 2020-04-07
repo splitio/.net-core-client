@@ -26,11 +26,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new Queue<EventArgs>();
                 _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url);
-                eventSourceClient.Connect();
+                var eventSourceClient = new EventSourceClient(url);                
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.Connect();
 
                 Thread.Sleep(5000);
 
