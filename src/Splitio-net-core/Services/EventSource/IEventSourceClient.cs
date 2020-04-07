@@ -4,10 +4,12 @@ namespace Splitio.Services.EventSource
 {
     public interface IEventSourceClient
     {
-        Status Status();
+        void Connect();
         void Disconnect();
-
+        bool IsConnected();
+        
         event EventHandler<EventReceivedEventArgs> EventReceived;
-        event EventHandler<ErrorReceivedEventArgs> ErrorReceived;
+        event EventHandler<EventArgs> ConnectedEvent;
+        event EventHandler<EventArgs> DisconnectEvent;
     }
 }

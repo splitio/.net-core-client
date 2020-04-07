@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -9,7 +10,8 @@ namespace Splitio_net_core.Integration_tests.EventSource
     public class EventSourceClientTests
     {
         private Queue<EventReceivedEventArgs> _eventsReceived;
-        private Queue<ErrorReceivedEventArgs> _errorsReceived;
+        private Queue<EventArgs> _connectedEvent;
+        private Queue<EventArgs> _disconnectEvent;
 
         [TestMethod]
         public void EventSourceClient_SplitUpdateEvent_ShouldReceiveEvent()
@@ -21,19 +23,28 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
+                Assert.IsTrue(eventSourceClient.IsConnected());
                 Assert.AreEqual(1, _eventsReceived.Count);
                 var ev = _eventsReceived.Dequeue();
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -47,21 +58,29 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(1, _eventsReceived.Count);
                 var ev = _eventsReceived.Dequeue();
                 Assert.AreEqual(NotificationType.SPLIT_KILL, ev.Event.Type);
                 Assert.AreEqual(1585868246622, ((SplitKillNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("off", ((SplitKillNotification)ev.Event).DefaultTreatment);
                 Assert.AreEqual("test-split", ((SplitKillNotification)ev.Event).SplitName);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -75,20 +94,28 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(1, _eventsReceived.Count);
                 var ev = _eventsReceived.Dequeue();
                 Assert.AreEqual(NotificationType.SEGMENT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585868933303, ((SegmentChangeNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -102,19 +129,27 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(1, _eventsReceived.Count);
                 var ev = _eventsReceived.Dequeue();
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual("test-control-type", ((ControlEventData)ev.Event).ControlType);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -138,16 +173,24 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(1, _errorsReceived.Count);
                 Assert.AreEqual(0, _eventsReceived.Count);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -161,16 +204,19 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(0, _eventsReceived.Count);
+                Assert.AreEqual(1, _disconnectEvent.Count);
             }
         }
 
@@ -183,16 +229,24 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new Queue<EventReceivedEventArgs>();
-                _errorsReceived = new Queue<ErrorReceivedEventArgs>();
+                _connectedEvent = new Queue<EventArgs>();
+                _disconnectEvent = new Queue<EventArgs>();
 
-                var eventSourceClient = new EventSourceClient(url, 10000);
+                var eventSourceClient = new EventSourceClient(url);
+                eventSourceClient.Connect();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ErrorReceived += ErrorReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;                
 
                 Thread.Sleep(5000);
 
-                Assert.AreEqual(0, _errorsReceived.Count);
                 Assert.AreEqual(0, _eventsReceived.Count);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                Assert.AreEqual(1, _disconnectEvent.Count);
+                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -202,9 +256,14 @@ namespace Splitio_net_core.Integration_tests.EventSource
             _eventsReceived.Enqueue(e);
         }
 
-        private void ErrorReceived(object sender, ErrorReceivedEventArgs e)
+        private void ConnectedEvent(object sender, EventArgs e)
         {
-            _errorsReceived.Enqueue(e);
+            _connectedEvent.Enqueue(e);
+        }
+
+        private void DisconnectEvent(object sender, EventArgs e)
+        {
+            _disconnectEvent.Enqueue(e);
         }
         #endregion
     }
