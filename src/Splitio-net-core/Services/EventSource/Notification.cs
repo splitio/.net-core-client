@@ -11,7 +11,18 @@
     {
         public string Id { get; set; }
         public string Channel { get; set; }
-        public object Data { get; set; }
+        public string Data { get; set; }
+    }
+
+    public class NotificationError
+    {
+        public ErrorData Error { get; set; }
+    }
+
+    public class ErrorData
+    {
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
     }
 
     public enum NotificationType
@@ -22,30 +33,30 @@
         CONTROL
     }
 
-    public class EventData
+    public class IncomingNotification
     {
         public NotificationType Type { get; set; }
     }
 
-    public class SplitUpdateEventData : EventData
+    public class SplitChangeNotifiaction : IncomingNotification
     {
         public long ChangeNumber { get; set; }
     }
 
-    public class SplitKillEventData : EventData
+    public class SplitKillNotification : IncomingNotification
     {
         public long ChangeNumber { get; set; }
         public string DefaultTreatment { get; set; }
         public string SplitName { get; set; }
     }
 
-    public class SegmentUpdateEventData : EventData
+    public class SegmentChangeNotification : IncomingNotification
     {
         public long ChangeNumber { get; set; }
         public string SegmentName { get; set; }
     }
 
-    public class ControlEventData : EventData
+    public class ControlEventData : IncomingNotification
     {
         public string ControlType { get; set; }
     }
