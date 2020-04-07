@@ -14,25 +14,24 @@ namespace Splitio.Services.EventSource
     public class EventSourceClient : IEventSourceClient
     {
         private const string KeepAliveResponse = "\n";
+        private const int ReadTimeout = 70;
 
         private readonly ISplitLogger _log;
-        private readonly INotificationParser _notificationParser;
-        private readonly string _url;
-        private readonly int _readTimeout;
-
+        private readonly INotificationParser _notificationParser;        
+        
         private readonly object _connectedLock = new object();
         private bool _connected;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
+        private string _url;
 
         public EventSourceClient(string url,
-            int readTimeout = 300000,
             ISplitLogger log = null,
             INotificationParser notificationParser = null)
         {
             _url = url;
-            _readTimeout = readTimeout;
+
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();   
         }
@@ -84,7 +83,7 @@ namespace Splitio.Services.EventSource
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        stream.ReadTimeout = _readTimeout;
+                        stream.ReadTimeout = ReadTimeout;
                         _log.Info($"Connected to {_url}");
                         UpdateStatus(connected: true);
                         DispatchConnected();
