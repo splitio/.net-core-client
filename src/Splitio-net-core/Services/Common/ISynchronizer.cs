@@ -3,8 +3,8 @@
     public interface ISynchronizer
     {
         void SyncAll();
-        void SynchorizeSplits();
-        void SynchorizeSegment(string segmentName);
+        void SynchronizeSplits();
+        void SynchronizeSegment(string segmentName);
         void StartPeriodicFetching();
         void StopPeriodicFetching();
         void StartPeriodicDataRecording();

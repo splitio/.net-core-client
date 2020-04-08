@@ -55,7 +55,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Exactly(4));
-            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Exactly(3));
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Exactly(3));
         }
 
         [TestMethod]
@@ -67,7 +67,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Never);
         }
 
         [TestMethod]
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Once);
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Once);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
             _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchorizeSplits(), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Never);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Splitio.Services.Cache.Interfaces;
-using Splitio.Services.Events.Interfaces;
+﻿using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
@@ -7,7 +6,6 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -18,7 +16,6 @@ namespace Splitio.Services.Common
         private readonly IImpressionsLog _impressionsLog;
         private readonly IEventsLog _eventsLog;
         private readonly IMetricsLog _metricsLog;
-        private readonly IReadinessGatesCache _gates;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
 
@@ -27,7 +24,6 @@ namespace Splitio.Services.Common
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
             IMetricsLog metricsLog,
-            IReadinessGatesCache gates,
             IWrapperAdapter wrapperAdapter = null,
             ISplitLogger log = null)
         {
@@ -36,7 +32,6 @@ namespace Splitio.Services.Common
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _metricsLog = metricsLog;
-            _gates = gates;
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
@@ -53,7 +48,7 @@ namespace Splitio.Services.Common
         public void StartPeriodicFetching()
         {
             _splitFetcher.Start();
-            StartFetchSegmentsTask();
+            _segmentFetcher.Start();
             _log.Debug("Spltis and Segments fetchers started...");
         }
 
@@ -75,39 +70,20 @@ namespace Splitio.Services.Common
         public void SyncAll()
         {
             _splitFetcher.FetchSplits();
-            _segmentFetcher.FetchSegments();
+            _segmentFetcher.FetchAll();
             _log.Debug("Spltis and Segments synchronized...");
         }
 
-        public void SynchorizeSegment(string segmentName)
+        public void SynchronizeSegment(string segmentName)
         {
-            _segmentFetcher.FetchSegment(segmentName);
+            _segmentFetcher.Fetch(segmentName);
             _log.Debug($"Segment fetched: {segmentName}...");
         }
 
-        public void SynchorizeSplits()
+        public void SynchronizeSplits()
         {
             _splitFetcher.FetchSplits();
             _log.Debug("Splits fetched...");
-        }
-        #endregion
-
-        #region Private Methods
-        private void StartFetchSegmentsTask()
-        {
-            Task.Factory.StartNew(() =>
-            {
-                while (true)
-                {
-                    if (_gates.IsSDKReady(0))
-                    {
-                        _segmentFetcher.Start();
-                        break;
-                    }
-
-                    _wrapperAdapter.TaskDelay(500).Wait();
-                }
-            });
         }
         #endregion
     }

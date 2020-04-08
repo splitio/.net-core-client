@@ -63,7 +63,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
                     {
-                        _synchronizer.SynchorizeSegment(segment.SegmentName);
+                        _synchronizer.SynchronizeSegment(segment.SegmentName);
                     }
                 }
             }

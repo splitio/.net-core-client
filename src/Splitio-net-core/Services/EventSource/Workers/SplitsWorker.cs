@@ -72,7 +72,7 @@ namespace Splitio.Services.EventSource.Workers
 
                     if (changeNumber > _splitCache.GetChangeNumber())
                     {
-                        _synchronizer.SynchorizeSplits();
+                        _synchronizer.SynchronizeSplits();
                     }
                 }
             }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.Events.Interfaces;
 using Splitio.Services.Impressions.Interfaces;
@@ -8,7 +7,6 @@ using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
-using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -20,7 +18,6 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IImpressionsLog> _impressionsLog;
         private readonly Mock<IEventsLog> _eventsLog;
         private readonly Mock<IMetricsLog> _metricsLog;
-        private readonly Mock<IReadinessGatesCache> _gates;
         private readonly Mock<ISplitLogger> _log;
         private readonly ISynchronizer _synchronizer;
 
@@ -31,10 +28,9 @@ namespace Splitio_Tests.Unit_Tests.Common
             _impressionsLog = new Mock<IImpressionsLog>();
             _eventsLog = new Mock<IEventsLog>();
             _metricsLog = new Mock<IMetricsLog>();
-            _gates = new Mock<IReadinessGatesCache>();
             _log = new Mock<ISplitLogger>();
 
-            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _metricsLog.Object, _gates.Object, log: _log.Object);
+            _synchronizer = new Synchronizer(_splitFetcher.Object, _segmentFetcher.Object, _impressionsLog.Object, _eventsLog.Object, _metricsLog.Object, log: _log.Object);
         }
 
         [TestMethod]
@@ -52,18 +48,11 @@ namespace Splitio_Tests.Unit_Tests.Common
         [TestMethod]
         public void StartPeriodicFetching_ShouldStartFetchings()
         {
-            // Arrange.
-            _gates
-                .Setup(mock => mock.IsSDKReady(0))
-                .Returns(true);
-
             // Act.
             _synchronizer.StartPeriodicFetching();
 
             // Assert.
             _splitFetcher.Verify(mock => mock.Start(), Times.Once);
-
-            Thread.Sleep(100);
             _segmentFetcher.Verify(mock => mock.Start(), Times.Once);
         }
 
@@ -98,27 +87,27 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);
-            _segmentFetcher.Verify(mock => mock.FetchSegments(), Times.Once);
+            _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
         }
 
         [TestMethod]
-        public void SynchorizeSegment_ShouldFetchSegmentByName()
+        public void SynchronizeSegment_ShouldFetchSegmentByName()
         {
             // Arrange.
             var segmentName = "segment-test";
 
             // Act.
-            _synchronizer.SynchorizeSegment(segmentName);
+            _synchronizer.SynchronizeSegment(segmentName);
 
             // Assert.
-            _segmentFetcher.Verify(mock => mock.FetchSegment(segmentName), Times.Once);
+            _segmentFetcher.Verify(mock => mock.Fetch(segmentName), Times.Once);
         }
 
         [TestMethod]
-        public void SynchorizeSplits_ShouldFetchSplits()
+        public void SynchronizeSplits_ShouldFetchSplits()
         {
             // Act.
-            _synchronizer.SynchorizeSplits();
+            _synchronizer.SynchronizeSplits();
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);

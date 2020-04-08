@@ -43,10 +43,23 @@ namespace Splitio.Services.SegmentFetcher.Classes
         #region Public Methods
         public void Start()
         {
-            //Delay first execution until expected time has passed
-            _wrappedAdapter.TaskDelay(_interval * 1000).Wait();
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    if (_gates.IsSDKReady(0))
+                    {
+                        //Delay first execution until expected time has passed
+                        var intervalInMilliseconds = _interval * 1000;
+                        _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
 
-            var schedulerTask = PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds: _interval * 1000, cancelToken: _cancelTokenSource.Token);
+                        PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource.Token);
+                        break;
+                    }
+
+                    _wrappedAdapter.TaskDelay(500).Wait();
+                }
+            });
         }
 
         public void Stop()
@@ -76,7 +89,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public void FetchSegments()
+        public void FetchAll()
         {
             foreach (var segment in _segments.Values)
             {
@@ -86,7 +99,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public void FetchSegment(string segmentName)
+        public void Fetch(string segmentName)
         {
             var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
             refreshingSegment.FetchSegment();

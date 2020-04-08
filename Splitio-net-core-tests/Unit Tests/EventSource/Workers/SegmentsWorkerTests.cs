@@ -4,7 +4,6 @@ using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
-using Splitio.Services.SegmentFetcher.Interfaces;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -66,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Exactly(3));
-            _synchronizer.Verify(mock => mock.SynchorizeSegment(It.IsAny<string>()), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SynchronizeSegment(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -78,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Never);
-            _synchronizer.Verify(mock => mock.SynchorizeSegment(It.IsAny<string>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSegment(It.IsAny<string>()), Times.Never);
         }
     }
 }
