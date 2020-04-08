@@ -3,6 +3,8 @@ using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
+using System;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -34,6 +36,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var token = "fake-test";
             var channels = "channel-test";
 
+            _eventSourceClient
+                .Setup(mock => mock.Connect())
+                .Raises(mock => mock.ConnectedEvent += null, new FeedbackEventArgs(true));
+
             // Act.
             _sseHandler.Start(token, channels);
 
@@ -46,7 +52,16 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         [TestMethod]
         public void Stop_ShouldDisconnect()
         {
+            // Arrange.
+            var token = "fake-test";
+            var channels = "channel-test";
+
+            _eventSourceClient
+                .Setup(mock => mock.Disconnect())
+                .Raises(mock => mock.DisconnectEvent += null, new FeedbackEventArgs(false));
+
             // Act.
+            _sseHandler.Start(token, channels);
             _sseHandler.Stop();
 
             // Assert.

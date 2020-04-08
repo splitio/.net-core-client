@@ -37,8 +37,8 @@ namespace Splitio.Services.EventSource
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
-        public event EventHandler<EventArgs> ConnectedEvent;
-        public event EventHandler<EventArgs> DisconnectEvent;
+        public event EventHandler<FeedbackEventArgs> ConnectedEvent;
+        public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         #region Public Methods
         public void Connect()
@@ -151,12 +151,12 @@ namespace Splitio.Services.EventSource
 
         private void DispatchDisconnect()
         {
-            OnDisconnect(EventArgs.Empty);
+            OnDisconnect(new FeedbackEventArgs(isConnected: false));
         }
 
         private void DispatchConnected()
         {
-            OnConnected(EventArgs.Empty);
+            OnConnected(new FeedbackEventArgs(isConnected: true));
         }
 
         private void OnEvent(EventReceivedEventArgs e)
@@ -164,12 +164,12 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, e);
         }
 
-        private void OnConnected(EventArgs e)
+        private void OnConnected(FeedbackEventArgs e)
         {
             ConnectedEvent?.Invoke(this, e);
         }
 
-        private void OnDisconnect(EventArgs e)
+        private void OnDisconnect(FeedbackEventArgs e)
         {
             DisconnectEvent?.Invoke(this, e);
         }

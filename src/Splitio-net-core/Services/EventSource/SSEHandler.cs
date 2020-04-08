@@ -15,8 +15,8 @@ namespace Splitio.Services.EventSource
 
         private IEventSourceClient _eventSourceClient;
 
-        public event EventHandler<EventArgs> ConnectedEvent;
-        public event EventHandler<EventArgs> DisconnectEvent;
+        public event EventHandler<FeedbackEventArgs> ConnectedEvent;
+        public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
@@ -43,8 +43,6 @@ namespace Splitio.Services.EventSource
             _eventSourceClient.ConnectedEvent += OnConnected;
             _eventSourceClient.DisconnectEvent += OnDisconnect;
             _eventSourceClient.Connect();
-
-            StartWorkers();
         }
 
         public void Stop()
@@ -52,8 +50,6 @@ namespace Splitio.Services.EventSource
             if (_eventSourceClient != null)
             {
                 _eventSourceClient.Disconnect();
-
-                StopWorkers();
             }
         }
         #endregion
@@ -64,13 +60,15 @@ namespace Splitio.Services.EventSource
             _notificationPorcessor.Proccess(e.Event);
         }
 
-        private void OnConnected(object sender, EventArgs e)
+        private void OnConnected(object sender, FeedbackEventArgs e)
         {
+            StartWorkers();
             ConnectedEvent?.Invoke(this, e);
         }
 
-        private void OnDisconnect(object sender, EventArgs e)
+        private void OnDisconnect(object sender, FeedbackEventArgs e)
         {
+            StopWorkers();
             DisconnectEvent?.Invoke(this, e);
         }
 

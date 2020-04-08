@@ -17,8 +17,8 @@ namespace Splitio.Services.Common
         public PushManager(int authRetryBackOffBase,
             ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
-            ISplitLogger log = null,
-            IWrapperAdapter wrapperAdapter = null)
+            IWrapperAdapter wrapperAdapter = null,
+            ISplitLogger log = null)
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
