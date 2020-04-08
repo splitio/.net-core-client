@@ -28,5 +28,10 @@ namespace Splitio.Services.Client.Classes
         public IImpressionListener ImpressionListener { get; set; }
         public CacheAdapterConfigurationOptions CacheAdapterConfig { get; set; }
         public bool? IPAddressesEnabled { get; set; }
+        public bool? StreamingEnabled { get; set; }
+        public int? AuthRetryBackoffBase { get; set; }
+        public int? StreamingReconnectBackoffBase { get; set; }
+        public string AuthServiceURL { get; set; }
+        public string StreamingServiceURL { get; set; }
     }
 }
