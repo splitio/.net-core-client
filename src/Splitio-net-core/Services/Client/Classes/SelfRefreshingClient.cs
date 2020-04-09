@@ -106,7 +106,7 @@ namespace Splitio.Services.Client.Classes
             _config.MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             _config.NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
             LabelsEnabled = config.LabelsEnabled ?? true;
-            _config.StreamingEnabled = config.StreamingEnabled.HasValue ? config.StreamingEnabled.Value : true;
+            _config.StreamingEnabled = config.StreamingEnabled ?? true;
             _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1);
             _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1);
             _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split-stage.io/api/auth" : config.AuthServiceURL;
@@ -193,15 +193,22 @@ namespace Splitio.Services.Client.Classes
 
         private void BuildSyncManager()
         {
-            var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, _wrapperAdapter);
-            var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
-            var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
-            var notificationProcessor = new NotificationPorcessor(splitsWorker, segmentsWorker);
-            var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor);
-            var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
-            var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
+            try
+            {
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, _wrapperAdapter);
+                var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
+                var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
+                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
+                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor);
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
+                var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 
-            _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"BuildSyncManager: {ex.Message}");
+            }
         }
 
         private void Start()
