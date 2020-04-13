@@ -1,7 +1,8 @@
 ﻿using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using Splitio.Services.SplitFetcher.Interfaces;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,71 +12,110 @@ namespace Splitio.Services.EventSource.Workers
     public class SplitsWorker : ISplitsWorker
     {
         private readonly ISplitLogger _log;
-        private readonly ISplitFetcher _splitFetcher;
         private readonly ISplitCache _splitCache;
+        private readonly ISynchronizer _synchronizer;
 
         private BlockingCollection<long> _queue;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public SplitsWorker(ISplitFetcher splitFetcher,
-            ISplitCache splitCache,
+        public SplitsWorker(ISplitCache splitCache,
+            ISynchronizer synchronizer,
             ISplitLogger log = null)
         {
-            _splitFetcher = splitFetcher;
             _splitCache = splitCache;
+            _synchronizer = synchronizer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
         }
 
         #region Public Methods
         public void AddToQueue(long changeNumber)
         {
-            if (_queue != null)
+            try
             {
-                _queue.TryAdd(changeNumber);
+                if (_queue != null)
+                {
+                    _log.Debug($"Add to queue: {changeNumber}");
+                    _queue.TryAdd(changeNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"AddToQueue: {ex.Message}");
             }
         }
 
         public void KillSplit(long changeNumber, string splitName, string defaultTreatment)
         {
-            if (_queue != null)
+            try
             {
-                _splitCache.Kill(changeNumber, splitName, defaultTreatment);
-                AddToQueue(changeNumber);
+                if (_queue != null)
+                {
+                    _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
+                    _splitCache.Kill(changeNumber, splitName, defaultTreatment);
+                    AddToQueue(changeNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"KillSplit: {ex.Message}");
             }
         }
 
         public void Start()
         {
-            _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
-            _cancellationTokenSource = new CancellationTokenSource();
-            Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+            try
+            {
+                _log.Debug("SplitsWorker starting ...");
+                _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
+                _cancellationTokenSource = new CancellationTokenSource();
+                Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Start: {ex.Message}");
+            }
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _queue.Dispose();
-            _queue = null;
+            try
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _queue.Dispose();
+                _queue = null;
+
+                _log.Debug("SplitsWorker stoped ...");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Stop: {ex.Message}");
+            }
         }
         #endregion
 
         #region Private Mthods
         private void Execute()
         {
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            try
             {
-                //Wait indefinitely until a segment is queued
-                if (_queue.TryTake(out long changeNumber, -1))
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    _log.Debug($"ChangeNumber dequeue: {changeNumber}");
-
-                    if (changeNumber > _splitCache.GetChangeNumber())
+                    //Wait indefinitely until a segment is queued
+                    if (_queue.TryTake(out long changeNumber, -1))
                     {
-                        // TODO: change this after synchronizer implementation.
-                        _splitFetcher.Fetch();
+                        _log.Debug($"ChangeNumber dequeue: {changeNumber}");
+
+                        if (changeNumber > _splitCache.GetChangeNumber())
+                        {
+                            _synchronizer.SynchronizeSplits();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Execute: {ex.Message}");
             }
         }
         #endregion

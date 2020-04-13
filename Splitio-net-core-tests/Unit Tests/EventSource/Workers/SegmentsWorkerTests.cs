@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
-using Splitio.Services.SegmentFetcher.Interfaces;
 using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource.Workers
@@ -13,7 +13,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
     {
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISegmentCache> _segmentCache;
-        private readonly Mock<ISelfRefreshingSegment> _selfRefreshingSegment;
+        private readonly Mock<ISynchronizer> _synchronizer;
 
         private readonly ISegmentsWorker _segmentsWorker;
 
@@ -21,9 +21,9 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         {
             _log = new Mock<ISplitLogger>();
             _segmentCache = new Mock<ISegmentCache>();
-            _selfRefreshingSegment = new Mock<ISelfRefreshingSegment>();
+            _synchronizer = new Mock<ISynchronizer>();
 
-            _segmentsWorker = new SegmentsWorker(_segmentCache.Object, _selfRefreshingSegment.Object, _log.Object);
+            _segmentsWorker = new SegmentsWorker(_segmentCache.Object, _synchronizer.Object, _log.Object);
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Exactly(3));
-            _selfRefreshingSegment.Verify(mock => mock.FetchSegment(It.IsAny<string>()), Times.Exactly(2));
+            _synchronizer.Verify(mock => mock.SynchronizeSegment(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Never);
-            _selfRefreshingSegment.Verify(mock => mock.FetchSegment(It.IsAny<string>()), Times.Never);
+            _synchronizer.Verify(mock => mock.SynchronizeSegment(It.IsAny<string>()), Times.Never);
         }
     }
 }

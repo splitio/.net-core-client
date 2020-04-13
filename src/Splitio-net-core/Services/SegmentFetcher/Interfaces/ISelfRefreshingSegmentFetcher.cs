@@ -4,5 +4,7 @@
     {
         void Start();
         void Stop();
+        void FetchAll();
+        void Fetch(string segmentName);
     }
 }

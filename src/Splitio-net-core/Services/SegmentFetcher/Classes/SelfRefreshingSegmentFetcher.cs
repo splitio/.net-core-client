@@ -40,20 +40,34 @@ namespace Splitio.Services.SegmentFetcher.Classes
             StartWorker();
         }
 
+        #region Public Methods
+        public void Start()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    if (_gates.IsSDKReady(0))
+                    {
+                        //Delay first execution until expected time has passed
+                        var intervalInMilliseconds = _interval * 1000;
+                        _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
+
+                        PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource.Token);
+                        break;
+                    }
+
+                    _wrappedAdapter.TaskDelay(500).Wait();
+                }
+            });
+        }
+
         public void Stop()
         {
             _cancelTokenSource.Cancel();
             SegmentTaskQueue.segmentsQueue.Dispose();
             _segments.Clear();
             _segmentCache.Clear();
-        }
-
-        public void Start()
-        {
-            //Delay first execution until expected time has passed
-            _wrappedAdapter.TaskDelay(_interval * 1000).Wait();
-
-            var schedulerTask = PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds: _interval * 1000, cancelToken: _cancelTokenSource.Token);
         }
 
         public override void InitializeSegment(string name)
@@ -75,6 +89,24 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
+        public void FetchAll()
+        {
+            foreach (var segment in _segments.Values)
+            {
+                segment.FetchSegment();
+
+                _log.Debug(string.Format("Segment fetched: {0}", segment.Name));
+            }
+        }
+
+        public void Fetch(string segmentName)
+        {
+            var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
+            refreshingSegment.FetchSegment();
+        }
+        #endregion
+
+        #region Private Methods
         private void AddSegmentsToQueue()
         {
             foreach (var segment in _segments.Values)
@@ -92,5 +124,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             var workerTask = Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
+        #endregion
     }
 }

@@ -46,5 +46,10 @@ namespace Splitio.Redis.Services.Metrics.Classes
         {
             return;
         }
+
+        public void Start()
+        {
+            return;
+        }
     }
 }

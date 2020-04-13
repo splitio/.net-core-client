@@ -24,7 +24,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _log = new Mock<ISplitLogger>();
             _sseHandler = new Mock<ISSEHandler>();
 
-            _pushManager = new PushManager(AuthRetryBackOffBase, _sseHandler.Object, _authApiClient.Object, _log.Object);
+            _pushManager = new PushManager(AuthRetryBackOffBase, _sseHandler.Object, _authApiClient.Object, log: _log.Object);
         }
 
         [TestMethod]
@@ -126,7 +126,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _sseHandler.Verify(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _sseHandler.Verify(mock => mock.Stop(), Times.Once);
 
-            Thread.Sleep(1100);
+            Thread.Sleep(1500);
             _authApiClient.Verify(mock => mock.AuthenticateAsync(), Times.Exactly(2));
             _sseHandler.Verify(mock => mock.Start(response2.Token, response2.Channels), Times.Once);
         }

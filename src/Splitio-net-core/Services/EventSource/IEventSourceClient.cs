@@ -9,7 +9,7 @@ namespace Splitio.Services.EventSource
         bool IsConnected();
         
         event EventHandler<EventReceivedEventArgs> EventReceived;
-        event EventHandler<EventArgs> ConnectedEvent;
-        event EventHandler<EventArgs> DisconnectEvent;
+        event EventHandler<FeedbackEventArgs> ConnectedEvent;
+        event EventHandler<FeedbackEventArgs> DisconnectEvent;
     }
 }

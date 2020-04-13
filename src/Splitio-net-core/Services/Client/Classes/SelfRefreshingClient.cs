@@ -2,8 +2,11 @@
 using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
+using Splitio.Services.Common;
 using Splitio.Services.Events.Classes;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.EventSource;
+using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Classes;
@@ -18,7 +21,6 @@ using Splitio.Services.SplitFetcher.Classes;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -42,6 +44,7 @@ namespace Splitio.Services.Client.Classes
         private IEventSdkApiClient _eventSdkApiClient;
         private IMetricsSdkApiClient _metricsSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
+        private ISyncManager _syncManager;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -60,28 +63,12 @@ namespace Splitio.Services.Client.Classes
             BuildEvaluator();
             BuildBlockUntilReadyService();
             BuildManager();
+            BuildSyncManager();
 
             Start();
-            LaunchTaskSchedulerOnReady();
         }
 
         #region Public Methods
-        public void Start()
-        {
-            _impressionsLog.Start();
-            _eventsLog.Start();
-            _splitFetcher.Start();
-        }
-
-        public void Stop()
-        {
-            _splitFetcher.Stop(); // Stop + Clear
-            _selfRefreshingSegmentFetcher.Stop(); // Stop + Clear
-            _impressionsLog.Stop(); //Stop + SendBulk + Clear
-            _eventsLog.Stop(); //Stop + SendBulk + Clear
-            _metricsLog.Clear(); //Clear
-        }
-
         public override void Destroy()
         {
             if (!Destroyed)
@@ -119,6 +106,11 @@ namespace Splitio.Services.Client.Classes
             _config.MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
             _config.NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
             LabelsEnabled = config.LabelsEnabled ?? true;
+            _config.StreamingEnabled = config.StreamingEnabled ?? true;
+            _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase");
+            _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase");
+            _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split-stage.io/api/auth" : config.AuthServiceURL;
+            _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://realtime.ably.io/event-stream" : config.StreamingServiceURL ;
         }
 
         private void BuildSdkReadinessGates()
@@ -199,21 +191,46 @@ namespace Splitio.Services.Client.Classes
             _blockUntilReadyService = new SelfRefreshingBlockUntilReadyService(_gates, _log);
         }
 
-        private void LaunchTaskSchedulerOnReady()
+        private void BuildSyncManager()
         {
-            var workerTask = Task.Factory.StartNew(
-                () => {
-                    while (true)
-                    {
-                        if (_gates.IsSDKReady(0))
-                        {
-                            _selfRefreshingSegmentFetcher.Start();
-                            break;
-                        }
+            try
+            {
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, _wrapperAdapter);
+                var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
+                var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
+                var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
+                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor);
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
+                var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 
-                        _wrapperAdapter.TaskDelay(500).Wait();
-                    }
-                });
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"BuildSyncManager: {ex.Message}");
+            }
+        }
+
+        private void Start()
+        {
+            _syncManager.Start();
+        }
+
+        private void Stop()
+        {
+            _syncManager.Shutdown();
+        }
+
+        private int GetMinimunAllowed(int value, int minAllowed, string configName)
+        {
+            if (value < minAllowed)
+            {
+                _log.Warn($"{configName} minumum allowed value: {minAllowed}");
+
+                return minAllowed;
+            }
+
+            return value;
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)
