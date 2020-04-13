@@ -107,8 +107,8 @@ namespace Splitio.Services.Client.Classes
             _config.NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
             LabelsEnabled = config.LabelsEnabled ?? true;
             _config.StreamingEnabled = config.StreamingEnabled ?? true;
-            _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1);
-            _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1);
+            _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase");
+            _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase");
             _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split-stage.io/api/auth" : config.AuthServiceURL;
             _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://realtime.ably.io/event-stream" : config.StreamingServiceURL ;
         }
@@ -221,9 +221,14 @@ namespace Splitio.Services.Client.Classes
             _syncManager.Shutdown();
         }
 
-        private int GetMinimunAllowed(int value, int minAllowed)
+        private int GetMinimunAllowed(int value, int minAllowed, string configName)
         {
-            if (value < minAllowed) return minAllowed;
+            if (value < minAllowed)
+            {
+                _log.Warn($"{configName} minumum allowed value: {minAllowed}");
+
+                return minAllowed;
+            }
 
             return value;
         }
