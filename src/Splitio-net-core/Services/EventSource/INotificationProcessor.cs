@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Services.EventSource
 {
-    public interface INotificationPorcessor
+    public interface INotificationProcessor
     {
         void Proccess(IncomingNotification notification);
     }

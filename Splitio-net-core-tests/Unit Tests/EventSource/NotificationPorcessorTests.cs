@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
         private readonly Mock<ISegmentsWorker> _segmentsWorker;
-        private readonly INotificationPorcessor _notificationPorcessor;
+        private readonly INotificationProcessor _notificationPorcessor;
 
         public NotificationPorcessorTests()
         {
@@ -20,7 +20,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _splitsWorker = new Mock<ISplitsWorker>();
             _segmentsWorker = new Mock<ISegmentsWorker>();
 
-            _notificationPorcessor = new NotificationPorcessor(_splitsWorker.Object, _segmentsWorker.Object, _log.Object);
+            _notificationPorcessor = new NotificationProcessor(_splitsWorker.Object, _segmentsWorker.Object, _log.Object);
         }
 
         [TestMethod]
