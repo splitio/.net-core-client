@@ -3,8 +3,6 @@ using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.EventSource.Workers;
 using Splitio.Services.Logger;
-using System;
-using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -14,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
         private readonly Mock<ISegmentsWorker> _segmentsWorker;
-        private readonly Mock<INotificationPorcessor> _notificationPorcessor;
+        private readonly Mock<INotificationProcessor> _notificationPorcessor;
         private readonly Mock<IEventSourceClient> _eventSourceClient;
         private readonly ISSEHandler _sseHandler;
 
@@ -23,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
             _segmentsWorker = new Mock<ISegmentsWorker>();
-            _notificationPorcessor = new Mock<INotificationPorcessor>();
+            _notificationPorcessor = new Mock<INotificationProcessor>();
             _eventSourceClient = new Mock<IEventSourceClient>();
 
             _sseHandler = new SSEHandler("www.fake.com", _splitsWorker.Object, _segmentsWorker.Object, _notificationPorcessor.Object, _log.Object, _eventSourceClient.Object);

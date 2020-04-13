@@ -51,25 +51,39 @@ namespace Splitio.Services.Common
             }
             catch (Exception ex)
             {
-                _log.Error(ex.Message);
+                _log.Error($"StartSse: {ex.Message}");
             }
         }
 
         public void StopSse()
         {
-            _sseHandler.Stop();
+            try
+            {
+                _sseHandler.Stop();
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"StopSse: {ex.Message}");
+            }
         }
         #endregion
 
         #region Private Methods
         private void ScheduleNextTokenRefresh(double time)
         {
-            _wrapperAdapter
-                .TaskDelay(Convert.ToInt32(time))
-                .ContinueWith((t) =>
-                {
-                    StartSse();
-                });
+            try
+            { 
+                _wrapperAdapter
+                    .TaskDelay(Convert.ToInt32(time))
+                    .ContinueWith((t) =>
+                    {
+                        StartSse();
+                    });
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"ScheduleNextTokenRefresh: {ex.Message}");
+            }
         }
         #endregion
     }
