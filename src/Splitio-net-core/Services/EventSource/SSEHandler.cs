@@ -10,18 +10,18 @@ namespace Splitio.Services.EventSource
         private readonly ISplitLogger _log;
         private readonly ISplitsWorker _splitsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
-        private readonly INotificationPorcessor _notificationPorcessor;
+        private readonly INotificationProcessor _notificationPorcessor;
         private readonly string _streaminServiceUrl;
 
         private IEventSourceClient _eventSourceClient;
 
-        public event EventHandler<EventArgs> ConnectedEvent;
-        public event EventHandler<EventArgs> DisconnectEvent;
+        public event EventHandler<FeedbackEventArgs> ConnectedEvent;
+        public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
             ISegmentsWorker segmentsWorker,
-            INotificationPorcessor notificationPorcessor,
+            INotificationProcessor notificationPorcessor,
             ISplitLogger log = null,
             IEventSourceClient eventSourceClient = null)
         {
@@ -36,50 +36,69 @@ namespace Splitio.Services.EventSource
         #region Private Methods
         public void Start(string token, string channels)
         {
-            var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
-            _eventSourceClient = _eventSourceClient ?? new EventSourceClient(url);
+            try
+            {
+                _log.Debug($"SSE Handler starting...");
+                var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
+                _eventSourceClient = _eventSourceClient ?? new EventSourceClient(url);
 
-            _eventSourceClient.EventReceived += EventReceived;
-            _eventSourceClient.ConnectedEvent += OnConnected;
-            _eventSourceClient.DisconnectEvent += OnDisconnect;
-            _eventSourceClient.Connect();
+                _eventSourceClient.EventReceived += EventReceived;
+                _eventSourceClient.ConnectedEvent += OnConnected;
+                _eventSourceClient.DisconnectEvent += OnDisconnect;
+                _eventSourceClient.Connect();                
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Start: {ex.Message}");
+            }
         }
 
         public void Stop()
         {
-            if (_eventSourceClient != null)
+            try
             {
-                _eventSourceClient.Disconnect();
+                if (_eventSourceClient != null)
+                {
+                    _eventSourceClient.Disconnect();
+                    _log.Debug($"SSE Handler stoped...");
+                }
             }
-        }
-
-        public void StartWorkers()
-        {
-            _splitsWorker.Start();
-            _segmentsWorker.Start();
-        }
-
-        public void StopWorkers()
-        {
-            _splitsWorker.Stop();
-            _segmentsWorker.Stop();
+            catch (Exception ex)
+            {
+                _log.Error($"Stop: {ex.Message}");
+            }
         }
         #endregion
 
         #region Private Methods
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
+            _log.Debug($"Event received {e.Event}");
             _notificationPorcessor.Proccess(e.Event);
         }
 
-        private void OnConnected(object sender, EventArgs e)
+        private void OnConnected(object sender, FeedbackEventArgs e)
         {
+            StartWorkers();
             ConnectedEvent?.Invoke(this, e);
         }
 
-        private void OnDisconnect(object sender, EventArgs e)
+        private void OnDisconnect(object sender, FeedbackEventArgs e)
         {
+            StopWorkers();
             DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void StartWorkers()
+        {
+            _splitsWorker.Start();
+            _segmentsWorker.Start();
+        }
+
+        private void StopWorkers()
+        {
+            _splitsWorker.Stop();
+            _segmentsWorker.Stop();
         }
         #endregion
     }

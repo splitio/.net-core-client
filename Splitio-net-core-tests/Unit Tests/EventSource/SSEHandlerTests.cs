@@ -12,7 +12,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
         private readonly Mock<ISegmentsWorker> _segmentsWorker;
-        private readonly Mock<INotificationPorcessor> _notificationPorcessor;
+        private readonly Mock<INotificationProcessor> _notificationPorcessor;
         private readonly Mock<IEventSourceClient> _eventSourceClient;
         private readonly ISSEHandler _sseHandler;
 
@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
             _segmentsWorker = new Mock<ISegmentsWorker>();
-            _notificationPorcessor = new Mock<INotificationPorcessor>();
+            _notificationPorcessor = new Mock<INotificationProcessor>();
             _eventSourceClient = new Mock<IEventSourceClient>();
 
             _sseHandler = new SSEHandler("www.fake.com", _splitsWorker.Object, _segmentsWorker.Object, _notificationPorcessor.Object, _log.Object, _eventSourceClient.Object);
@@ -34,41 +34,36 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var token = "fake-test";
             var channels = "channel-test";
 
+            _eventSourceClient
+                .Setup(mock => mock.Connect())
+                .Raises(mock => mock.ConnectedEvent += null, new FeedbackEventArgs(true));
+
             // Act.
             _sseHandler.Start(token, channels);
 
             // Assert.
             _eventSourceClient.Verify(mock => mock.Connect(), Times.Once);
-        }
-
-        [TestMethod]
-        public void Stop_ShouldDisconnect()
-        {
-            // Act.
-            _sseHandler.Stop();
-
-            // Assert.
-            _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
-        }
-
-        [TestMethod]
-        public void StartWorkers_ShouldStartWorkers()
-        {
-            // Act.
-            _sseHandler.StartWorkers();
-
-            // Assert.
             _splitsWorker.Verify(mock => mock.Start(), Times.Once);
             _segmentsWorker.Verify(mock => mock.Start(), Times.Once);
         }
 
         [TestMethod]
-        public void StopWorkers_ShouldStopWorkers()
+        public void Stop_ShouldDisconnect()
         {
+            // Arrange.
+            var token = "fake-test";
+            var channels = "channel-test";
+
+            _eventSourceClient
+                .Setup(mock => mock.Disconnect())
+                .Raises(mock => mock.DisconnectEvent += null, new FeedbackEventArgs(false));
+
             // Act.
-            _sseHandler.StopWorkers();
+            _sseHandler.Start(token, channels);
+            _sseHandler.Stop();
 
             // Assert.
+            _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
             _splitsWorker.Verify(mock => mock.Stop(), Times.Once);
             _segmentsWorker.Verify(mock => mock.Stop(), Times.Once);
         }

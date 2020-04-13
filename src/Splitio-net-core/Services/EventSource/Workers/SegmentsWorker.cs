@@ -2,6 +2,7 @@
 using Splitio.Services.Common;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,43 +30,74 @@ namespace Splitio.Services.EventSource.Workers
         #region Public Methods
         public void AddToQueue(long changeNumber, string segmentName)
         {
-            if (_queue != null)
+            try
             {
-                _queue.TryAdd(new SegmentQueueDto { ChangeNumber = changeNumber, SegmentName = segmentName });
+                if (_queue != null)
+                {
+                    _log.Debug($"Add to queue: {segmentName} - {changeNumber}");
+                    _queue.TryAdd(new SegmentQueueDto { ChangeNumber = changeNumber, SegmentName = segmentName });
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"AddToQueue: {ex.Message}");
             }
         }
 
         public void Start()
         {
-            _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
-            _cancellationTokenSource = new CancellationTokenSource();
-            Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+            try
+            {
+                _log.Debug($"Segments worker starting ...");
+                _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
+                _cancellationTokenSource = new CancellationTokenSource();
+                Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Start: {ex.Message}");
+            }
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _queue.Dispose();
-            _queue = null;
+            try
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _queue.Dispose();
+                _queue = null;
+                _log.Debug($"Segments worker stoped ...");
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Stop: {ex.Message}");
+            }
         }
         #endregion
 
         #region Private Methods
         public void Execute()
         {
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            try
             {
-                //Wait indefinitely until a segment is queued
-                if (_queue.TryTake(out SegmentQueueDto segment, -1))
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    _log.Debug($"Segment dequeue: {segment.SegmentName}");
-
-                    if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
+                    //Wait indefinitely until a segment is queued
+                    if (_queue.TryTake(out SegmentQueueDto segment, -1))
                     {
-                        _synchronizer.SynchronizeSegment(segment.SegmentName);
+                        _log.Debug($"Segment dequeue: {segment.SegmentName}");
+
+                        if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
+                        {
+                            _synchronizer.SynchronizeSegment(segment.SegmentName);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Execute: {ex.Message}");
             }
         }
         #endregion
