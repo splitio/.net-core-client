@@ -55,7 +55,6 @@ namespace Splitio.Services.Client.Classes
             _manager = new SplitManager(_splitCache, _blockUntilReadyService);
 
             ApiKey = "localhost";
-
             Destroyed = false;
 
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
