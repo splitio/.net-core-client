@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Services.EventSource
 {
@@ -17,8 +18,10 @@ namespace Splitio.Services.EventSource
         private const int ReadTimeout = 70;
 
         private readonly ISplitLogger _log;
-        private readonly INotificationParser _notificationParser;        
-        
+        private readonly INotificationParser _notificationParser;
+        private readonly IBackOff _backOff;
+        private readonly IWrapperAdapter _wrapperAdapter;
+
         private readonly object _connectedLock = new object();
         private bool _connected;
 
@@ -26,14 +29,16 @@ namespace Splitio.Services.EventSource
         private CancellationTokenSource _cancellationTokenSource;
         private string _url;
 
-        public EventSourceClient(string url,
+        public EventSourceClient(int backOffBase,
             ISplitLogger log = null,
-            INotificationParser notificationParser = null)
+            INotificationParser notificationParser = null,
+            IBackOff backOff = null,
+            IWrapperAdapter wrapperAdapter = null)
         {
-            _url = url;
-
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
-            _notificationParser = notificationParser ?? new NotificationParser();   
+            _notificationParser = notificationParser ?? new NotificationParser();
+            _backOff = backOff ?? new BackOff(backOffBase);
+            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -41,8 +46,9 @@ namespace Splitio.Services.EventSource
         public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         #region Public Methods
-        public void Connect()
+        public void Connect(string url)
         {
+            _url = url;
             Task.Factory.StartNew(() => ConnectAsync());
         }
 
@@ -63,7 +69,11 @@ namespace Splitio.Services.EventSource
             _splitHttpClient.Dispose();
 
             UpdateStatus(connected: false);
-            DispatchDisconnect();
+
+            if (_backOff.GetAttempt() == 0)
+            {
+                DispatchDisconnect();
+            }
 
             _log.Info($"Disconnected from {_url}");
         }
@@ -74,6 +84,8 @@ namespace Splitio.Services.EventSource
         {
             try
             {
+                _wrapperAdapter.TaskDelay(Convert.ToInt32(_backOff.GetInterval()) * 1000).Wait();
+
                 _splitHttpClient = new SplitioHttpClient();
                 _cancellationTokenSource = new CancellationTokenSource();
 
@@ -86,6 +98,7 @@ namespace Splitio.Services.EventSource
                         stream.ReadTimeout = ReadTimeout;
                         _log.Info($"Connected to {_url}");
                         UpdateStatus(connected: true);
+                        _backOff.Reset();
                         DispatchConnected();
                         await ReadStreamAsync(stream);
                     }
@@ -96,6 +109,7 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"Error connecting to {_url}: {ex.Message}");                
 
                 Disconnect();
+                ConnectAsync();
             }
         }
 
@@ -129,7 +143,7 @@ namespace Splitio.Services.EventSource
                             catch (NotificationErrorException ex)
                             {
                                 _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
-                                DispatchDisconnect();
+                                Disconnect();
                             }
                             catch (Exception ex)
                             {

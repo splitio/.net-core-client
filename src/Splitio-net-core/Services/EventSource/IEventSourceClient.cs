@@ -4,7 +4,7 @@ namespace Splitio.Services.EventSource
 {
     public interface IEventSourceClient
     {
-        void Connect();
+        void Connect(string url);
         void Disconnect();
         bool IsConnected();
         

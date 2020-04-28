@@ -12,19 +12,20 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _log;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISSEHandler _sseHandler;
-        private readonly int _authRetryBackOffBase;
+        private readonly IBackOff _backOff;
 
         public PushManager(int authRetryBackOffBase,
             ISSEHandler sseHandler,
             IAuthApiClient authApiClient,
             IWrapperAdapter wrapperAdapter = null,
-            ISplitLogger log = null)
+            ISplitLogger log = null,
+            IBackOff backOff = null)
         {
             _sseHandler = sseHandler;
             _authApiClient = authApiClient;
             _log = log ?? WrapperAdapter.GetLogger(typeof(PushManager));
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
-            _authRetryBackOffBase = authRetryBackOffBase;
+            _backOff = backOff ?? new BackOff(authRetryBackOffBase, attempt: 1);
         }
 
         #region Public Methods
@@ -46,7 +47,7 @@ namespace Splitio.Services.Common
 
                 if (response.Retry.Value)
                 {
-                    ScheduleNextTokenRefresh(_authRetryBackOffBase);
+                    ScheduleNextTokenRefresh(_backOff.GetInterval());
                 }
             }
             catch (Exception ex)
@@ -74,9 +75,10 @@ namespace Splitio.Services.Common
             try
             { 
                 _wrapperAdapter
-                    .TaskDelay(Convert.ToInt32(time))
+                    .TaskDelay(Convert.ToInt32(time) * 1000)
                     .ContinueWith((t) =>
                     {
+                        StopSse();
                         StartSse();
                     });
             }
