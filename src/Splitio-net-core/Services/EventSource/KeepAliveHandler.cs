@@ -30,11 +30,20 @@ namespace Splitio.Services.EventSource
             }
         }
 
+        public void Stop()
+        {
+            lock (_clockLock)
+            {
+                _clock.Stop();
+            }
+        }
+
         public void Restart()
         {
             lock (_clockLock)
             {
                 _clock.Restart();
+                _clock.Start();
             }
         }
         #endregion

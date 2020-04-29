@@ -138,6 +138,8 @@ namespace Splitio.Services.EventSource
 
                     if (len > 0 && IsConnected())
                     {
+                        _keepAliveHandler.Stop();
+
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
@@ -167,8 +169,6 @@ namespace Splitio.Services.EventSource
                                 }
                             }
                         }
-
-                        _keepAliveHandler.Restart();
                     }
                 }
             }

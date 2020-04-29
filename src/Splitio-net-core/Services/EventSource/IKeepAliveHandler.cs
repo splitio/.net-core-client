@@ -7,6 +7,7 @@ namespace Splitio.Services.EventSource
     {
         void Start(CancellationToken cancellationTokenSource);
         void Restart();
+        void Stop();
 
         event EventHandler<EventArgs> ReconnectEvent;
     }
