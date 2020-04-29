@@ -44,10 +44,10 @@ namespace Splitio.Services.EventSource
             switch (controlEvent.ControlType)
             {
                 case ControlType.STREAMING_PAUSED:
-                    DispatchOccupancyEvent(publiserAvailable: false);
+                    DispatchOccupancyEvent(publisherAvailable: false);
                     break;
                 case ControlType.STREAMING_RESUMED:
-                    if (IsPublisherAvailable()) DispatchOccupancyEvent(publiserAvailable: true);
+                    if (IsPublisherAvailable()) DispatchOccupancyEvent(publisherAvailable: true);
                     break;
                 case ControlType.STREAMING_DISABLED:
                     DispatchPushShutdown();
@@ -74,9 +74,9 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        private void DispatchOccupancyEvent(bool publiserAvailable)
+        private void DispatchOccupancyEvent(bool publisherAvailable)
         {
-            OccupancyEvent?.Invoke(this, new OccupancyEventArgs(publiserAvailable));
+            OccupancyEvent?.Invoke(this, new OccupancyEventArgs(publisherAvailable));
         }
 
         private void DispatchPushShutdown()
