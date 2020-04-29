@@ -14,6 +14,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         private readonly Mock<IPushManager> _pushManager;
         private readonly Mock<ISSEHandler> _sseHandler;
         private readonly Mock<ISplitLogger> _log;
+        private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
         private ISyncManager _syncManager;
 
         public SyncManagerTests()
@@ -22,6 +23,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _pushManager = new Mock<IPushManager>();
             _sseHandler = new Mock<ISSEHandler>();
             _log = new Mock<ISplitLogger>();
+            _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();
         }
 
         [TestMethod]
@@ -29,7 +31,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = false;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
@@ -49,7 +51,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
@@ -69,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         {
             // Arrange.
             var streamingEnabled = true;
-            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _log.Object);
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
 
             // Act.
             _syncManager.Shutdown();

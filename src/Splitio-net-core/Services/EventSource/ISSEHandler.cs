@@ -6,6 +6,8 @@ namespace Splitio.Services.EventSource
     {
         void Start(string token, string channels);
         void Stop();
+        void StartWorkers();
+        void StopWorkers();
 
         event EventHandler<FeedbackEventArgs> ConnectedEvent;
         event EventHandler<FeedbackEventArgs> DisconnectEvent;

@@ -133,21 +133,31 @@ namespace Splitio.Services.EventSource
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
                         if (notificationString != KeepAliveResponse)
-                        {
-                            try
-                            {
-                                var eventData = _notificationParser.Parse(notificationString);
+                        {                            
+                            var lines = notificationString.Contains("\"error\"") 
+                                ? new string[] { notificationString }
+                                : notificationString.Split('\n');
 
-                                DispatchEvent(eventData);
-                            }
-                            catch (NotificationErrorException ex)
+                            foreach (var line in lines)
                             {
-                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
-                                Disconnect();
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.Debug($"Error during event parse: {ex.Message}");
+                                try
+                                {
+                                    if (!string.IsNullOrEmpty(line))
+                                    {
+                                        var eventData = _notificationParser.Parse(line);
+
+                                        DispatchEvent(eventData);
+                                    }
+                                }
+                                catch (NotificationErrorException ex)
+                                {
+                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
+                                    Disconnect();
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.Debug($"Error during event parse: {ex.Message}");
+                                }
                             }
                         }
                     }

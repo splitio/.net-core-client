@@ -11,6 +11,7 @@ namespace Splitio.Services.EventSource
         private readonly ISplitsWorker _splitsWorker;
         private readonly ISegmentsWorker _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
+        private readonly INotificationManagerKeeper _notificationManagerKeeper;
         private readonly string _streaminServiceUrl;
 
         private IEventSourceClient _eventSourceClient;
@@ -22,6 +23,7 @@ namespace Splitio.Services.EventSource
             ISplitsWorker splitsWorker,
             ISegmentsWorker segmentsWorker,
             INotificationProcessor notificationPorcessor,
+            INotificationManagerKeeper notificationManagerKeeper,
             ISplitLogger log = null,
             IEventSourceClient eventSourceClient = null)
         {
@@ -29,6 +31,7 @@ namespace Splitio.Services.EventSource
             _splitsWorker = splitsWorker;
             _segmentsWorker = segmentsWorker;
             _notificationPorcessor = notificationPorcessor;
+            _notificationManagerKeeper = notificationManagerKeeper;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SSEHandler));
             _eventSourceClient = eventSourceClient;
 
@@ -45,7 +48,7 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                _eventSourceClient.Connect(url);                
+                _eventSourceClient.Connect(url);
             }
             catch (Exception ex)
             {
@@ -68,13 +71,33 @@ namespace Splitio.Services.EventSource
                 _log.Error($"Stop: {ex.Message}");
             }
         }
+
+        public void StartWorkers()
+        {
+            _splitsWorker.Start();
+            _segmentsWorker.Start();
+        }
+
+        public void StopWorkers()
+        {
+            _splitsWorker.Stop();
+            _segmentsWorker.Stop();
+        }
         #endregion
 
         #region Private Methods
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
             _log.Debug($"Event received {e.Event}");
-            _notificationPorcessor.Proccess(e.Event);
+
+            if (e.Event.Type == NotificationType.OCCUPANCY || e.Event.Type == NotificationType.CONTROL)
+            {
+                _notificationManagerKeeper.HandleIncomingEvent(e.Event);
+            }
+            else
+            {
+                _notificationPorcessor.Proccess(e.Event);
+            }
         }
 
         private void OnConnected(object sender, FeedbackEventArgs e)
@@ -87,18 +110,6 @@ namespace Splitio.Services.EventSource
         {
             StopWorkers();
             DisconnectEvent?.Invoke(this, e);
-        }
-
-        private void StartWorkers()
-        {
-            _splitsWorker.Start();
-            _segmentsWorker.Start();
-        }
-
-        private void StopWorkers()
-        {
-            _splitsWorker.Stop();
-            _segmentsWorker.Stop();
         }
         #endregion
     }

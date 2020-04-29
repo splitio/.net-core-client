@@ -30,12 +30,21 @@
         SPLIT_UPDATE,
         SPLIT_KILL,
         SEGMENT_UPDATE,
-        CONTROL
+        CONTROL,
+        OCCUPANCY
+    }
+
+    public enum ControlType
+    {
+        STREAMING_PAUSED,
+        STREAMING_RESUMED,
+        STREAMING_DISABLED
     }
 
     public class IncomingNotification
     {
         public NotificationType Type { get; set; }
+        public string Channel { get; set; }
     }
 
     public class SplitChangeNotifiaction : IncomingNotification
@@ -56,8 +65,18 @@
         public string SegmentName { get; set; }
     }
 
-    public class ControlEventData : IncomingNotification
+    public class ControlNotification : IncomingNotification
     {
-        public string ControlType { get; set; }
+        public ControlType ControlType { get; set; }
+    }
+
+    public class OccupancyNotification : IncomingNotification
+    {
+        public OccupancyMetricsData Metrics { get; set; }
+    }
+
+    public class OccupancyMetricsData
+    {
+        public int Publishers { get; set; }
     }
 }

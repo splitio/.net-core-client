@@ -113,11 +113,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
         }
 
         [TestMethod]
-        public void EventSourceClient_ControlEvent_ShouldReceiveEvent()
+        public void EventSourceClient_ControlEvent_StreamingPaused_ShouldReceiveEvent()
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_segments\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"test-control-type\\\"}\"}}\n";
+                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}}\n";
                 httpClientMock.SSE_Channels_Response(notification);
 
                 var url = httpClientMock.GetUrl();
@@ -133,7 +133,71 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
-                Assert.AreEqual("test-control-type", ((ControlEventData)ev.Event).ControlType);
+                Assert.AreEqual(ControlType.STREAMING_PAUSED, ((ControlNotification)ev.Event).ControlType);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                _disconnectEvent.TryTake(out EventArgs ed, -1);
+                Assert.IsNotNull(ed);
+                Assert.IsFalse(eventSourceClient.IsConnected());
+            }
+        }
+
+        [TestMethod]
+        public void EventSourceClient_ControlEvent_StreamingResumed_ShouldReceiveEvent()
+        {
+            using (var httpClientMock = new HttpClientMock())
+            {
+                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}}\n";
+                httpClientMock.SSE_Channels_Response(notification);
+
+                var url = httpClientMock.GetUrl();
+                _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
+                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+
+                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                eventSourceClient.EventReceived += EventReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.Connect(url);
+
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
+                Assert.AreEqual(ControlType.STREAMING_RESUMED, ((ControlNotification)ev.Event).ControlType);
+                Assert.AreEqual(1, _connectedEvent.Count);
+
+                eventSourceClient.Disconnect();
+
+                _disconnectEvent.TryTake(out EventArgs ed, -1);
+                Assert.IsNotNull(ed);
+                Assert.IsFalse(eventSourceClient.IsConnected());
+            }
+        }
+
+        [TestMethod]
+        public void EventSourceClient_ControlEvent_StreamingDisabled_ShouldReceiveEvent()
+        {
+            using (var httpClientMock = new HttpClientMock())
+            {
+                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}}\n";
+                httpClientMock.SSE_Channels_Response(notification);
+
+                var url = httpClientMock.GetUrl();
+                _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
+                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+
+                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                eventSourceClient.EventReceived += EventReceived;
+                eventSourceClient.ConnectedEvent += ConnectedEvent;
+                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.Connect(url);
+
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
+                Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)ev.Event).ControlType);
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
@@ -189,7 +253,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\n\t\"error\":{\n\t\t\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\n\t\t\"code\":40142,\n\t\t\"statusCode\":401,\n\t\t\"href\":\"https://help.ably.io/error/40142\",\n\t\t\"serverId\":\"123123\"\n\t}\n}";
+                var notification = "{\"error\":{\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\"code\":40142,\"statusCode\":401,\"href\":\"https://help.ably.io/error/40142\",\"serverId\":\"123123\"}}\n";
                 httpClientMock.SSE_Channels_Response(notification);
 
                 var url = httpClientMock.GetUrl();
@@ -205,7 +269,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 _disconnectEvent.TryTake(out EventArgs e, -1);
                 Assert.IsNotNull(e);
-                Assert.AreEqual(0, _eventsReceived.Count);
             }
         }
 
