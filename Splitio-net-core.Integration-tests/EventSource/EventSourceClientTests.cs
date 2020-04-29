@@ -133,7 +133,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
-                Assert.AreEqual("test-control-type", ((ControlEventData)ev.Event).ControlType);
+                Assert.AreEqual("test-control-type", ((ControlNotification)ev.Event).ControlType);
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();

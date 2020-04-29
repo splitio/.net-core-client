@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -17,6 +18,7 @@ namespace Splitio.Services.Common
             ISynchronizer synchronizer,
             IPushManager pushManager,
             ISSEHandler sseHandler,
+            INotificationManagerKeeper notificationManagerKeeper,
             ISplitLogger log = null)
         {
             _streamingEnabled = streamingEnabled;
@@ -27,6 +29,8 @@ namespace Splitio.Services.Common
 
             _sseHandler.ConnectedEvent += OnProcessFeedbackSSE;
             _sseHandler.DisconnectEvent += OnProcessFeedbackSSE;
+            notificationManagerKeeper.OccupancyEvent += OnOccupancyEvent;
+            notificationManagerKeeper.PushShutdownEvent += OnPushShutdownEvent;
         }
 
         #region Public Methods
@@ -75,6 +79,26 @@ namespace Splitio.Services.Common
             {
                 _synchronizer.StartPeriodicFetching();
             }
+        }
+
+        private void OnOccupancyEvent(object sender, OccupancyEventArgs e)
+        {
+            if (e.PublisherAvailable)
+            {
+                _synchronizer.StopPeriodicFetching();
+                _synchronizer.SyncAll();
+                _sseHandler.StartWorkers();
+            }
+            else
+            {
+                _sseHandler.StopWorkers();
+                _synchronizer.StartPeriodicFetching();
+            }
+        }
+
+        private void OnPushShutdownEvent(object sender, EventArgs e)
+        {
+            _pushManager.StopSse();
         }
         #endregion
     }

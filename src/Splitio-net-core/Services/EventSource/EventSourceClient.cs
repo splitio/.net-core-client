@@ -134,20 +134,25 @@ namespace Splitio.Services.EventSource
 
                         if (notificationString != KeepAliveResponse)
                         {
-                            try
+                            var lines = notificationString.Split('\n');
+                            foreach (var line in lines)
                             {
-                                var eventData = _notificationParser.Parse(notificationString);
 
-                                DispatchEvent(eventData);
-                            }
-                            catch (NotificationErrorException ex)
-                            {
-                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
-                                Disconnect();
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.Debug($"Error during event parse: {ex.Message}");
+                                try
+                                {
+                                    var eventData = _notificationParser.Parse(line);
+
+                                    DispatchEvent(eventData);
+                                }
+                                catch (NotificationErrorException ex)
+                                {
+                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
+                                    Disconnect();
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.Debug($"Error during event parse: {ex.Message}");
+                                }
                             }
                         }
                     }

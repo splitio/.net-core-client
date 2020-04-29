@@ -6,36 +6,79 @@ namespace Splitio.Services.EventSource
 {
     public class NotificationParser : INotificationParser
     {
-        public IncomingNotification Parse(string notificationString)
+        private const string _exceptionMessage = "Unexpected type received from EventSource";
+
+        public IncomingNotification Parse(string notification)
         {
-            try
+            if (notification.Contains("\"event\":\"message\""))
             {
-                var notification = JsonConvert.DeserializeObject<Notification>(notificationString);
-                var data = JsonConvert.DeserializeObject<IncomingNotification>(notification.Data.Data);
-
-                switch (data?.Type)
+                if (notification.Contains("[?occupancy=metrics.publishers]"))
                 {
-                    case NotificationType.SPLIT_UPDATE:
-                        return JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notification.Data.Data);
-                    case NotificationType.SPLIT_KILL:
-                        return JsonConvert.DeserializeObject<SplitKillNotification>(notification.Data.Data);
-                    case NotificationType.SEGMENT_UPDATE:
-                        return JsonConvert.DeserializeObject<SegmentChangeNotification>(notification.Data.Data);
-                    case NotificationType.CONTROL:
-                        return JsonConvert.DeserializeObject<ControlEventData>(notification.Data.Data);
-                    default:
-                        throw new Exception("Unexpected type received from EventSource");
+                    return ParseOccupancy(notification);
                 }
+
+                return ParseMessage(notification);
             }
-            catch
+            else if (notification.Contains("\"error\""))
             {
-                var notificatinError = JsonConvert.DeserializeObject<NotificationError>(notificationString);
-
-                if (notificatinError?.Error != null)
-                    throw new NotificationErrorException(notificatinError);
-
-                throw new Exception("Unexpected type received from EventSource");
+                return ParseError(notification);
             }
+
+            throw new Exception(_exceptionMessage);
+        }
+
+        private IncomingNotification ParseMessage(string notificationString)
+        {
+            var result = new IncomingNotification();
+            var notification = JsonConvert.DeserializeObject<Notification>(notificationString);
+            var data = JsonConvert.DeserializeObject<IncomingNotification>(notification.Data.Data);
+
+            switch (data?.Type)
+            {
+                case NotificationType.SPLIT_UPDATE:
+                    result = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notification.Data.Data);
+                    break;
+                case NotificationType.SPLIT_KILL:
+                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notification.Data.Data);
+                    break;
+                case NotificationType.SEGMENT_UPDATE:
+                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notification.Data.Data);
+                    break;
+                case NotificationType.CONTROL:
+                    result = JsonConvert.DeserializeObject<ControlNotification>(notification.Data.Data);
+                    break;
+                default:
+                    throw new Exception(_exceptionMessage);
+            }
+
+            result.Channel = notification.Data.Channel;
+
+            return result;
+        }
+
+        private IncomingNotification ParseOccupancy(string notificationString)
+        {
+            var notification = JsonConvert.DeserializeObject<Notification>(notificationString);
+
+            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(notification.Data.Data);            
+
+            if (occupancyNotification?.Metrics == null)
+                throw new Exception(_exceptionMessage);
+
+            occupancyNotification.Type = NotificationType.OCCUPANCY;
+            occupancyNotification.Channel = notification.Data.Channel.Replace("[?occupancy=metrics.publishers]", string.Empty);
+
+            return occupancyNotification;
+        }
+
+        private IncomingNotification ParseError(string notificationString)
+        {
+            var notificatinError = JsonConvert.DeserializeObject<NotificationError>(notificationString);
+
+            if (notificatinError?.Error != null)
+                throw new NotificationErrorException(notificatinError);
+
+            throw new Exception(_exceptionMessage);
         }
     }
 }

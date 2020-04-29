@@ -87,7 +87,18 @@ namespace Splitio.Services.Common
                 .Select(c => c.First.Path)
                 .ToList();
 
-            return string.Join(",", channelsList);
+            var channels = AddPrefixControlChannels(string.Join(",", channelsList));
+
+            return channels;
+        }
+
+        private string AddPrefixControlChannels(string channels)
+        {
+            channels = channels
+                .Replace("control_pri", "[?occupancy=metrics.publishers]control_pri")
+                .Replace("control_sec", "[?occupancy=metrics.publishers]control_sec");
+
+            return channels;
         }
 
         private double GetExpiration(Jwt token)

@@ -201,11 +201,12 @@ namespace Splitio.Services.Client.Classes
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
                 var notificationParser = new NotificationParser();
                 var eventSourceClient = new EventSourceClient(_config.StreamingReconnectBackoffBase, notificationParser: notificationParser);
-                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, eventSourceClient: eventSourceClient);
+                var notificationManagerKeeper = new NotificationManagerKeeper();
+                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
                 var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 
-                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler);
+                _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper);
             }
             catch (Exception ex)
             {
