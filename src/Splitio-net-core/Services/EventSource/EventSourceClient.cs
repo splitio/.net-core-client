@@ -71,9 +71,6 @@ namespace Splitio.Services.EventSource
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
 
-            _cancellationTokenKeepAlive.Cancel();
-            _cancellationTokenKeepAlive.Dispose();
-
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
@@ -209,6 +206,9 @@ namespace Splitio.Services.EventSource
 
         private void ProcessReconnectEvent(object sender, EventArgs e)
         {
+            _cancellationTokenKeepAlive.Cancel();
+            _cancellationTokenKeepAlive.Dispose();
+
             Disconnect();
             ConnectAsync();
         }
