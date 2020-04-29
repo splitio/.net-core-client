@@ -1,14 +1,15 @@
-﻿using Splitio.Services.Exceptions;
-using Splitio.Services.Common;
+﻿using Splitio.Services.Common;
+using Splitio.Services.Exceptions;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Splitio.Services.Shared.Interfaces;
 
 namespace Splitio.Services.EventSource
 {
@@ -86,16 +87,13 @@ namespace Splitio.Services.EventSource
             {
                 _wrapperAdapter.TaskDelay(Convert.ToInt32(_backOff.GetInterval()) * 1000).Wait();
 
-                _splitHttpClient = new SplitioHttpClient();
+                _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
                 _cancellationTokenSource = new CancellationTokenSource();
-
-                _log.Info($"Connecting to {_url}");
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        stream.ReadTimeout = ReadTimeout;
                         _log.Info($"Connected to {_url}");
                         UpdateStatus(connected: true);
                         _backOff.Reset();
@@ -106,7 +104,7 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                _log.Debug($"Error connecting to {_url}: {ex.Message}");                
+                _log.Error($"Error connecting to {_url}: {ex.Message}");                
 
                 Disconnect();
                 ConnectAsync();
@@ -121,11 +119,11 @@ namespace Splitio.Services.EventSource
 
             while (!_cancellationTokenSource.IsCancellationRequested && IsConnected())
             {
-                if (stream.CanRead)
+                if (stream.CanRead && IsConnected())
                 {
-                    var buffer = new byte[2048];
+                    var buffer = new byte[10000];
 
-                    int len = await stream.ReadAsync(buffer, 0, 2048, _cancellationTokenSource.Token);
+                    int len = await stream.ReadAsync(buffer, 0, 10000, _cancellationTokenSource.Token);
 
                     if (len > 0 && IsConnected())
                     {

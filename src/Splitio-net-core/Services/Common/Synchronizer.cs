@@ -60,10 +60,10 @@ namespace Splitio.Services.Common
             _log.Debug("Periodic Data Recording stoped...");
         }
 
-        public void StopPeriodicFetching()
+        public void StopPeriodicFetching(bool isDestroy = false)
         {
-            _splitFetcher.Stop();
-            _segmentFetcher.Stop();
+            _splitFetcher.Stop(isDestroy);
+            _segmentFetcher.Stop(isDestroy);
             _log.Debug("Spltis and Segments fetchers stoped...");
         }
 

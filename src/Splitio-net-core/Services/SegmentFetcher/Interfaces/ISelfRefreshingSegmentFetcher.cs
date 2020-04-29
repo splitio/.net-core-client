@@ -3,7 +3,7 @@
     public interface ISelfRefreshingSegmentFetcher
     {
         void Start();
-        void Stop();
+        void Stop(bool isDestroy = false);
         void FetchAll();
         void Fetch(string segmentName);
     }

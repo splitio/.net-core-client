@@ -77,7 +77,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _syncManager.Shutdown();
 
             // Assert.
-            _synchronizer.Verify(mock => mock.StopPeriodicFetching(), Times.Once);
+            _synchronizer.Verify(mock => mock.StopPeriodicFetching(It.IsAny<bool>()), Times.Once);
             _synchronizer.Verify(mock => mock.StopPeriodicDataRecording(), Times.Once);
             _pushManager.Verify(mock => mock.StopSse(), Times.Once);
         }
