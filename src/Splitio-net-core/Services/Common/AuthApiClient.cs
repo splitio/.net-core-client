@@ -95,8 +95,8 @@ namespace Splitio.Services.Common
         private string AddPrefixControlChannels(string channels)
         {
             channels = channels
-                .Replace("control_pri", "[?occupancy=metrics.publishers]control_pri")
-                .Replace("control_sec", "[?occupancy=metrics.publishers]control_sec");
+                .Replace(Constans.PushControlPri, $"{Constans.PushOccupancyPrefix}{Constans.PushControlPri}")
+                .Replace(Constans.PushControlSec, $"{Constans.PushOccupancyPrefix}{Constans.PushControlSec}");
 
             return channels;
         }

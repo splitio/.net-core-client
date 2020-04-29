@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Logger;
+﻿using Splitio.Domain;
+using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
 
@@ -28,7 +29,7 @@ namespace Splitio.Services.EventSource
             {
                 ProcessEventControl(notification);
             }
-            else if (notification.Channel == "control_pri")
+            else if (notification.Type == NotificationType.OCCUPANCY && notification.Channel == Constans.PushControlPri)
             {
                 ProcessEventOccupancy(notification);
             }
@@ -49,6 +50,7 @@ namespace Splitio.Services.EventSource
                     if (IsPublisherAvailable()) DispatchOccupancyEvent(publiserAvailable: true);
                     break;
                 case ControlType.STREAMING_DISABLED:
+                    DispatchPushShutdown();
                     break;
                 default:
                     _log.Error($"Incorrect control type. {controlEvent.ControlType}");
