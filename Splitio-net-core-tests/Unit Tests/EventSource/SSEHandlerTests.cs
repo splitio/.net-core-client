@@ -35,14 +35,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.Connect())
+                .Setup(mock => mock.Connect(It.IsAny<string>()))
                 .Raises(mock => mock.ConnectedEvent += null, new FeedbackEventArgs(true));
 
             // Act.
             _sseHandler.Start(token, channels);
 
             // Assert.
-            _eventSourceClient.Verify(mock => mock.Connect(), Times.Once);
+            _eventSourceClient.Verify(mock => mock.Connect(It.IsAny<string>()), Times.Once);
             _splitsWorker.Verify(mock => mock.Start(), Times.Once);
             _segmentsWorker.Verify(mock => mock.Start(), Times.Once);
         }

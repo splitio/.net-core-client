@@ -45,7 +45,7 @@ namespace Splitio_Tests.Unit_Tests.Common
         }
 
         [TestMethod]
-        public void Start_WithStreamingEnabled_ShouldStartPoll()
+        public void Start_WithStreamingEnabled_ShouldStartStream()
         {
             // Arrange.
             var streamingEnabled = true;

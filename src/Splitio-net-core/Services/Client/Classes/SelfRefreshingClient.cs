@@ -110,7 +110,7 @@ namespace Splitio.Services.Client.Classes
             _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase");
             _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase");
             _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split-stage.io/api/auth" : config.AuthServiceURL;
-            _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://realtime.ably.io/event-stream" : config.StreamingServiceURL ;
+            _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://split-realtime.ably.io/event-stream" : config.StreamingServiceURL;
         }
 
         private void BuildSdkReadinessGates()
@@ -199,7 +199,9 @@ namespace Splitio.Services.Client.Classes
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
-                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor);
+                var notificationParser = new NotificationParser();
+                var eventSourceClient = new EventSourceClient(_config.StreamingReconnectBackoffBase, notificationParser: notificationParser);
+                var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, eventSourceClient: eventSourceClient);
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
                 var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 

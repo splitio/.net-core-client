@@ -59,16 +59,9 @@ namespace Splitio.Services.Common
 
         private void StartStream()
         {
-            Task.Factory.StartNew(() =>
-            {
-                _synchronizer.SyncAll();
-                _synchronizer.StartPeriodicDataRecording();
-            });
-
-            Task.Factory.StartNew(() =>
-            {
-                _pushManager.StartSse();
-            });
+            _synchronizer.StartPeriodicDataRecording();
+            Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
+            Task.Factory.StartNew(() => { _pushManager.StartSse(); });
         }
 
         private void OnProcessFeedbackSSE(object sender, FeedbackEventArgs e)

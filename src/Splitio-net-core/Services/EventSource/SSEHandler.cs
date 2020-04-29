@@ -31,6 +31,10 @@ namespace Splitio.Services.EventSource
             _notificationPorcessor = notificationPorcessor;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SSEHandler));
             _eventSourceClient = eventSourceClient;
+
+            _eventSourceClient.EventReceived += EventReceived;
+            _eventSourceClient.ConnectedEvent += OnConnected;
+            _eventSourceClient.DisconnectEvent += OnDisconnect;
         }
 
         #region Private Methods
@@ -40,12 +44,8 @@ namespace Splitio.Services.EventSource
             {
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
-                _eventSourceClient = _eventSourceClient ?? new EventSourceClient(url);
 
-                _eventSourceClient.EventReceived += EventReceived;
-                _eventSourceClient.ConnectedEvent += OnConnected;
-                _eventSourceClient.DisconnectEvent += OnDisconnect;
-                _eventSourceClient.Connect();                
+                _eventSourceClient.Connect(url);                
             }
             catch (Exception ex)
             {
