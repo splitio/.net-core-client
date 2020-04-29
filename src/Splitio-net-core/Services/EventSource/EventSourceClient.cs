@@ -22,24 +22,30 @@ namespace Splitio.Services.EventSource
         private readonly INotificationParser _notificationParser;
         private readonly IBackOff _backOff;
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly IKeepAliveHandler _keepAliveHandler;
 
         private readonly object _connectedLock = new object();
         private bool _connected;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _cancellationTokenKeepAlive;
         private string _url;
 
         public EventSourceClient(int backOffBase,
+            IKeepAliveHandler keepAliveHandler,
             ISplitLogger log = null,
             INotificationParser notificationParser = null,
             IBackOff backOff = null,
             IWrapperAdapter wrapperAdapter = null)
         {
+            _keepAliveHandler = keepAliveHandler;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();
             _backOff = backOff ?? new BackOff(backOffBase);
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+
+            keepAliveHandler.ReconnectEvent += ProcessReconnectEvent;
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -48,7 +54,7 @@ namespace Splitio.Services.EventSource
 
         #region Public Methods
         public void Connect(string url)
-        {
+        { 
             _url = url;
             Task.Factory.StartNew(() => ConnectAsync());
         }
@@ -64,7 +70,10 @@ namespace Splitio.Services.EventSource
         public void Disconnect()
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
-            
+
+            _cancellationTokenKeepAlive.Cancel();
+            _cancellationTokenKeepAlive.Dispose();
+
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
@@ -89,6 +98,7 @@ namespace Splitio.Services.EventSource
 
                 _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
                 _cancellationTokenSource = new CancellationTokenSource();
+                _cancellationTokenKeepAlive = new CancellationTokenSource();
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
@@ -123,6 +133,7 @@ namespace Splitio.Services.EventSource
                 {
                     var buffer = new byte[10000];
 
+                    _keepAliveHandler.Restart();
                     int len = await stream.ReadAsync(buffer, 0, 10000, _cancellationTokenSource.Token);
 
                     if (len > 0 && IsConnected())
@@ -156,6 +167,8 @@ namespace Splitio.Services.EventSource
                                 }
                             }
                         }
+
+                        _keepAliveHandler.Restart();
                     }
                 }
             }
@@ -192,6 +205,12 @@ namespace Splitio.Services.EventSource
         private void OnDisconnect(FeedbackEventArgs e)
         {
             DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void ProcessReconnectEvent(object sender, EventArgs e)
+        {
+            Disconnect();
+            ConnectAsync();
         }
 
         private void UpdateStatus(bool connected)
