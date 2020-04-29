@@ -89,8 +89,8 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_NotificationError_ShouldReturnException()
         {
             // Arrange.
-            var text = "{\n\t\"error\":{\n\t\t\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\n\t\t\"code\":40142,\n\t\t\"statusCode\":401,\n\t\t\"href\":\"https://help.ably.io/error/40142\",\n\t\t\"serverId\":\"123123\"\n\t}\n}";
-            
+            var text = "{\n\t\"error\": {\n\t\t\"message\": \"Token expired. (See https://help.ably.io/error/40142 for help.)\",\n\t\t\"code\": 40142,\n\t\t\"statusCode\": 401,\n\t\t\"href\": \"https://help.ably.io/error/40142\",\n\t\t\"serverId\": \"frontend.a5f4.2.us-east-1-A.i-07146aec34569f60c\"\n\t}\n}";
+
             // Act.
             var result = _notificationParser.Parse(text);
         }

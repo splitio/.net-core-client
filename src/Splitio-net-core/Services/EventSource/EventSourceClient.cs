@@ -133,16 +133,21 @@ namespace Splitio.Services.EventSource
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
                         if (notificationString != KeepAliveResponse)
-                        {
-                            var lines = notificationString.Split('\n');
+                        {                            
+                            var lines = notificationString.Contains("\"error\"") 
+                                ? new string[] { notificationString }
+                                : notificationString.Split('\n');
+
                             foreach (var line in lines)
                             {
-
                                 try
                                 {
-                                    var eventData = _notificationParser.Parse(line);
+                                    if (!string.IsNullOrEmpty(line))
+                                    {
+                                        var eventData = _notificationParser.Parse(line);
 
-                                    DispatchEvent(eventData);
+                                        DispatchEvent(eventData);
+                                    }
                                 }
                                 catch (NotificationErrorException ex)
                                 {
