@@ -50,7 +50,7 @@ namespace Splitio.Services.EventSource
                     result = JsonConvert.DeserializeObject<ControlNotification>(notificationData.Data);
                     break;
                 default:
-                    throw new Exception(_exceptionMessage);
+                    return null;
             }
 
             result.Channel = notificationData.Channel;

@@ -132,9 +132,7 @@ namespace Splitio.Services.EventSource
 
                         if (notificationString != KeepAliveResponse)
                         {
-                            var lines = notificationString.Contains("\"error\"")
-                                ? new string[] { notificationString }
-                                : notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
+                            var lines = notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
 
                             foreach (var line in lines)
                             {
