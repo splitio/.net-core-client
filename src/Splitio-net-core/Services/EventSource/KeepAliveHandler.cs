@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.EventSource
 {
@@ -13,6 +14,11 @@ namespace Splitio.Services.EventSource
 
         #region Public Methods
         public void Start(CancellationToken cancellationToken)
+        {
+            Task.Factory.StartNew(() => Run(cancellationToken), cancellationToken);
+        }
+
+        public void Run(CancellationToken cancellationToken)
         {
             _clock = new Stopwatch();
             _clock.Start();
