@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Splitio.Domain;
 using Splitio.Services.Exceptions;
 using System;
 
@@ -10,75 +11,84 @@ namespace Splitio.Services.EventSource
 
         public IncomingNotification Parse(string notification)
         {
-            if (notification.Contains("\"event\":\"message\""))
+            if (notification.Contains("event: message"))
             {
-                if (notification.Contains("[?occupancy=metrics.publishers]"))
+                if (notification.Contains(Constans.PushOccupancyPrefix))
                 {
                     return ParseOccupancy(notification);
                 }
 
                 return ParseMessage(notification);
             }
-            else if (notification.Contains("\"error\""))
+            else if (notification.Contains("event: error"))
             {
                 return ParseError(notification);
             }
 
-            throw new Exception(_exceptionMessage);
+            return null;
         }
 
         private IncomingNotification ParseMessage(string notificationString)
         {
             var result = new IncomingNotification();
-            var notification = JsonConvert.DeserializeObject<Notification>(notificationString);
-            var data = JsonConvert.DeserializeObject<IncomingNotification>(notification.Data.Data);
+
+            var notificationData = GetNotificationData<NotificationData>(notificationString);
+            var data = JsonConvert.DeserializeObject<IncomingNotification>(notificationData.Data);
 
             switch (data?.Type)
             {
                 case NotificationType.SPLIT_UPDATE:
-                    result = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notification.Data.Data);
+                    result = JsonConvert.DeserializeObject<SplitChangeNotifiaction>(notificationData.Data);
                     break;
                 case NotificationType.SPLIT_KILL:
-                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notification.Data.Data);
+                    result = JsonConvert.DeserializeObject<SplitKillNotification>(notificationData.Data);
                     break;
                 case NotificationType.SEGMENT_UPDATE:
-                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notification.Data.Data);
+                    result = JsonConvert.DeserializeObject<SegmentChangeNotification>(notificationData.Data);
                     break;
                 case NotificationType.CONTROL:
-                    result = JsonConvert.DeserializeObject<ControlNotification>(notification.Data.Data);
+                    result = JsonConvert.DeserializeObject<ControlNotification>(notificationData.Data);
                     break;
                 default:
-                    throw new Exception(_exceptionMessage);
+                    return null;
             }
 
-            result.Channel = notification.Data.Channel;
+            result.Channel = notificationData.Channel;
 
             return result;
         }
 
         private IncomingNotification ParseOccupancy(string notificationString)
         {
-            var notification = JsonConvert.DeserializeObject<Notification>(notificationString);
+            var notificationData = GetNotificationData<NotificationData>(notificationString);
 
-            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(notification.Data.Data);            
+            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(notificationData.Data);
 
             if (occupancyNotification?.Metrics == null)
-                throw new Exception(_exceptionMessage);
+                return null;
 
             occupancyNotification.Type = NotificationType.OCCUPANCY;
-            occupancyNotification.Channel = notification.Data.Channel.Replace("[?occupancy=metrics.publishers]", string.Empty);
+            occupancyNotification.Channel = notificationData.Channel.Replace(Constans.PushOccupancyPrefix, string.Empty);
 
             return occupancyNotification;
         }
 
         private IncomingNotification ParseError(string notificationString)
         {
-            var notificatinError = JsonConvert.DeserializeObject<NotificationError>(notificationString);
+            var notificatinError = GetNotificationData<NotificationError>(notificationString);
 
-            if (notificatinError?.Error != null)
+            if (notificatinError.Message != null)
                 throw new NotificationErrorException(notificatinError);
 
-            throw new Exception(_exceptionMessage);
+            return null;
+        }
+
+        private T GetNotificationData<T>(string notificationString)
+        {
+            var notificationArray = notificationString.Split('\n');
+            var index = Array.FindIndex(notificationArray, row => row.Contains("data: "));
+
+            return JsonConvert.DeserializeObject<T>(notificationArray[index].Replace("data: ", string.Empty));
         }
     }
 }
