@@ -63,9 +63,9 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _queue.Dispose();
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _queue?.Dispose();
                 _queue = null;
                 _log.Debug($"Segments worker stoped ...");
             }

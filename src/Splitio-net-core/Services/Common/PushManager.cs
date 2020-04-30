@@ -35,6 +35,8 @@ namespace Splitio.Services.Common
             {
                 var response = await _authApiClient.AuthenticateAsync();
 
+                _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
+
                 if (response.PushEnabled.Value)
                 {
                     _sseHandler.Start(response.Token, response.Channels);

@@ -58,12 +58,15 @@ namespace Splitio.Services.Common
         #region Private Methods
         private void StartPoll()
         {
+            _log.Debug("Starting push mode ...");
             _synchronizer.StartPeriodicFetching();
             _synchronizer.StartPeriodicDataRecording();
         }
 
         private void StartStream()
         {
+            _log.Debug("Starting push mode ...");
+
             _synchronizer.StartPeriodicDataRecording();
             Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
             Task.Factory.StartNew(() => { _pushManager.StartSse(); });
