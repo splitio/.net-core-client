@@ -48,7 +48,8 @@ namespace Splitio.Services.Common
 
         public void Shutdown()
         {
-            _synchronizer.StopPeriodicFetching(isDestroy: true);
+            _synchronizer.StopPeriodicFetching();
+            _synchronizer.ClearFetchersCache();
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
         }

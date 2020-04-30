@@ -62,9 +62,15 @@ namespace Splitio.Services.Common
 
         public void StopPeriodicFetching(bool isDestroy = false)
         {
-            _splitFetcher.Stop(isDestroy);
-            _segmentFetcher.Stop(isDestroy);
+            _splitFetcher.Stop();
+            _segmentFetcher.Stop();
             _log.Debug("Spltis and Segments fetchers stoped...");
+        }
+
+        public void ClearFetchersCache()
+        {
+            _splitFetcher.Clear();
+            _segmentFetcher.Clear();
         }
 
         public void SyncAll()

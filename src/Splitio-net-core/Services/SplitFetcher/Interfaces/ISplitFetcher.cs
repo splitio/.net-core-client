@@ -3,7 +3,8 @@
     public interface ISplitFetcher
     {
         void Start();
-        void Stop(bool isDestroy = false);
+        void Stop();
         void FetchSplits();
+        void Clear();
     }
 }

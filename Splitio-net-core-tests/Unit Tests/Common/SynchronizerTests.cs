@@ -75,8 +75,8 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.StopPeriodicFetching();
 
             // Assert.
-            _splitFetcher.Verify(mock => mock.Stop(It.IsAny<bool>()), Times.Once);
-            _segmentFetcher.Verify(mock => mock.Stop(It.IsAny<bool>()), Times.Once);
+            _splitFetcher.Verify(mock => mock.Stop(), Times.Once);
+            _segmentFetcher.Verify(mock => mock.Stop(), Times.Once);
         }
 
         [TestMethod]

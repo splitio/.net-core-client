@@ -95,8 +95,8 @@ namespace Splitio.Services.EventSource
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
                         _log.Info($"Connected to {_url}");
-                        UpdateStatus(connected: true);
-                        _backOff.Reset();
+                        _backOff.Reset();                        
+                        UpdateStatus(connected: true);                        
                         DispatchConnected();
                         await ReadStreamAsync(stream);
                     }
@@ -134,7 +134,7 @@ namespace Splitio.Services.EventSource
                         {                            
                             var lines = notificationString.Contains("\"error\"") 
                                 ? new string[] { notificationString }
-                                : notificationString.Split('\n');
+                                : notificationString.Split('\n\n');
 
                             foreach (var line in lines)
                             {

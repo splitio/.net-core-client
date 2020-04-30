@@ -9,5 +9,6 @@
         void StopPeriodicFetching(bool isDestroy = false);
         void StartPeriodicDataRecording();
         void StopPeriodicDataRecording();
+        void ClearFetchersCache();
     }
 }

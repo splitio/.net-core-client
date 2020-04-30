@@ -49,11 +49,14 @@ namespace Splitio.Services.SplitFetcher.Classes
             cancelToken: _cancelTokenSource.Token);
         }
 
-        public void Stop(bool isDestroy = false)
+        public void Stop()
         {
             _cancelTokenSource.Cancel();
+        }
 
-            if (isDestroy) _splitCache.Clear();
+        public void Clear()
+        {
+            _splitCache.Clear();
         }
 
         public async void FetchSplits()
