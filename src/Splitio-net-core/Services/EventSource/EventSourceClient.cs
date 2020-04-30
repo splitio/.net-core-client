@@ -134,7 +134,7 @@ namespace Splitio.Services.EventSource
                         {                            
                             var lines = notificationString.Contains("\"error\"") 
                                 ? new string[] { notificationString }
-                                : notificationString.Split('\n\n');
+                                : notificationString.Split('\n');
 
                             foreach (var line in lines)
                             {
