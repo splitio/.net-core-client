@@ -15,7 +15,7 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
-        private const string KeepAliveResponse = "\n";
+        private const string KeepAliveResponse = ":keepalive\n\n";
         private const int ReadTimeout = 70;
 
         private readonly ISplitLogger _log;
@@ -131,10 +131,10 @@ namespace Splitio.Services.EventSource
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
                         if (notificationString != KeepAliveResponse)
-                        {                            
-                            var lines = notificationString.Contains("\"error\"") 
+                        {
+                            var lines = notificationString.Contains("\"error\"")
                                 ? new string[] { notificationString }
-                                : notificationString.Split('\n');
+                                : notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
 
                             foreach (var line in lines)
                             {
@@ -144,12 +144,12 @@ namespace Splitio.Services.EventSource
                                     {
                                         var eventData = _notificationParser.Parse(line);
 
-                                        DispatchEvent(eventData);
+                                        if(eventData != null) DispatchEvent(eventData);
                                     }
                                 }
                                 catch (NotificationErrorException ex)
                                 {
-                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.Error.StatusCode}.");
+                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
                                     Disconnect();
                                 }
                                 catch (Exception ex)

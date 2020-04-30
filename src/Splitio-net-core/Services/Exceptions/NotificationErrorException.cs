@@ -8,7 +8,7 @@ namespace Splitio.Services.Exceptions
         public NotificationError Notification { get; set; }
 
         public NotificationErrorException(NotificationError notification)
-            : base(notification.Error.Message)
+            : base(notification.Message)
         {
             Notification = notification;
         }
