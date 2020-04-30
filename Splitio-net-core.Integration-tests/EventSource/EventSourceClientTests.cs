@@ -2,6 +2,7 @@
 using Splitio.Services.EventSource;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Splitio_net_core.Integration_tests.EventSource
 {
@@ -39,10 +40,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -74,10 +71,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -107,11 +100,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
                 _connectedEvent.TryTake(out EventArgs e, -1);
                 Assert.IsNotNull(e);
-
-                eventSourceClient.Disconnect();
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -141,10 +129,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -174,10 +158,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -207,10 +187,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -249,9 +225,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(0, _eventsReceived.Count);
 
                 eventSourceClient.Disconnect();
-
-                Assert.AreEqual(1, _disconnectEvent.Count);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -301,13 +274,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 _connectedEvent.TryTake(out EventArgs e, -1);
                 Assert.IsNotNull(e);
+                Thread.Sleep(1000);
                 Assert.AreEqual(0, _eventsReceived.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 

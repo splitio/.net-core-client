@@ -7,35 +7,25 @@ namespace Splitio.Services.EventSource
 {
     public class KeepAliveHandler : IKeepAliveHandler
     {
+        private readonly int _sseKeepaliveSeconds;
+
         private readonly object _clockLock = new object();
         private Stopwatch _clock;
 
         public event EventHandler<EventArgs> ReconnectEvent;
 
+        public KeepAliveHandler(int sseKeepaliveSeconds = 70)
+        {
+            _sseKeepaliveSeconds = sseKeepaliveSeconds;
+        }
+
         #region Public Methods
         public void Start(CancellationToken cancellationToken)
         {
+            _clock = new Stopwatch();
             Task.Factory.StartNew(() => Run(cancellationToken), cancellationToken);
         }
-
-        public void Run(CancellationToken cancellationToken)
-        {
-            _clock = new Stopwatch();
-            _clock.Start();
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                var seconds = GetTimerValue() / 1000;
-
-                if (seconds >= 70)
-                {
-                    OnReconnect(EventArgs.Empty);
-                    _clock.Stop();
-                    break;
-                }
-            }
-        }
-
+        
         public void Stop()
         {
             lock (_clockLock)
@@ -55,6 +45,21 @@ namespace Splitio.Services.EventSource
         #endregion
 
         #region Private Methods
+        private void Run(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var seconds = GetTimerValue() / 1000;
+
+                if (seconds >= _sseKeepaliveSeconds)
+                {
+                    OnReconnect();
+                    _clock.Stop();
+                    return;
+                }
+            }
+        }
+
         private long GetTimerValue()
         {
             lock (_clockLock)
@@ -63,9 +68,9 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        private void OnReconnect(EventArgs e)
+        private void OnReconnect()
         {
-            ReconnectEvent?.Invoke(this, e);
+            ReconnectEvent?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }
