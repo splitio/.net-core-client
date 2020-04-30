@@ -2,6 +2,7 @@
 using Splitio.Services.EventSource;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Splitio_net_core.Integration_tests.EventSource
 {
@@ -17,15 +18,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234234432\",\"event\":\"message\",\"data\":{\"id\":\"KXLEfWv-l4:0:0\",\"clientId\":\"3233424\",\"timestamp\":1585867724988,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1585867723838}\"}}\n";
+                var notification  = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_UPDATE\\\",\\\"changeNumber\\\":1585867723838}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -38,10 +40,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -50,15 +48,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"23423432\",\"event\":\"message\",\"data\":{\"id\":\"vJ0EW4_EZa:0:0\",\"clientId\":\"332432324\",\"timestamp\":1585868247781,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_KILL\\\",\\\"changeNumber\\\":1585868246622,\\\"defaultTreatment\\\":\\\"off\\\",\\\"splitName\\\":\\\"test-split\\\"}\"}}\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_splits\",\"data\":\"{\\\"type\\\":\\\"SPLIT_KILL\\\",\\\"changeNumber\\\":1585868246622,\\\"defaultTreatment\\\":\\\"off\\\",\\\"splitName\\\":\\\"test-split\\\"}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -72,10 +71,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -84,15 +79,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_segments\",\"data\":\"{\\\"type\\\":\\\"SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1585868933303,\\\"segmentName\\\":\\\"test-segment\\\"}\"}}\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"xxxx_xxxx_segments\",\"data\":\"{\\\"type\\\":\\\"SEGMENT_UPDATE\\\",\\\"changeNumber\\\":1585868933303,\\\"segmentName\\\":\\\"test-segment\\\"}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -104,11 +100,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
                 _connectedEvent.TryTake(out EventArgs e, -1);
                 Assert.IsNotNull(e);
-
-                eventSourceClient.Disconnect();
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -117,15 +108,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}}\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -137,10 +129,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -149,15 +137,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}}\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -169,10 +158,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -181,15 +166,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"id\":\"234432\",\"event\":\"message\",\"data\":{\"id\":\"rwlbcidVwD:0:0\",\"clientId\":\"234234234\",\"timestamp\":1585868933616,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}}\n";
+                var notification = "id: 234234432\nevent: message\ndata: {\"id\":\"jSOE7oGJWo:0:0\",\"clientId\":\"pri:ODc1NjQyNzY1\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -201,10 +187,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1, _connectedEvent.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -226,12 +208,13 @@ namespace Splitio_net_core.Integration_tests.EventSource
                          }
                         }");
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -242,9 +225,6 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(0, _eventsReceived.Count);
 
                 eventSourceClient.Disconnect();
-
-                Assert.AreEqual(1, _disconnectEvent.Count);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 
@@ -253,15 +233,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                var notification = "{\"error\":{\"message\":\"Token expired. (See https://help.fake.io/error/40142 for help.)\",\"code\":40142,\"statusCode\":401,\"href\":\"https://help.ably.io/error/40142\",\"serverId\":\"123123\"}}\n";
+                var notification = "event: error\ndata: {\"message\":\"Token expired\",\"code\":40142,\"statusCode\":401,\"href\":\"https://help.ably.io/error/40142\"}\n\n";
                 httpClientMock.SSE_Channels_Response(notification);
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -277,14 +258,15 @@ namespace Splitio_net_core.Integration_tests.EventSource
         {
             using (var httpClientMock = new HttpClientMock())
             {
-                httpClientMock.SSE_Channels_Response("\n");
+                httpClientMock.SSE_Channels_Response(":keepalive\n\n");
 
+                var keepAliveHandler = new KeepAliveHandler();
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient(backOffBase: 5, keepAliveHandler: keepAliveHandler);
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -292,13 +274,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 _connectedEvent.TryTake(out EventArgs e, -1);
                 Assert.IsNotNull(e);
+                Thread.Sleep(1000);
                 Assert.AreEqual(0, _eventsReceived.Count);
 
                 eventSourceClient.Disconnect();
-
-                _disconnectEvent.TryTake(out EventArgs ed, -1);
-                Assert.IsNotNull(ed);
-                Assert.IsFalse(eventSourceClient.IsConnected());
             }
         }
 

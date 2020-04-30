@@ -6,5 +6,6 @@
         void Stop();
         void FetchAll();
         void Fetch(string segmentName);
+        void Clear();
     }
 }

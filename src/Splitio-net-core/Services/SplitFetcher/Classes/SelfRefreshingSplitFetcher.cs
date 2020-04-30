@@ -52,6 +52,10 @@ namespace Splitio.Services.SplitFetcher.Classes
         public void Stop()
         {
             _cancelTokenSource.Cancel();
+        }
+
+        public void Clear()
+        {
             _splitCache.Clear();
         }
 

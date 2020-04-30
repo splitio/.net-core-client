@@ -5,5 +5,6 @@
         void Start();
         void Stop();
         void FetchSplits();
+        void Clear();
     }
 }

@@ -3,6 +3,7 @@ using Splitio.Domain;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,9 +17,14 @@ namespace Splitio.Services.Common
         private readonly ISplitLogger _log;
         private readonly HttpClient _httpClient;
 
-        public SplitioHttpClient()
+        public SplitioHttpClient(Dictionary<string, string> headers)
         {
             _httpClient = new HttpClient();
+
+            foreach (var header in headers)
+            {
+                _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
+            }
         }
 
         public SplitioHttpClient(
