@@ -6,7 +6,7 @@
         void SynchronizeSplits();
         void SynchronizeSegment(string segmentName);
         void StartPeriodicFetching();
-        void StopPeriodicFetching(bool isDestroy = false);
+        void StopPeriodicFetching();
         void StartPeriodicDataRecording();
         void StopPeriodicDataRecording();
         void ClearFetchersCache();
