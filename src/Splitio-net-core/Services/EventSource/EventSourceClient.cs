@@ -17,6 +17,7 @@ namespace Splitio.Services.EventSource
     {
         private const string KeepAliveResponse = ":keepalive\n\n";
         private const int ReadTimeout = 70;
+        private const int BufferSize = 10000;
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
@@ -127,10 +128,10 @@ namespace Splitio.Services.EventSource
             {
                 if (stream.CanRead && IsConnected())
                 {
-                    var buffer = new byte[10000];
+                    var buffer = new byte[BufferSize];
                     
                     var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
-                    var streamReadTask = stream.ReadAsync(buffer, 0, 10000, _cancellationTokenSource.Token);
+                    var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _cancellationTokenSource.Token);
                     var completedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
                     if (completedTask == timeoutTask)
