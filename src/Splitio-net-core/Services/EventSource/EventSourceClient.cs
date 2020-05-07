@@ -132,9 +132,11 @@ namespace Splitio.Services.EventSource
                     
                     var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
                     var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _cancellationTokenSource.Token);
-                    var completedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
+                    // Creates a task that will complete when any of the supplied tasks have completed.
+                    // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
+                    var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                    if (completedTask == timeoutTask)
+                    if (finishedTask == timeoutTask)
                     {
                         ProcessReconnect();
                     }
