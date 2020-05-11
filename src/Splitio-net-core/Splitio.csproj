@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
-    <AssemblyName>Splitio</AssemblyName>
-    <PackageId>Splitio</PackageId>
+    <AssemblyName>Splitio-net-core</AssemblyName>
+    <PackageId>Splitio-net-core</PackageId>
     <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
       $(PackageTargetFallback);dnxcore50
     </PackageTargetFallback>

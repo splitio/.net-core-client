@@ -29,7 +29,6 @@ namespace Splitio.Services.EventSource
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _cancellationTokenKeepAlive;
         private string _url;
 
         public EventSourceClient(int backOffBase,
@@ -50,7 +49,7 @@ namespace Splitio.Services.EventSource
 
         #region Public Methods
         public void Connect(string url)
-        { 
+        {
             _url = url;
             Task.Factory.StartNew(() => ConnectAsync());
         }
@@ -66,9 +65,6 @@ namespace Splitio.Services.EventSource
         public void Disconnect()
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
-
-            _cancellationTokenKeepAlive.Cancel();
-            _cancellationTokenKeepAlive.Dispose();
 
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
@@ -97,30 +93,36 @@ namespace Splitio.Services.EventSource
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    {                        
-                        _log.Info($"Connected to {_url}");
+                    try
+                    {
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        {
+                            _log.Info($"Connected to {_url}");
 
-                        UpdateStatus(connected: true);
-                        _backOff.Reset();
-                        DispatchConnected();
-                        await ReadStreamAsync(stream);
+                            UpdateStatus(connected: true);
+                            _backOff.Reset();
+                            DispatchConnected();
+                            await ReadStreamAsync(stream);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error($"Error reading stream: {ex.Message}");
+                        Reconnect();
                     }
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"Error connecting to {_url}: {ex.Message}");                
-
+                _log.Error($"Error connecting to {_url}: {ex.Message}");
                 Disconnect();
-                ConnectAsync();
             }
         }
 
         private async Task ReadStreamAsync(Stream stream)
         {
             var encoder = new UTF8Encoding();
-            _cancellationTokenKeepAlive = new CancellationTokenSource();
+            var streamReadcancellationTokenSource = new CancellationTokenSource();
 
             _log.Debug($"Reading stream ....");
 
@@ -129,49 +131,45 @@ namespace Splitio.Services.EventSource
                 if (stream.CanRead && IsConnected())
                 {
                     var buffer = new byte[BufferSize];
-                    
+
                     var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
-                    var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _cancellationTokenSource.Token);
+                    var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, streamReadcancellationTokenSource.Token);
                     // Creates a task that will complete when any of the supplied tasks have completed.
                     // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                     var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                    if (finishedTask == timeoutTask)
-                    {
-                        ProcessReconnect();
-                    }
+                    if (finishedTask == timeoutTask) Reconnect();
 
                     int len = streamReadTask.Result;
 
-                    if (len > 0 && IsConnected())
+                    if (len == 0) Reconnect();
+
+                    var notificationString = encoder.GetString(buffer, 0, len);
+                    _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                    if (notificationString != KeepAliveResponse && IsConnected())
                     {
-                        var notificationString = encoder.GetString(buffer, 0, len);
-                        _log.Debug($"Read stream encoder buffer: {notificationString}");
+                        var lines = notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
 
-                        if (notificationString != KeepAliveResponse)
+                        foreach (var line in lines)
                         {
-                            var lines = notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
-
-                            foreach (var line in lines)
+                            try
                             {
-                                try
+                                if (!string.IsNullOrEmpty(line))
                                 {
-                                    if (!string.IsNullOrEmpty(line))
-                                    {
-                                        var eventData = _notificationParser.Parse(line);
+                                    var eventData = _notificationParser.Parse(line);
 
-                                        if (eventData != null) DispatchEvent(eventData);
-                                    }
+                                    if (eventData != null) DispatchEvent(eventData);
                                 }
-                                catch (NotificationErrorException ex)
-                                {
-                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
-                                    Disconnect();
-                                }
-                                catch (Exception ex)
-                                {
-                                    _log.Debug($"Error during event parse: {ex.Message}");
-                                }
+                            }
+                            catch (NotificationErrorException ex)
+                            {
+                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
+                                Disconnect();
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.Debug($"Error during event parse: {ex.Message}");
                             }
                         }
                     }
@@ -212,7 +210,7 @@ namespace Splitio.Services.EventSource
             DisconnectEvent?.Invoke(this, e);
         }
 
-        private void ProcessReconnect()
+        private void Reconnect()
         {
             Disconnect();
             ConnectAsync();
