@@ -75,11 +75,15 @@ namespace Splitio.Services.Common
         private void ScheduleNextTokenRefresh(double time)
         {
             try
-            { 
+            {
+                var sleepTime = Convert.ToInt32(time) * 1000;
+                _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
+
                 _wrapperAdapter
-                    .TaskDelay(Convert.ToInt32(time) * 1000)
+                    .TaskDelay(sleepTime)
                     .ContinueWith((t) =>
                     {
+                        _log.Debug("Starting ScheduleNextTokenRefresh ...");
                         StopSse();
                         StartSse();
                     });

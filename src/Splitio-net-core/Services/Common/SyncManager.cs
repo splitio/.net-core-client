@@ -69,7 +69,7 @@ namespace Splitio.Services.Common
 
             _synchronizer.StartPeriodicDataRecording();
             Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
-            Task.Factory.StartNew(() => { _pushManager.StartSse(); });
+            _pushManager.StartSse();
         }
 
         private void OnProcessFeedbackSSE(object sender, FeedbackEventArgs e)
