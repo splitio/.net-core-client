@@ -17,12 +17,12 @@ namespace Splitio.Services.EventSource
     {
         private const string KeepAliveResponse = ":keepalive\n\n";
         private const int ReadTimeout = 70;
+        private const int BufferSize = 10000;
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
         private readonly IBackOff _backOff;
         private readonly IWrapperAdapter _wrapperAdapter;
-        private readonly IKeepAliveHandler _keepAliveHandler;
 
         private readonly object _connectedLock = new object();
         private bool _connected;
@@ -33,19 +33,15 @@ namespace Splitio.Services.EventSource
         private string _url;
 
         public EventSourceClient(int backOffBase,
-            IKeepAliveHandler keepAliveHandler,
             ISplitLogger log = null,
             INotificationParser notificationParser = null,
             IBackOff backOff = null,
             IWrapperAdapter wrapperAdapter = null)
         {
-            _keepAliveHandler = keepAliveHandler;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();
             _backOff = backOff ?? new BackOff(backOffBase);
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
-
-            keepAliveHandler.ReconnectEvent += ProcessReconnectEvent;
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -102,7 +98,7 @@ namespace Splitio.Services.EventSource
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
                     using (var stream = await response.Content.ReadAsStreamAsync())
-                    {
+                    {                        
                         _log.Info($"Connected to {_url}");
 
                         UpdateStatus(connected: true);
@@ -125,7 +121,6 @@ namespace Splitio.Services.EventSource
         {
             var encoder = new UTF8Encoding();
             _cancellationTokenKeepAlive = new CancellationTokenSource();
-            _keepAliveHandler.Start(_cancellationTokenKeepAlive.Token);
 
             _log.Debug($"Reading stream ....");
 
@@ -133,15 +128,23 @@ namespace Splitio.Services.EventSource
             {
                 if (stream.CanRead && IsConnected())
                 {
-                    var buffer = new byte[10000];
+                    var buffer = new byte[BufferSize];
+                    
+                    var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
+                    var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _cancellationTokenSource.Token);
+                    // Creates a task that will complete when any of the supplied tasks have completed.
+                    // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
+                    var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                    _keepAliveHandler.Restart();
-                    int len = await stream.ReadAsync(buffer, 0, 10000, _cancellationTokenSource.Token);
+                    if (finishedTask == timeoutTask)
+                    {
+                        ProcessReconnect();
+                    }
+
+                    int len = streamReadTask.Result;
 
                     if (len > 0 && IsConnected())
                     {
-                        _keepAliveHandler.Stop();
-
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
 
@@ -157,7 +160,7 @@ namespace Splitio.Services.EventSource
                                     {
                                         var eventData = _notificationParser.Parse(line);
 
-                                        if(eventData != null) DispatchEvent(eventData);
+                                        if (eventData != null) DispatchEvent(eventData);
                                     }
                                 }
                                 catch (NotificationErrorException ex)
@@ -209,7 +212,7 @@ namespace Splitio.Services.EventSource
             DisconnectEvent?.Invoke(this, e);
         }
 
-        private void ProcessReconnectEvent(object sender, EventArgs e)
+        private void ProcessReconnect()
         {
             Disconnect();
             ConnectAsync();

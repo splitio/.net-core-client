@@ -9,6 +9,7 @@ namespace Splitio.Services.Shared.Interfaces
     {
         ReadConfigData ReadConfig(ConfigurationOptions config, ISplitLogger log);
         Task TaskDelay(int millisecondsDelay);
+        Task<Task> WhenAny(params Task[] tasks);
         Task<T> TaskFromResult<T>(T result);
     }
 }
