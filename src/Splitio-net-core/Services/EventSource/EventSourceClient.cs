@@ -29,6 +29,7 @@ namespace Splitio.Services.EventSource
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _connectAsyncCancellationTokenSource;
         private string _url;
 
         public EventSourceClient(int backOffBase,
@@ -51,7 +52,17 @@ namespace Splitio.Services.EventSource
         public void Connect(string url)
         {
             _url = url;
-            Task.Factory.StartNew(() => ConnectAsync());
+
+            if (_connectAsyncCancellationTokenSource != null)
+            {
+                _connectAsyncCancellationTokenSource.Cancel();
+                _connectAsyncCancellationTokenSource.Dispose();
+                _connectAsyncCancellationTokenSource = null;
+            }
+
+            _connectAsyncCancellationTokenSource = new CancellationTokenSource();
+
+            Task.Factory.StartNew(() => ConnectAsync(), _connectAsyncCancellationTokenSource.Token);
         }
 
         public bool IsConnected()
@@ -62,7 +73,7 @@ namespace Splitio.Services.EventSource
             }
         }
 
-        public void Disconnect()
+        public void Disconnect(bool reconnect = false)
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
 
@@ -74,7 +85,7 @@ namespace Splitio.Services.EventSource
 
             if (_backOff.GetAttempt() == 0)
             {
-                DispatchDisconnect();
+                DispatchDisconnect(reconnect);
             }
 
             _log.Info($"Disconnected from {_url}");
@@ -115,8 +126,10 @@ namespace Splitio.Services.EventSource
             catch (Exception ex)
             {
                 _log.Error($"Error connecting to {_url}: {ex.Message}");
-                Disconnect();
             }
+
+            _log.Debug("Finish ConnectAsync.");
+            Disconnect();
         }
 
         private async Task ReadStreamAsync(Stream stream)
@@ -165,7 +178,7 @@ namespace Splitio.Services.EventSource
                             catch (NotificationErrorException ex)
                             {
                                 _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
-                                Disconnect();
+                                Disconnect(reconnect: true);
                             }
                             catch (Exception ex)
                             {
@@ -185,9 +198,9 @@ namespace Splitio.Services.EventSource
             OnEvent(new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchDisconnect()
+        private void DispatchDisconnect(bool reconnect = false)
         {
-            OnDisconnect(new FeedbackEventArgs(isConnected: false));
+            OnDisconnect(new FeedbackEventArgs(isConnected: false, reconnect: reconnect));
         }
 
         private void DispatchConnected()

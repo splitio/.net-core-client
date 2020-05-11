@@ -57,7 +57,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.Disconnect())
+                .Setup(mock => mock.Disconnect(It.IsAny<bool>()))
                 .Raises(mock => mock.DisconnectEvent += null, new FeedbackEventArgs(false));
 
             // Act.
@@ -65,7 +65,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _sseHandler.Stop();
 
             // Assert.
-            _eventSourceClient.Verify(mock => mock.Disconnect(), Times.Once);
+            _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<bool>()), Times.Once);
             _splitsWorker.Verify(mock => mock.Stop(), Times.Once);
             _segmentsWorker.Verify(mock => mock.Stop(), Times.Once);
         }
