@@ -66,7 +66,7 @@ namespace Splitio.Services.Common
 
         private void StartStream()
         {
-            _log.Debug("Starting push mode ...");
+            _log.Debug("Starting push mode...");
 
             _synchronizer.StartPeriodicDataRecording();
             Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
