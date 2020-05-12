@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SplitFetcher.Classes
 {
@@ -41,9 +42,9 @@ namespace Splitio.Services.SplitFetcher.Classes
         #region Public Methods
         public void Start()
         {
-            var periodicTask = PeriodicTaskFactory.Start(() =>
+            var periodicTask = PeriodicTaskFactory.Start(async() =>
             {
-                FetchSplits();
+                await FetchSplits();
             },
             intervalInMilliseconds: _interval * 1000,
             cancelToken: _cancelTokenSource.Token);
@@ -59,7 +60,7 @@ namespace Splitio.Services.SplitFetcher.Classes
             _splitCache.Clear();
         }
 
-        public async void FetchSplits()
+        public async Task FetchSplits()
         {
             while (true)
             {

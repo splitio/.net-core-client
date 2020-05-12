@@ -69,7 +69,7 @@ namespace Splitio.Services.Common
             _log.Debug("Starting push mode...");
 
             _synchronizer.StartPeriodicDataRecording();
-            Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
+            _synchronizer.SyncAll();
             _pushManager.StartSse();
         }
 
@@ -82,7 +82,7 @@ namespace Splitio.Services.Common
             }
             else if (e.Reconnect)
             {
-                Task.Factory.StartNew(() => { _synchronizer.SyncAll(); });
+                _synchronizer.SyncAll();
                 _pushManager.StartSse();
             }
             else
