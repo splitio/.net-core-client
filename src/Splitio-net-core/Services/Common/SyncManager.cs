@@ -59,7 +59,7 @@ namespace Splitio.Services.Common
         #region Private Methods
         private void StartPoll()
         {
-            _log.Debug("Starting push mode...");
+            _log.Debug("Starting push mode ...");
             _synchronizer.StartPeriodicFetching();
             _synchronizer.StartPeriodicDataRecording();
         }
