@@ -93,20 +93,20 @@ namespace Splitio.Services.SegmentFetcher.Classes
             }
         }
 
-        public void FetchAll()
+        public async Task FetchAll()
         {
             foreach (var segment in _segments.Values)
             {
-                segment.FetchSegment();
+                await segment.FetchSegment();
 
                 _log.Debug(string.Format("Segment fetched: {0}", segment.Name));
             }
         }
 
-        public void Fetch(string segmentName)
+        public async Task Fetch(string segmentName)
         {
             var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
-            refreshingSegment.FetchSegment();
+            await refreshingSegment.FetchSegment();
         }
         #endregion
 

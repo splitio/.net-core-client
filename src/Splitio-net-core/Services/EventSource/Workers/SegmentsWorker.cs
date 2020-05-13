@@ -77,7 +77,7 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Methods
-        public void Execute()
+        public async void Execute()
         {
             try
             {
@@ -90,7 +90,7 @@ namespace Splitio.Services.EventSource.Workers
 
                         if (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName))
                         {
-                            _synchronizer.SynchronizeSegment(segment.SegmentName);
+                            await _synchronizer.SynchronizeSegment(segment.SegmentName);
                         }
                     }
                 }

@@ -48,7 +48,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
                         }
 
                         IncrementCounter();
-                        Task task = new Task(() => segment.FetchSegment(), token);
+                        Task task = new Task(async() => await segment.FetchSegment(), token);
                         task.ContinueWith((x) => { DecrementCounter(); });
                         task.Start();
                     }

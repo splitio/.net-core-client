@@ -6,7 +6,7 @@ namespace Splitio.Services.Common
     {
         void SyncAll();
         Task SynchronizeSplits();
-        void SynchronizeSegment(string segmentName);
+        Task SynchronizeSegment(string segmentName);
         void StartPeriodicFetching();
         void StopPeriodicFetching();
         void StartPeriodicDataRecording();
