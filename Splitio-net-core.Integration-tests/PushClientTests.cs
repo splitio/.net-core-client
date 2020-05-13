@@ -118,6 +118,7 @@ namespace Splitio_net_core.Integration_tests
             }
         }
 
+        [Ignore]
         [TestMethod]
         public void GetTreatment_SplitKill_ShouldFetch()
         {
