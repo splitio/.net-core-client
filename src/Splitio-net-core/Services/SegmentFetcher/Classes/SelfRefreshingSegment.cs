@@ -4,6 +4,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
@@ -26,14 +27,14 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _gates.RegisterSegment(name);
         }
 
-        public void FetchSegment(string segmentName)
+        public async Task FetchSegment(string segmentName)
         {
             Name = segmentName;
             _gates.RegisterSegment(Name);
-            FetchSegment();
+            await FetchSegment();
         }
 
-        public async void FetchSegment()
+        public async Task FetchSegment()
         {
             while (true)
             {

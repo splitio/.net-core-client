@@ -27,9 +27,11 @@ namespace Splitio.Services.EventSource
         private readonly object _connectedLock = new object();
         private bool _connected;
 
+        private readonly object _finishedConnectionLock = new object();
+        private bool _finishedConnection;
+
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _connectAsyncCancellationTokenSource;
         private string _url;
 
         public EventSourceClient(int backOffBase,
@@ -42,6 +44,8 @@ namespace Splitio.Services.EventSource
             _notificationParser = notificationParser ?? new NotificationParser();
             _backOff = backOff ?? new BackOff(backOffBase);
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+
+            UpdateFinishedConnection(finished: true);
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -49,20 +53,17 @@ namespace Splitio.Services.EventSource
         public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         #region Public Methods
-        public void Connect(string url)
+        public async Task ConnectAsync(string url)
         {
             _url = url;
 
-            if (_connectAsyncCancellationTokenSource != null)
+            while (!IsConnectionFinished())
             {
-                _connectAsyncCancellationTokenSource.Cancel();
-                _connectAsyncCancellationTokenSource.Dispose();
-                _connectAsyncCancellationTokenSource = null;
+                // Wait until current connection ends.
+                _wrapperAdapter.TaskDelay(1000).Wait();
             }
 
-            _connectAsyncCancellationTokenSource = new CancellationTokenSource();
-
-            Task.Factory.StartNew(() => ConnectAsync(), _connectAsyncCancellationTokenSource.Token);
+            await ConnectAsync();
         }
 
         public bool IsConnected()
@@ -81,13 +82,11 @@ namespace Splitio.Services.EventSource
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
 
-            UpdateStatus(connected: false);
-
             if (_backOff.GetAttempt() == 0)
             {
                 DispatchDisconnect(reconnect);
             }
-
+            UpdateStatus(connected: false);
             _log.Info($"Disconnected from {_url}");
         }
         #endregion
@@ -104,6 +103,7 @@ namespace Splitio.Services.EventSource
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
+                    UpdateFinishedConnection(finished: false);
                     try
                     {
                         using (var stream = await response.Content.ReadAsStreamAsync())
@@ -119,7 +119,7 @@ namespace Splitio.Services.EventSource
                     catch (Exception ex)
                     {
                         _log.Error($"Error reading stream: {ex.Message}");
-                        Reconnect();
+                        ReconnectAsync();
                     }
                 }
             }
@@ -128,8 +128,9 @@ namespace Splitio.Services.EventSource
                 _log.Error($"Error connecting to {_url}: {ex.Message}");
             }
 
-            _log.Debug("Finish ConnectAsync.");
+            _log.Debug("Finished Event Source client ConnectAsync.");
             Disconnect();
+            UpdateFinishedConnection(finished: true);
         }
 
         private async Task ReadStreamAsync(Stream stream)
@@ -151,11 +152,11 @@ namespace Splitio.Services.EventSource
                     // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                     var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                    if (finishedTask == timeoutTask) Reconnect();
+                    if (finishedTask == timeoutTask) throw new Exception($"Streaming read time out after {ReadTimeout} seconds.");
 
                     int len = streamReadTask.Result;
 
-                    if (len == 0) Reconnect();
+                    if (len == 0) throw new Exception($"Streaming end of the file.");
 
                     var notificationString = encoder.GetString(buffer, 0, len);
                     _log.Debug($"Read stream encoder buffer: {notificationString}");
@@ -223,10 +224,10 @@ namespace Splitio.Services.EventSource
             DisconnectEvent?.Invoke(this, e);
         }
 
-        private void Reconnect()
+        private void ReconnectAsync()
         {
             Disconnect();
-            ConnectAsync();
+            Task.Factory.StartNew(() => ConnectAsync(_url));
         }
 
         private void UpdateStatus(bool connected)
@@ -234,6 +235,22 @@ namespace Splitio.Services.EventSource
             lock (_connectedLock)
             {
                 _connected = connected;
+            }
+        }
+
+        private void UpdateFinishedConnection(bool finished)
+        {
+            lock (_finishedConnectionLock)
+            {
+                _finishedConnection = finished;
+            }
+        }
+
+        private bool IsConnectionFinished()
+        {
+            lock (_finishedConnectionLock)
+            {
+                return _finishedConnection;
             }
         }
         #endregion

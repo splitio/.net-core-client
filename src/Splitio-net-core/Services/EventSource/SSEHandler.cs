@@ -48,11 +48,11 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                _eventSourceClient.Connect(url);
+                _eventSourceClient.ConnectAsync(url);
             }
             catch (Exception ex)
             {
-                _log.Error($"Start: {ex.Message}");
+                _log.Error($"SSE Handler Start: {ex.Message}");
             }
         }
 
@@ -68,7 +68,7 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                _log.Error($"Stop: {ex.Message}");
+                _log.Error($"SSE Handler Stop: {ex.Message}");
             }
         }
 

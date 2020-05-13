@@ -1,10 +1,12 @@
-﻿namespace Splitio.Services.Common
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.Common
 {
     public interface ISynchronizer
     {
         void SyncAll();
-        void SynchronizeSplits();
-        void SynchronizeSegment(string segmentName);
+        Task SynchronizeSplits();
+        Task SynchronizeSegment(string segmentName);
         void StartPeriodicFetching();
         void StopPeriodicFetching();
         void StartPeriodicDataRecording();

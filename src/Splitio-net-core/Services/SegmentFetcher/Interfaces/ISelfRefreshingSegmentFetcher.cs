@@ -1,11 +1,13 @@
-﻿namespace Splitio.Services.SegmentFetcher.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.SegmentFetcher.Interfaces
 {
     public interface ISelfRefreshingSegmentFetcher
     {
         void Start();
         void Stop();
-        void FetchAll();
-        void Fetch(string segmentName);
+        Task FetchAll();
+        Task Fetch(string segmentName);
         void Clear();
     }
 }

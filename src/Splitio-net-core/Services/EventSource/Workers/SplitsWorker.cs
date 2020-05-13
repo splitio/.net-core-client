@@ -68,7 +68,7 @@ namespace Splitio.Services.EventSource.Workers
                 _log.Debug("SplitsWorker starting ...");
                 _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
                 _cancellationTokenSource = new CancellationTokenSource();
-                Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+                Task.Factory.StartNew(() => ExecuteAsync(), _cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace Splitio.Services.EventSource.Workers
         #endregion
 
         #region Private Mthods
-        private void Execute()
+        private async void ExecuteAsync()
         {
             try
             {
@@ -108,7 +108,7 @@ namespace Splitio.Services.EventSource.Workers
 
                         if (changeNumber > _splitCache.GetChangeNumber())
                         {
-                            _synchronizer.SynchronizeSplits();
+                            await _synchronizer.SynchronizeSplits();
                         }
                     }
                 }

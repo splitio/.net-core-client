@@ -6,6 +6,7 @@ using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -76,19 +77,19 @@ namespace Splitio.Services.Common
         public async void SyncAll()
         {
             await _splitFetcher.FetchSplits();
-            _segmentFetcher.FetchAll();
+            await _segmentFetcher.FetchAll();
             _log.Debug("Spltis and Segments synchronized...");
         }
 
-        public void SynchronizeSegment(string segmentName)
+        public async Task SynchronizeSegment(string segmentName)
         {
-            _segmentFetcher.Fetch(segmentName);
+            await _segmentFetcher.Fetch(segmentName);
             _log.Debug($"Segment fetched: {segmentName}...");
         }
 
-        public void SynchronizeSplits()
+        public async Task SynchronizeSplits()
         {
-            _splitFetcher.FetchSplits();
+            await _splitFetcher.FetchSplits();
             _log.Debug("Splits fetched...");
         }
         #endregion
