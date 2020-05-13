@@ -12,7 +12,7 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private const long ExpirationRate = 600;
+        private const long ExpirationRate = 900;
 
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
