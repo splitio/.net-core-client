@@ -158,7 +158,7 @@ namespace Splitio_net_core.Integration_tests
                 var splitFactory = new SplitFactory(apikey, config);
                 var client = splitFactory.Client();
 
-                client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000000);
                 Thread.Sleep(2000);
 
                 var result = client.GetTreatment("admin", "push_test");

@@ -36,7 +36,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.IsTrue(eventSourceClient.IsConnected());
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
-                Assert.AreEqual(1, _connectedEvent.Count);
+                Assert.IsTrue(_connectedEvent.Count >= 1);
 
                 eventSourceClient.Disconnect();
             }
@@ -66,7 +66,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1585868246622, ((SplitKillNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("off", ((SplitKillNotification)ev.Event).DefaultTreatment);
                 Assert.AreEqual("test-split", ((SplitKillNotification)ev.Event).SplitName);
-                Assert.AreEqual(1, _connectedEvent.Count);
+                Assert.IsTrue(_connectedEvent.Count >= 1);
 
                 eventSourceClient.Disconnect();
             }
@@ -122,7 +122,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_PAUSED, ((ControlNotification)ev.Event).ControlType);
-                Assert.AreEqual(1, _connectedEvent.Count);
+                Assert.IsTrue(_connectedEvent.Count >= 1);
 
                 eventSourceClient.Disconnect();
             }
@@ -150,7 +150,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_RESUMED, ((ControlNotification)ev.Event).ControlType);
-                Assert.AreEqual(1, _connectedEvent.Count);
+                Assert.IsTrue(_connectedEvent.Count >= 1);
 
                 eventSourceClient.Disconnect();
             }
@@ -178,7 +178,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)ev.Event).ControlType);
-                Assert.AreEqual(1, _connectedEvent.Count);
+                Assert.IsTrue(_connectedEvent.Count >= 1);
 
                 eventSourceClient.Disconnect();
             }
