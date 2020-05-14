@@ -12,7 +12,7 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private const long SecondsBeforeExpiration = 600;
+        private const long SecondsBeforeExpiration = 600; // how many seconds prior to token expiration to trigger reauth
 
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
