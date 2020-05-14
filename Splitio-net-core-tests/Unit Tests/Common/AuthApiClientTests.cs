@@ -19,7 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _logMock = new Mock<ISplitLogger>();
             _splitioHttpClientMock = new Mock<ISplitioHttpClient>();
 
-            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", "test-apikey", 200, _splitioHttpClientMock.Object, _logMock.Object);
+            _authApiClient = new AuthApiClient("https://auth.fake.io/auth", "test-apikey", 200, 1, _splitioHttpClientMock.Object, _logMock.Object);
         }
 
         [TestMethod]

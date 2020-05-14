@@ -12,19 +12,20 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private const long ExpirationRate = 900;
-
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly string _url;
+        private readonly int _authServiceTokenExpirationMin;
 
         public AuthApiClient(string url,
             string apiKey,
             long connectionTimeOut,
+            int authServiceTokenExpirationMin,
             ISplitioHttpClient splitioHttpClient = null,
             ISplitLogger log = null)
         {
             _url = url;
+            _authServiceTokenExpirationMin = authServiceTokenExpirationMin;
             _splitioHttpClient = splitioHttpClient ?? new SplitioHttpClient(apiKey, connectionTimeOut);
             _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
         }
@@ -71,7 +72,7 @@ namespace Splitio.Services.Common
                 var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
                 authResponse.Channels = GetChannels(token);
-                authResponse.Expiration = GetExpiration(token);
+                authResponse.Expiration = GetExpirationMiliseconds(token);
             }
 
             authResponse.Retry = false;
@@ -101,9 +102,9 @@ namespace Splitio.Services.Common
             return channels;
         }
 
-        private double GetExpiration(Jwt token)
+        private double GetExpirationMiliseconds(Jwt token)
         {
-            return (token.Expiration - ExpirationRate) - GetUnixTimeSeconds();
+            return 60 * _authServiceTokenExpirationMin;
         }
 
         private string DecodeJwt(string token)
@@ -119,12 +120,6 @@ namespace Splitio.Services.Common
 
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedBody);
             return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-        }
-
-        // Returns the number of seconds that have elapsed since 1970-01-01T00:00:00Z.
-        private double GetUnixTimeSeconds()
-        {
-            return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         }
 #endregion
     }

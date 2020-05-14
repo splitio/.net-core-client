@@ -23,5 +23,6 @@
         public int StreamingReconnectBackoffBase { get; set; }
         public string AuthServiceURL { get; set; }
         public string StreamingServiceURL { get; set; }
+        public int AuthServiceTokenExpirationMin { get; set; }
     }
 }
