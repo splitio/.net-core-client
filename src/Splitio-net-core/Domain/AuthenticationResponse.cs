@@ -19,5 +19,7 @@ namespace Splitio.Domain
         public string ClientId { get; set; }
         [JsonProperty("exp")]
         public long Expiration { get; set; }
+        [JsonProperty("iat")]
+        public long IssuedAt { get; set; }
     }
 }

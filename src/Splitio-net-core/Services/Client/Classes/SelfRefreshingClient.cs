@@ -111,7 +111,6 @@ namespace Splitio.Services.Client.Classes
             _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase");
             _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split-stage.io/api/auth" : config.AuthServiceURL;
             _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL;
-            _config.AuthServiceTokenExpirationMin = config.AuthServiceTokenExpirationMin ?? 50;
         }
 
         private void BuildSdkReadinessGates()
@@ -204,7 +203,7 @@ namespace Splitio.Services.Client.Classes
                 var eventSourceClient = new EventSourceClient(_config.StreamingReconnectBackoffBase, notificationParser: notificationParser);
                 var notificationManagerKeeper = new NotificationManagerKeeper();
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
-                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout, _config.AuthServiceTokenExpirationMin);
+                var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
                 var pushManager = new PushManager(_config.AuthRetryBackoffBase, sseHandler, authApiClient, _wrapperAdapter);
 
                 _syncManager = new SyncManager(_config.StreamingEnabled, synchronizer, pushManager, sseHandler, notificationManagerKeeper);

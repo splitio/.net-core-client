@@ -12,20 +12,19 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
+        private const long SecondsBeforeExpiration = 600;
+
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly string _url;
-        private readonly int _authServiceTokenExpirationMin;
 
         public AuthApiClient(string url,
             string apiKey,
             long connectionTimeOut,
-            int authServiceTokenExpirationMin,
             ISplitioHttpClient splitioHttpClient = null,
             ISplitLogger log = null)
         {
             _url = url;
-            _authServiceTokenExpirationMin = authServiceTokenExpirationMin;
             _splitioHttpClient = splitioHttpClient ?? new SplitioHttpClient(apiKey, connectionTimeOut);
             _log = log ?? WrapperAdapter.GetLogger(typeof(AuthApiClient));            
         }
@@ -72,7 +71,7 @@ namespace Splitio.Services.Common
                 var token = JsonConvert.DeserializeObject<Jwt>(tokenDecoded);
 
                 authResponse.Channels = GetChannels(token);
-                authResponse.Expiration = GetExpirationMiliseconds(token);
+                authResponse.Expiration = GetExpirationSeconds(token);
             }
 
             authResponse.Retry = false;
@@ -102,9 +101,9 @@ namespace Splitio.Services.Common
             return channels;
         }
 
-        private double GetExpirationMiliseconds(Jwt token)
+        private double GetExpirationSeconds(Jwt token)
         {
-            return 60 * _authServiceTokenExpirationMin;
+            return token.Expiration - token.IssuedAt - SecondsBeforeExpiration;
         }
 
         private string DecodeJwt(string token)
