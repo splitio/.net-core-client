@@ -79,7 +79,7 @@ namespace Splitio.Services.Common
                 var sleepTime = Convert.ToInt32(time) * 1000;
                 _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
 
-                var task = _wrapperAdapter
+                _wrapperAdapter
                     .TaskDelay(sleepTime)
                     .ContinueWith((t) =>
                     {
