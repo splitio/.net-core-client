@@ -28,7 +28,6 @@ namespace Splitio.Services.Common
 
             _sseHandler.ConnectedEvent += OnProcessFeedbackSSE;
             _sseHandler.DisconnectEvent += OnProcessFeedbackSSE;
-            _sseHandler.DisconnectEvent += OnProcessFeedbackSSE;
             notificationManagerKeeper.OccupancyEvent += OnOccupancyEvent;
             notificationManagerKeeper.PushShutdownEvent += OnPushShutdownEvent;
         }
