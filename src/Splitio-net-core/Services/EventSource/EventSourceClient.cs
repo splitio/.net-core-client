@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Splitio.Services.Common;
+using Splitio.Services.Exceptions;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
+using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -12,53 +15,79 @@ namespace Splitio.Services.EventSource
 {
     public class EventSourceClient : IEventSourceClient
     {
-        private const string KeepAliveResponse = "\n";
+        private const string KeepAliveResponse = ":keepalive\n\n";
+        private const int ReadTimeout = 70;
+        private const int BufferSize = 10000;
 
         private readonly ISplitLogger _log;
-        private readonly Uri _uri;
-        private readonly int _readTimeout;
+        private readonly INotificationParser _notificationParser;
+        private readonly IBackOff _backOff;
+        private readonly IWrapperAdapter _wrapperAdapter;
 
-        private readonly object _statusLock = new object();
-        private Status _status;
+        private readonly object _connectedLock = new object();
+        private bool _connected;
 
-        private HttpClient _httpClient;
+        private readonly object _finishedConnectionLock = new object();
+        private bool _finishedConnection;
+
+        private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
+        private string _url;
 
-        public EventSourceClient(string url,
-            int readTimeout = 300000,
-            ISplitLogger log = null)
+        public EventSourceClient(int backOffBase,
+            ISplitLogger log = null,
+            INotificationParser notificationParser = null,
+            IBackOff backOff = null,
+            IWrapperAdapter wrapperAdapter = null)
         {
-            _uri = new Uri(url);
-            _readTimeout = readTimeout;
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
+            _notificationParser = notificationParser ?? new NotificationParser();
+            _backOff = backOff ?? new BackOff(backOffBase);
+            _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
 
-            Task.Factory.StartNew(() => ConnectAsync());
+            UpdateFinishedConnection(finished: true);
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
-        public event EventHandler<ErrorReceivedEventArgs> ErrorReceived;
+        public event EventHandler<FeedbackEventArgs> ConnectedEvent;
+        public event EventHandler<FeedbackEventArgs> DisconnectEvent;
 
         #region Public Methods
-        public Status Status()
+        public async Task ConnectAsync(string url)
         {
-            lock (_statusLock)
+            _url = url;
+
+            while (!IsConnectionFinished())
             {
-                return _status;
+                // Wait until current connection ends.
+                _wrapperAdapter.TaskDelay(1000).Wait();
+            }
+
+            await ConnectAsync();
+        }
+
+        public bool IsConnected()
+        {
+            lock (_connectedLock)
+            {
+                return _connected;
             }
         }
 
-        public void Disconnect()
+        public void Disconnect(bool reconnect = false)
         {
-            _log.Debug($"Disconnecting from {_uri}");
+            if (_cancellationTokenSource.IsCancellationRequested) return;
 
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            _httpClient.CancelPendingRequests();
-            _httpClient.Dispose();
+            _splitHttpClient.Dispose();
 
-            UpdateStatus(EventSource.Status.Disconnected);
-
-            _log.Info($"Disconnected from {_uri}");
+            if (_backOff.GetAttempt() == 0)
+            {
+                DispatchDisconnect(reconnect);
+            }
+            UpdateStatus(connected: false);
+            _log.Info($"Disconnected from {_url}");
         }
         #endregion
 
@@ -67,86 +96,94 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                _httpClient = new HttpClient();
+                _wrapperAdapter.TaskDelay(Convert.ToInt32(_backOff.GetInterval()) * 1000).Wait();
+
+                _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                _log.Info($"Connecting to {_uri}");
-                UpdateStatus(EventSource.Status.Connecting);
-
-                var request = new HttpRequestMessage(HttpMethod.Get, _uri);
-
-                using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
+                using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
-                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    UpdateFinishedConnection(finished: false);
+                    try
                     {
-                        stream.ReadTimeout = _readTimeout;
-                        _log.Info($"Connected to {_uri}");
-                        UpdateStatus(EventSource.Status.Connected);
-                        await ReadStreamAsync(stream);
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        {
+                            _log.Info($"Connected to {_url}");
+
+                            UpdateStatus(connected: true);
+                            _backOff.Reset();
+                            DispatchConnected();
+                            await ReadStreamAsync(stream);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error($"Error reading stream: {ex.Message}");
+                        ReconnectAsync();
                     }
                 }
             }
             catch (Exception ex)
             {
-                DispatchError(ex.Message);
-                UpdateStatus(EventSource.Status.Disconnected);
+                _log.Error($"Error connecting to {_url}: {ex.Message}");
             }
+
+            _log.Debug("Finished Event Source client ConnectAsync.");
+            Disconnect();
+            UpdateFinishedConnection(finished: true);
         }
 
         private async Task ReadStreamAsync(Stream stream)
         {
             var encoder = new UTF8Encoding();
+            var streamReadcancellationTokenSource = new CancellationTokenSource();
 
             _log.Debug($"Reading stream ....");
 
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            while (!_cancellationTokenSource.IsCancellationRequested && IsConnected())
             {
-                if (stream.CanRead)
+                if (stream.CanRead && IsConnected())
                 {
-                    var buffer = new byte[2048];
+                    var buffer = new byte[BufferSize];
 
-                    int len = await stream.ReadAsync(buffer, 0, 2048, _cancellationTokenSource.Token);
+                    var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
+                    var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, streamReadcancellationTokenSource.Token);
+                    // Creates a task that will complete when any of the supplied tasks have completed.
+                    // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
+                    var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                    if (len > 0 && Status() == EventSource.Status.Connected)
+                    if (finishedTask == timeoutTask) throw new Exception($"Streaming read time out after {ReadTimeout} seconds.");
+
+                    int len = streamReadTask.Result;
+
+                    if (len == 0) throw new Exception($"Streaming end of the file.");
+
+                    var notificationString = encoder.GetString(buffer, 0, len);
+                    _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                    if (notificationString != KeepAliveResponse && IsConnected())
                     {
-                        var text = encoder.GetString(buffer, 0, len);
-                        _log.Debug($"Read stream encoder buffer: {text}");
+                        var lines = notificationString.Split(new[] { "\n\n" }, StringSplitOptions.None);
 
-                        if (text != KeepAliveResponse)
+                        foreach (var line in lines)
                         {
                             try
                             {
-                                var notification = JsonConvert.DeserializeObject<Notification>(text);
-                                var dataJsonString = JsonConvert.SerializeObject(notification.Data.Data);
-                                var data = JsonConvert.DeserializeObject<EventData>(dataJsonString);
-
-                                EventData eventData = null;
-
-                                switch (data.Type)
+                                if (!string.IsNullOrEmpty(line))
                                 {
-                                    case NotificationType.SPLIT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SplitUpdateEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.SPLIT_KILL:
-                                        eventData = JsonConvert.DeserializeObject<SplitKillEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.SEGMENT_UPDATE:
-                                        eventData = JsonConvert.DeserializeObject<SegmentUpdateEventData>(dataJsonString);
-                                        break;
-                                    case NotificationType.CONTROL:
-                                        eventData = JsonConvert.DeserializeObject<ControlEventData>(dataJsonString);
-                                        break;
-                                    default:
-                                        throw new Exception("Unexpected type received from EventSource");
+                                    var eventData = _notificationParser.Parse(line);
+
+                                    if (eventData != null) DispatchEvent(eventData);
                                 }
-
-                                if (eventData == null) throw new Exception("Incorrect format.");
-
-                                DispatchEvent(eventData);
+                            }
+                            catch (NotificationErrorException ex)
+                            {
+                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
+                                Disconnect(reconnect: true);
                             }
                             catch (Exception ex)
                             {
-                                DispatchError(ex.Message);
+                                _log.Debug($"Error during event parse: {ex.Message}");
                             }
                         }
                     }
@@ -156,16 +193,20 @@ namespace Splitio.Services.EventSource
             _log.Debug($"Stop read stream");
         }
 
-        private void DispatchEvent(EventData eventData)
+        private void DispatchEvent(IncomingNotification incomingNotification)
         {
-            _log.Debug($"DispatchEvent: {eventData}");
-            OnEvent(new EventReceivedEventArgs(eventData));
+            _log.Debug($"DispatchEvent: {incomingNotification}");
+            OnEvent(new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchError(string message)
+        private void DispatchDisconnect(bool reconnect = false)
         {
-            _log.Debug($"DispatchError: {message}");
-            OnError(new ErrorReceivedEventArgs(message));
+            OnDisconnect(new FeedbackEventArgs(isConnected: false, reconnect: reconnect));
+        }
+
+        private void DispatchConnected()
+        {
+            OnConnected(new FeedbackEventArgs(isConnected: true));
         }
 
         private void OnEvent(EventReceivedEventArgs e)
@@ -173,16 +214,43 @@ namespace Splitio.Services.EventSource
             EventReceived?.Invoke(this, e);
         }
 
-        private void OnError(ErrorReceivedEventArgs e)
+        private void OnConnected(FeedbackEventArgs e)
         {
-            ErrorReceived?.Invoke(this, e);
+            ConnectedEvent?.Invoke(this, e);
         }
 
-        private void UpdateStatus(Status status)
+        private void OnDisconnect(FeedbackEventArgs e)
         {
-            lock (_statusLock)
+            DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void ReconnectAsync()
+        {
+            Disconnect();
+            Task.Factory.StartNew(() => ConnectAsync(_url));
+        }
+
+        private void UpdateStatus(bool connected)
+        {
+            lock (_connectedLock)
             {
-                _status = status;
+                _connected = connected;
+            }
+        }
+
+        private void UpdateFinishedConnection(bool finished)
+        {
+            lock (_finishedConnectionLock)
+            {
+                _finishedConnection = finished;
+            }
+        }
+
+        private bool IsConnectionFinished()
+        {
+            lock (_finishedConnectionLock)
+            {
+                return _finishedConnection;
             }
         }
         #endregion

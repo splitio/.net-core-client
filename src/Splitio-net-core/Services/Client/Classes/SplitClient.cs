@@ -28,7 +28,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly ISplitNameValidator _splitNameValidator;
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
-        protected readonly IWrapperAdapter _wrapperAdapter;        
+        protected readonly IWrapperAdapter _wrapperAdapter;
 
         protected bool LabelsEnabled;
         protected bool Destroyed;

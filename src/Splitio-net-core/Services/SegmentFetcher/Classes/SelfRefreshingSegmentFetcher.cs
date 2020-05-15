@@ -4,14 +4,13 @@ using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
-using Splitio.Services.SplitFetcher.Interfaces;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISplitFetcher
+    public class SelfRefreshingSegmentFetcher : SegmentFetcher, ISelfRefreshingSegmentFetcher
     {
         private static readonly ISplitLogger _log = WrapperAdapter.GetLogger(typeof(SelfRefreshingSegmentFetcher));
 
@@ -41,20 +40,38 @@ namespace Splitio.Services.SegmentFetcher.Classes
             StartWorker();
         }
 
+        #region Public Methods
+        public void Start()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    if (_gates.IsSDKReady(0))
+                    {
+                        //Delay first execution until expected time has passed
+                        var intervalInMilliseconds = _interval * 1000;
+                        _wrappedAdapter.TaskDelay(intervalInMilliseconds).Wait();
+
+                        PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds, _cancelTokenSource.Token);
+                        break;
+                    }
+
+                    _wrappedAdapter.TaskDelay(500).Wait();
+                }
+            });
+        }
+
         public void Stop()
         {
             _cancelTokenSource.Cancel();
+        }
+
+        public void Clear()
+        {
             SegmentTaskQueue.segmentsQueue.Dispose();
             _segments.Clear();
             _segmentCache.Clear();
-        }
-
-        public void Start()
-        {
-            //Delay first execution until expected time has passed
-            _wrappedAdapter.TaskDelay(_interval * 1000).Wait();
-
-            var schedulerTask = PeriodicTaskFactory.Start(() => AddSegmentsToQueue(), intervalInMilliseconds: _interval * 1000, cancelToken: _cancelTokenSource.Token);
         }
 
         public override void InitializeSegment(string name)
@@ -71,11 +88,29 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug($"Segment queued: {segment.name}");
+                    _log.Debug($"Segment queued: {segment.Name}");
                 }
             }
         }
 
+        public async Task FetchAll()
+        {
+            foreach (var segment in _segments.Values)
+            {
+                await segment.FetchSegment();
+
+                _log.Debug(string.Format("Segment fetched: {0}", segment.Name));
+            }
+        }
+
+        public async Task Fetch(string segmentName)
+        {
+            var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
+            await refreshingSegment.FetchSegment();
+        }
+        #endregion
+
+        #region Private Methods
         private void AddSegmentsToQueue()
         {
             foreach (var segment in _segments.Values)
@@ -84,7 +119,7 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.Debug(string.Format("Segment queued: {0}", segment.name));
+                    _log.Debug(string.Format("Segment queued: {0}", segment.Name));
                 }
             }
         }
@@ -93,5 +128,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             var workerTask = Task.Factory.StartNew(() => _worker.ExecuteTasks(_cancelTokenSource.Token), _cancelTokenSource.Token);
         }
+        #endregion
     }
 }

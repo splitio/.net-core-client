@@ -1,5 +1,11 @@
 CHANGES
 
+6.1.0 (May 15, 2020)
+- Added support for the new Split streaming architecture. When enabled, the SDK will not poll for updates but instead receive notifications every time there's a change in your environments, allowing to process those much quicker. If disabled (default) or in the event of an issue, the SDK will fallback to the known polling mechanism to provide a seamless experience.
+
+6.0.3 (Apr 16, 2020)
+- Removed YamlDotNet.Signed obsolete dependency.
+
 6.0.2 (Feb 10, 2020)
 - Updated Newtonsoft.Json dependency to >= 10.0.3.
 
