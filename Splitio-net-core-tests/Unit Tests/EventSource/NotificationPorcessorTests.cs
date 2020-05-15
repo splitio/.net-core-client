@@ -57,6 +57,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Assert.
             _splitsWorker.Verify(mock => mock.KillSplit(notification.ChangeNumber, notification.SplitName, notification.DefaultTreatment), Times.Once);
+            _splitsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber), Times.Once);
         }
 
         [TestMethod]

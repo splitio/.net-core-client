@@ -71,7 +71,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         }
 
         [TestMethod]
-        public void Kill_ShouldTriggerFethc()
+        public void Kill_ShouldTriggerFetch()
         {
             // Arrange.            
             var changeNumber = 1585956698457;
@@ -90,12 +90,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
-            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Once);
         }
 
         [TestMethod]
-        public void Kill_ShouldNotTriggerFethc()
+        public void Kill_ShouldNotTriggerFetch()
         {
             // Arrange.            
             var changeNumber = 1585956698457;
@@ -114,8 +112,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
 
             // Assert.
             _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
-            _splitCache.Verify(mock => mock.GetChangeNumber(), Times.Once);
-            _synchronizer.Verify(mock => mock.SynchronizeSplits(), Times.Never);
         }
     }
 }

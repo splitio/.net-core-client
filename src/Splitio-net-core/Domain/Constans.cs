@@ -9,5 +9,6 @@
         public static string PushControlPri => "control_pri";
         public static string PushControlSec => "control_sec";
         public static string PushOccupancyPrefix => "[?occupancy=metrics.publishers]";
+        public static int PushSecondsBeforeExpiration => 600; // how many seconds prior to token expiration to trigger reauth
     }
 }

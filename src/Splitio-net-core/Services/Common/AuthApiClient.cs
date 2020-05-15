@@ -12,8 +12,6 @@ namespace Splitio.Services.Common
 {
     public class AuthApiClient : IAuthApiClient
     {
-        private const long SecondsBeforeExpiration = 600; // how many seconds prior to token expiration to trigger reauth
-
         private readonly ISplitLogger _log;
         private readonly ISplitioHttpClient _splitioHttpClient;
         private readonly string _url;
@@ -103,7 +101,7 @@ namespace Splitio.Services.Common
 
         private double GetExpirationSeconds(Jwt token)
         {
-            return token.Expiration - token.IssuedAt - SecondsBeforeExpiration;
+            return token.Expiration - token.IssuedAt - Constans.PushSecondsBeforeExpiration;
         }
 
         private string DecodeJwt(string token)

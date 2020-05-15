@@ -52,7 +52,6 @@ namespace Splitio.Services.EventSource.Workers
                 {
                     _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
                     _splitCache.Kill(changeNumber, splitName, defaultTreatment);
-                    AddToQueue(changeNumber);
                 }
             }
             catch (Exception ex)

@@ -33,6 +33,7 @@ namespace Splitio.Services.EventSource
                     case NotificationType.SPLIT_KILL:
                         var skn = (SplitKillNotification)notification;
                         _splitsWorker.KillSplit(skn.ChangeNumber, skn.SplitName, skn.DefaultTreatment);
+                        _splitsWorker.AddToQueue(skn.ChangeNumber);
                         break;
                     case NotificationType.SEGMENT_UPDATE:
                         var sc = (SegmentChangeNotification)notification;
