@@ -469,7 +469,6 @@ namespace Splitio_net_core.Integration_tests
             }
         }
 
-        //
         [TestMethod]
         public void ControlMessage_StreamingDisabled()
         {

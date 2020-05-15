@@ -68,7 +68,8 @@ namespace Splitio.Services.EventSource
             }
             catch (Exception ex)
             {
-                _log.Error($"SSE Handler Stop: {ex.Message}");
+                _log.Debug($"SSE Handler Stop: {ex.Message}");
+                DisconnectEvent?.Invoke(this, new FeedbackEventArgs(false));
             }
         }
 

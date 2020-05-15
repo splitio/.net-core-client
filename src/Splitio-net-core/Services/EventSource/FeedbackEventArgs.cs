@@ -9,7 +9,7 @@ namespace Splitio.Services.EventSource
 
         public FeedbackEventArgs(bool isConnected, bool reconnect = false)
         {
-            IsConnected = IsConnected;
+            IsConnected = isConnected;
             Reconnect = reconnect;
         }
     }
