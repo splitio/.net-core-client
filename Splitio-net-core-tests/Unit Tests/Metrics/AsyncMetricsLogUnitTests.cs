@@ -19,6 +19,7 @@ namespace Splitio_Tests.Unit_Tests.Metrics
             var counters = new ConcurrentDictionary<string, Counter>();
             var metricsCache = new InMemoryMetricsCache(counters);
             var metricsLog = new AsyncMetricsLog(null, metricsCache, 10, 3000);
+            metricsLog.Start();
 
             //Act
             metricsLog.Count("counter_test", 150);
@@ -39,6 +40,7 @@ namespace Splitio_Tests.Unit_Tests.Metrics
             var timers = new ConcurrentDictionary<string, ILatencyTracker>();
             var metricsCache = new InMemoryMetricsCache(null, timers);
             var metricsLog = new AsyncMetricsLog(null, metricsCache, 10, 3000);
+            metricsLog.Start();
 
             //Act
             metricsLog.Time("time_test", 1);
@@ -60,6 +62,7 @@ namespace Splitio_Tests.Unit_Tests.Metrics
             var gauges = new ConcurrentDictionary<string, long>();
             var metricsCache = new InMemoryMetricsCache(null, null, gauges);
             var metricsLog = new AsyncMetricsLog(null, metricsCache, 10, 3000);
+            metricsLog.Start();
 
             //Act
             metricsLog.Gauge("gauge_test", 1234);

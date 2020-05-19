@@ -39,17 +39,16 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 if (counter < numberOfParallelTasks)
                 {
-                    SelfRefreshingSegment segment;
                     //Wait indefinitely until a segment is queued
-                    if (SegmentTaskQueue.segmentsQueue.TryTake(out segment, -1))
+                    if (SegmentTaskQueue.segmentsQueue.TryTake(out SelfRefreshingSegment segment, -1))
                     {
                         if (Log.IsDebugEnabled)
                         {
-                            Log.Debug(string.Format("Segment dequeued: {0}", segment.name));
+                            Log.Debug(string.Format("Segment dequeued: {0}", segment.Name));
                         }
 
                         IncrementCounter();
-                        Task task = new Task(() => segment.RefreshSegment(), token);
+                        Task task = new Task(async() => await segment.FetchSegment(), token);
                         task.ContinueWith((x) => { DecrementCounter(); });
                         task.Start();
                     }

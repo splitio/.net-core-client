@@ -40,6 +40,15 @@ namespace Splitio.Services.Shared.Classes
 #endif
         }
 
+        public Task<Task> WhenAny(params Task[] tasks)
+        {
+#if NETSTANDARD || NET45
+            return Task.WhenAny(tasks);
+#else
+            return TaskEx.WhenAny(tasks);
+#endif
+        }
+
         public async Task<T> TaskFromResult<T>(T result)
         {
 #if NETSTANDARD || NET45

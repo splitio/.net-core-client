@@ -162,5 +162,18 @@ namespace Splitio.Services.Cache.Classes
                 .Where(s => s != null)
                 .ToList();
         }
+
+        public void Kill(long changeNumber, string splitName, string defaultTreatment)
+        {
+            var split = GetSplit(splitName);
+
+            if (split == null) return;
+
+            split.defaultTreatment = defaultTreatment;
+            split.killed = true;
+            split.changeNumber = changeNumber;
+
+            AddOrUpdate(splitName, split);
+        }
     }
 }

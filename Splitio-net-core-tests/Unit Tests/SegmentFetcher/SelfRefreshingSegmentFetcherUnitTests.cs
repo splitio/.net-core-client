@@ -8,6 +8,7 @@ using Moq;
 using Splitio.Services.SplitFetcher.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
+using Splitio.Services.Cache.Interfaces;
 
 namespace Splitio_Tests.Unit_Tests.SegmentFetcher
 {
@@ -51,25 +52,30 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
         public void StartSchedullerSuccessfully()
         {
             //Arrange
-            var gates = new InMemoryReadinessGatesCache();
+            var gates = new Mock<IReadinessGatesCache>();
             var apiClient = new Mock<ISegmentSdkApiClient>();
             apiClient
-            .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(Task.FromResult(@"{
-                          'name': 'payed',
-                          'added': [
-                            'abcdz',
-                            'bcadz',
-                            'xzydz'
-                          ],
-                          'removed': [],
-                          'since': -1,
-                          'till': 10001
-                        }"));
+                .Setup(x => x.FetchSegmentChanges(It.IsAny<string>(), It.IsAny<long>()))
+                .Returns(Task.FromResult(@"{
+                              'name': 'payed',
+                              'added': [
+                                'abcdz',
+                                'bcadz',
+                                'xzydz'
+                              ],
+                              'removed': [],
+                              'since': -1,
+                              'till': 10001
+                            }"));
+
+            gates
+                .Setup(mock => mock.IsSDKReady(0))
+                .Returns(true);
+
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 10, cache, 1);
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates.Object, 10, cache, 1);
 
             //Act
             segmentFetcher.InitializeSegment("payed");
