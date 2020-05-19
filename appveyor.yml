@@ -25,22 +25,15 @@ build_script:
 
 after_build:
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp1.0
+ - redis-server --service-stop
+ - redis-server --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net462
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - redis-server --service-stop
  - redis-server --service-start
  - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework netcoreapp2.2
  - redis-server --service-stop
  - redis-server --service-start
- - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework netcoreapp1.0
- - redis-server --service-stop
- - redis-server --service-start
  - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework net472
- - redis-server --service-stop
- - redis-server --service-start
- - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework net451
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release
