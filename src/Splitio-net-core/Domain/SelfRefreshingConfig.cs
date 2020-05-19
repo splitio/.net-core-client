@@ -18,5 +18,10 @@
         public int MaxTimeBetweenCalls { get; set; }
         public int NumberOfParalellSegmentTasks { get; set; }
         public bool RandomizeRefreshRates { get; set; }
+        public bool StreamingEnabled { get; set; }
+        public int AuthRetryBackoffBase { get; set; }
+        public int StreamingReconnectBackoffBase { get; set; }
+        public string AuthServiceURL { get; set; }
+        public string StreamingServiceURL { get; set; }
     }
 }

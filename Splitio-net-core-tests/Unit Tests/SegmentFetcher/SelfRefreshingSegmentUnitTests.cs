@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
     public class SelfRefreshingSegmentUnitTests
     {
         [TestMethod]
-        public void RefreshSegmentNullChangesFetcherResponseShouldNotUpdateCache()
+        public void FetchSegmentNullChangesFetcherResponseShouldNotUpdateCache()
         {
             //Arrange
             var gates = new InMemoryReadinessGatesCache();
@@ -29,14 +29,14 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
             
             //Act
-            segmentFetcher.RefreshSegment();
+            segmentFetcher.FetchSegment();
 
             //Assert
             Assert.AreEqual(0, segments.Count);
         }
 
         [TestMethod]
-        public void RefreshSegmentShouldUpdateReadinessGatesWhenNoMoreChanges()
+        public void FetchSegmentShouldUpdateReadinessGatesWhenNoMoreChanges()
         {
             //Arrange
             var gates = new InMemoryReadinessGatesCache();
@@ -60,14 +60,14 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
 
             //Act
-            segmentFetcher.RefreshSegment();
+            segmentFetcher.FetchSegment();
 
             //Assert
             Assert.IsTrue(gates.AreSegmentsReady(1));
         }
 
         [TestMethod]
-        public void RefreshSegmentShouldUpdateSegmentsCache()
+        public void FetchSegmentShouldUpdateSegmentsCache()
         {
             //Arrange
             var gates = new InMemoryReadinessGatesCache();
@@ -91,7 +91,7 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var segmentFetcher = new SelfRefreshingSegment("payed", apiFetcher, gates, cache);
 
             //Act
-            segmentFetcher.RefreshSegment();
+            segmentFetcher.FetchSegment();
 
             //Assert
             Assert.AreEqual(1, segments.Count);
