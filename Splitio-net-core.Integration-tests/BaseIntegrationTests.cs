@@ -835,11 +835,11 @@ namespace Splitio_net_core.Integration_tests
 
             try
             {
-                client.BlockUntilReady(10000);
+                manager.BlockUntilReady(10000);
             }
             catch
             {
-                client.BlockUntilReady(100000);
+                manager.BlockUntilReady(100000);
             }
 
             // Act.
@@ -892,11 +892,11 @@ namespace Splitio_net_core.Integration_tests
 
             try
             {
-                client.BlockUntilReady(10000);
+                manager.BlockUntilReady(10000);
             }
             catch
             {
-                client.BlockUntilReady(100000);
+                manager.BlockUntilReady(100000);
             }
 
             // Act.
