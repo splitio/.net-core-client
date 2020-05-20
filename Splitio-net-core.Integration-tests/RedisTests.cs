@@ -48,14 +48,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");
@@ -116,14 +109,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var treatmentResult1 = client.GetTreatment("mauro_test", "FACUNDO_TEST");

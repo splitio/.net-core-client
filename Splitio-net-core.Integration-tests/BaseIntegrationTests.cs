@@ -32,14 +32,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
@@ -103,14 +96,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
@@ -162,14 +148,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result = client.GetTreatment("nico_test", "Random_Treatment");
@@ -344,14 +323,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result = client.GetTreatment("nico_test", "Random_Treatment");
@@ -585,14 +557,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
@@ -800,14 +765,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             var manager = client.GetSplitManager();
 
@@ -833,14 +791,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
 
-            try
-            {
-                manager.BlockUntilReady(10000);
-            }
-            catch
-            {
-                manager.BlockUntilReady(100000);
-            }
+            manager.BlockUntilReady(10000);
 
             // Act.
             var result = manager.Splits();
@@ -890,14 +841,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var manager = splitFactory.Manager();
 
-            try
-            {
-                manager.BlockUntilReady(10000);
-            }
-            catch
-            {
-                manager.BlockUntilReady(100000);
-            }
+            manager.BlockUntilReady(10000);
 
             // Act.
             var result = manager.Split(splitName);
@@ -936,14 +880,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             foreach (var _event in events)
             {
@@ -984,14 +921,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             foreach (var _event in events)
             {
@@ -1033,14 +963,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             foreach (var _event in events)
             {
@@ -1089,14 +1012,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);
 
             foreach (var _event in events)
             {
@@ -1125,14 +1041,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            try
-            {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
+            client.BlockUntilReady(10000);            
 
             var manager = client.GetSplitManager();
 
