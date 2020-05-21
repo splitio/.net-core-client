@@ -24,13 +24,13 @@ build_script:
 
 after_build:
  - redis-server --service-start
- - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework net472
+ - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
  - redis-server --service-stop
  - redis-server --service-start
  - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework netcoreapp2.2
  - redis-server --service-stop
  - redis-server --service-start
- - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
+ - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework net472
  - redis-server --service-stop
  - redis-server --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472 

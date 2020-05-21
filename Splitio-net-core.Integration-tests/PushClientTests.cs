@@ -6,7 +6,6 @@ using System.Threading;
 
 namespace Splitio_net_core.Integration_tests
 {
-    [Ignore]
     [DeploymentItem(@"Resources\splits_push.json")]
     [DeploymentItem(@"Resources\splits_push2.json")]
     [DeploymentItem(@"Resources\splits_push3.json")]
