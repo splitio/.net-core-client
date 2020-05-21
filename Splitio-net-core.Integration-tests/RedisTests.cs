@@ -33,6 +33,8 @@ namespace Splitio_net_core.Integration_tests
 #if NETCORE
             rootFilePath = @"Resources\";
 #endif
+
+            LoadSplits();
         }
 
         [TestMethod]
@@ -186,7 +188,7 @@ namespace Splitio_net_core.Integration_tests
 
         protected override HttpClientMock GetHttpClientMock()
         {
-            LoadSplits();
+            //LoadSplits();
 
             return null;
         }
