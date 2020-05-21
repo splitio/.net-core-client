@@ -12,6 +12,7 @@ using System.Threading;
 
 namespace Splitio_net_core.Integration_tests
 {
+    [Ignore]
     [TestClass]
     public class RedisTests : BaseIntegrationTests
     {
