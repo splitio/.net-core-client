@@ -14,7 +14,7 @@ before_build:
  #- choco install "sonarscanner-msbuild-net46" -y
  - choco install redis-64
  - redis-server --service-install
- - dotnet restore -s https://www.nuget.org/api/v3/
+ - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
