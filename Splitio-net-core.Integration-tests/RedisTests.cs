@@ -18,7 +18,6 @@ namespace Splitio_net_core.Integration_tests
         private const string Host = "localhost";
         private const string Port = "6379";
         private const string Password = "";
-        private const string UserPrefix = "";
         private const int Database = 0;
 
         private readonly IRedisAdapter _redisAdapter;
@@ -165,30 +164,23 @@ namespace Splitio_net_core.Integration_tests
 
             var cacheConfig = new CacheAdapterConfigurationOptions
             {
-                Type = AdapterType.Redis,
                 Host = Host,
                 Port = Port,
                 Password = Password,
-                Database = Database,
-                ConnectTimeout = 5000,
-                ConnectRetry = 3,
-                SyncTimeout = 1000,
-                UserPrefix = UserPrefix
+                Database = Database                
             };            
 
             return new ConfigurationOptions
             {
-                ReadTimeout = 20000,
-                ConnectionTimeout = 20000,
                 ImpressionListener = _impressionListener,
                 FeaturesRefreshRate = featuresRefreshRate ?? 1,
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
                 MetricsRefreshRate = 1,
-                EventsPushRate = eventsPushRate ?? 1,
-                Mode = Mode.Consumer,
+                EventsPushRate = eventsPushRate ?? 1,                
+                IPAddressesEnabled = ipAddressesEnabled,
                 CacheAdapterConfig = cacheConfig,
-                IPAddressesEnabled = ipAddressesEnabled
+                Mode = Mode.Consumer
             };
         }
 
