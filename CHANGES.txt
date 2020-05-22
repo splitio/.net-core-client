@@ -1,6 +1,6 @@
 CHANGES
 
-6.1.1 (May 21, 2020)
+6.1.1 (May 22, 2020)
 - Updated YamlDotNet dependency to 8.1.1.
 
 6.1.0 (May 15, 2020)

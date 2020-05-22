@@ -177,7 +177,7 @@ namespace Splitio_net_core.Integration_tests
                 SegmentsRefreshRate = 1,
                 ImpressionsRefreshRate = 1,
                 MetricsRefreshRate = 1,
-                EventsPushRate = eventsPushRate ?? 1,                
+                EventsPushRate = eventsPushRate ?? 1,
                 IPAddressesEnabled = ipAddressesEnabled,
                 CacheAdapterConfig = cacheConfig,
                 Mode = Mode.Consumer
