@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.0.1</Version>
+    <Version>6.1.1</Version>
     <RootNamespace>Splitio</RootNamespace>
   </PropertyGroup>
 
@@ -26,6 +26,10 @@
     <DefineConstants>NETSTANDARD</DefineConstants>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" version="8.1.1" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
   </ItemGroup>
@@ -39,15 +43,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-    <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0" />    
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45'">
     <PackageReference Include="Common.Logging" version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" version="3.3.1" />    
+    <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" version="10.0.3" />
-    <PackageReference Include="YamlDotNet" version="6.0.0" />
+    
   </ItemGroup>  
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
