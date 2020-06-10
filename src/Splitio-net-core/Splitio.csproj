@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
@@ -40,7 +40,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="MurmurHash-net-core" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
     <PackageReference Include="System.IO.FileSystem.Watcher" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
@@ -49,7 +49,7 @@
     <PackageReference Include="Common.Logging" version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" version="3.3.1" />
     <PackageReference Include="murmurhash-signed" version="1.0.2" />
-    <PackageReference Include="Newtonsoft.Json" version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" version="11.0.1" />
     
   </ItemGroup>  
 
