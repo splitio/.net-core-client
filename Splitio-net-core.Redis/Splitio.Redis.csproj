@@ -19,7 +19,14 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6' Or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="StackExchange.Redis" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="StackExchange.Redis" Version="2.1.55" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45'">
