@@ -1,5 +1,9 @@
 CHANGES
 
+6.1.2 (Jun 15, 2020)
+- Removed vulnerabilities.
+- Updated StreamingEnabled default to true. 
+
 6.1.1 (May 22, 2020)
 - Updated YamlDotNet dependency to 8.1.1.
 

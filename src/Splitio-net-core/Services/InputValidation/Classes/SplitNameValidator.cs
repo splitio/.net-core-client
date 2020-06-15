@@ -40,7 +40,14 @@ namespace Splitio.Services.InputValidation.Classes
 
                 if (splitNameResult.Success)
                 {
-                    try { dicSplits.Add(splitNameResult.Value, splitNameResult.Value); } catch { }
+                    try
+                    {
+                        dicSplits.Add(splitNameResult.Value, splitNameResult.Value);
+                    }
+                    catch
+                    {
+                        _log.Warn($"{method}: error adding splitName into list.");
+                    }
                 }
             }
 
