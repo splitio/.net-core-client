@@ -69,13 +69,18 @@ namespace Splitio.Services.EventSource
                 return controlNotification;
             }
 
-            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(notificationData.Data);
+            return ParseOccupancy(notificationData.Data, channel);
+        }
+
+        private IncomingNotification ParseOccupancy(string payload, string channel)
+        {
+            var occupancyNotification = JsonConvert.DeserializeObject<OccupancyNotification>(payload);
 
             if (occupancyNotification?.Metrics == null)
                 return null;
 
             occupancyNotification.Type = NotificationType.OCCUPANCY;
-            occupancyNotification.Channel = notificationData.Channel.Replace(Constans.PushOccupancyPrefix, string.Empty);
+            occupancyNotification.Channel = channel;
 
             return occupancyNotification;
         }
