@@ -17,6 +17,7 @@ namespace Splitio.Services.EventSource.Workers
 
         private BlockingCollection<SegmentQueueDto> _queue;
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _running;
 
         public SegmentsWorker(ISegmentCache segmentCache,
             ISynchronizer synchronizer,
@@ -48,10 +49,17 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
+                if (_running)
+                {
+                    _log.Error("Segments Worker already running.");
+                    return;
+                }
+
                 _log.Debug($"Segments worker starting ...");
                 _queue = new BlockingCollection<SegmentQueueDto>(new ConcurrentQueue<SegmentQueueDto>());
                 _cancellationTokenSource = new CancellationTokenSource();
                 Task.Factory.StartNew(() => Execute(), _cancellationTokenSource.Token);
+                _running = true;
             }
             catch (Exception ex)
             {
@@ -63,11 +71,18 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
+                if (!_running)
+                {
+                    _log.Error("Segments Worker not running.");
+                    return;
+                }
+
                 _cancellationTokenSource?.Cancel();
                 _cancellationTokenSource?.Dispose();
                 _queue?.Dispose();
                 _queue = null;
                 _log.Debug($"Segments worker stoped ...");
+                _running = false;
             }
             catch (Exception ex)
             {
