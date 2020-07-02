@@ -15,7 +15,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
         private readonly Mock<ISegmentCache> _segmentCache;
         private readonly Mock<ISynchronizer> _synchronizer;
 
-        private readonly ISegmentsWorker _segmentsWorker;
+        private readonly IWorker<SegmentQueueDto> _segmentsWorker;
 
         public SegmentsWorkerTests()
         {
@@ -54,13 +54,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             _segmentsWorker.Start();
 
             // Act.
-            _segmentsWorker.AddToQueue(changeNumber, segmentName);
-            _segmentsWorker.AddToQueue(changeNumber2, segmentName2);
-            _segmentsWorker.AddToQueue(changeNumber3, segmentName3);
+            _segmentsWorker.AddToQueue(new SegmentQueueDto(changeNumber, segmentName));
+            _segmentsWorker.AddToQueue(new SegmentQueueDto(changeNumber2, segmentName2));
+            _segmentsWorker.AddToQueue(new SegmentQueueDto(changeNumber3, segmentName3));
             Thread.Sleep(1000);
 
             _segmentsWorker.Stop();
-            _segmentsWorker.AddToQueue(1585956698487, "segment-test-4");
+            _segmentsWorker.AddToQueue(new SegmentQueueDto(1585956698487, "segment-test-4"));
             Thread.Sleep(10);
 
             // Assert.

@@ -9,7 +9,7 @@ namespace Splitio.Services.EventSource
     {
         private readonly ISplitLogger _log;
         private readonly ISplitsWorker _splitsWorker;
-        private readonly ISegmentsWorker _segmentsWorker;
+        private readonly IWorker<SegmentQueueDto> _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
         private readonly string _streaminServiceUrl;
@@ -21,7 +21,7 @@ namespace Splitio.Services.EventSource
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
-            ISegmentsWorker segmentsWorker,
+            IWorker<SegmentQueueDto> segmentsWorker,
             INotificationProcessor notificationPorcessor,
             INotificationManagerKeeper notificationManagerKeeper,
             ISplitLogger log = null,

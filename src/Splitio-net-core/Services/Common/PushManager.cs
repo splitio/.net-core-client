@@ -41,6 +41,7 @@ namespace Splitio.Services.Common
                 {
                     _sseHandler.Start(response.Token, response.Channels);
                     ScheduleNextTokenRefresh(response.Expiration.Value);
+                    _backOff.Reset();
                 }
                 else
                 {

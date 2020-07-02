@@ -11,7 +11,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     {
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
-        private readonly Mock<ISegmentsWorker> _segmentsWorker;
+        private readonly Mock<IWorker<SegmentQueueDto>> _segmentsWorker;
         private readonly Mock<INotificationProcessor> _notificationPorcessor;
         private readonly Mock<IEventSourceClient> _eventSourceClient;
         private readonly Mock<INotificationManagerKeeper> _notificationManagerKeeper;
@@ -21,7 +21,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         {
             _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
-            _segmentsWorker = new Mock<ISegmentsWorker>();
+            _segmentsWorker = new Mock<IWorker<SegmentQueueDto>>();
             _notificationPorcessor = new Mock<INotificationProcessor>();
             _eventSourceClient = new Mock<IEventSourceClient>();
             _notificationManagerKeeper = new Mock<INotificationManagerKeeper>();

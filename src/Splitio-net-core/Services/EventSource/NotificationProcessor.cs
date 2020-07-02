@@ -9,10 +9,10 @@ namespace Splitio.Services.EventSource
     {
         private readonly ISplitLogger _log;
         private readonly ISplitsWorker _splitsWorker;
-        private readonly ISegmentsWorker _segmentsWorker;
+        private readonly IWorker<SegmentQueueDto> _segmentsWorker;
 
         public NotificationProcessor(ISplitsWorker splitsWorker,
-            ISegmentsWorker segmentsWorker,
+            IWorker<SegmentQueueDto> segmentsWorker,
             ISplitLogger log = null)
         {
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
@@ -37,7 +37,7 @@ namespace Splitio.Services.EventSource
                         break;
                     case NotificationType.SEGMENT_UPDATE:
                         var sc = (SegmentChangeNotification)notification;
-                        _segmentsWorker.AddToQueue(sc.ChangeNumber, sc.SegmentName);
+                        _segmentsWorker.AddToQueue(new SegmentQueueDto(sc.ChangeNumber, sc.SegmentName));
                         break;
                     default:
                         _log.Debug($"Incorrect Event type: {notification}");

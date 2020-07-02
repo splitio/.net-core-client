@@ -11,14 +11,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     {
         private readonly Mock<ISplitLogger> _log;
         private readonly Mock<ISplitsWorker> _splitsWorker;
-        private readonly Mock<ISegmentsWorker> _segmentsWorker;
+        private readonly Mock<IWorker<SegmentQueueDto>> _segmentsWorker;
         private readonly INotificationProcessor _notificationPorcessor;
 
         public NotificationPorcessorTests()
         {
             _log = new Mock<ISplitLogger>();
             _splitsWorker = new Mock<ISplitsWorker>();
-            _segmentsWorker = new Mock<ISegmentsWorker>();
+            _segmentsWorker = new Mock<IWorker<SegmentQueueDto>>();
 
             _notificationPorcessor = new NotificationProcessor(_splitsWorker.Object, _segmentsWorker.Object, _log.Object);
         }
@@ -75,7 +75,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationPorcessor.Proccess(notification);
 
             // Assert.
-            _segmentsWorker.Verify(mock => mock.AddToQueue(notification.ChangeNumber, notification.SegmentName), Times.Once);
+            _segmentsWorker.Verify(mock => mock.AddToQueue(It.IsAny<SegmentQueueDto>()), Times.Once);
         }
     }
 }

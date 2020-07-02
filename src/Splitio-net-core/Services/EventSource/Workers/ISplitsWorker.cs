@@ -1,8 +1,7 @@
 ﻿namespace Splitio.Services.EventSource.Workers
 {
-    public interface ISplitsWorker : IWorker
+    public interface ISplitsWorker : IWorker<long>
     {
-        void AddToQueue(long changeNumber);
         void KillSplit(long changeNumber, string splitName, string defaultTreatment);   
     }
 }
