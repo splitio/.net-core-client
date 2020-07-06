@@ -23,19 +23,19 @@ build_script:
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp1.0
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net462
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
- - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
