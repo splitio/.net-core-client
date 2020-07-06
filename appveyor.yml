@@ -13,7 +13,7 @@ configuration: Release
 before_build:
  - choco install "sonarscanner-msbuild-net46" -y
  - nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
- - C:\ProgramData\Redis-64\tools\Redis-64\tools\redis-server.exe.exe --service-install
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
@@ -23,19 +23,19 @@ build_script:
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
- - Redis-64\tools\redis-server.exe --service-start
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp1.0
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net472
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net462
- - Redis-64\tools\redis-server.exe --service-stop
- - Redis-64\tools\redis-server.exe --service-start
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-stop
+ - C:\ProgramData\Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
