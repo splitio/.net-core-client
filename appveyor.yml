@@ -13,7 +13,7 @@ configuration: Release
 before_build:
  - choco install "sonarscanner-msbuild-net46" -y
  - nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
- #- redis-server --service-install
+ - redis-server --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
 
@@ -23,10 +23,10 @@ build_script:
  - SonarScanner.MSBuild.exe end /d:sonar.login=%SONAR_LOGIN%
 
 after_build:
- - redis-server --service-start
+ #- redis-server --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp2.2
- - redis-server --service-stop
- - redis-server --service-start
+ #- redis-server --service-stop
+ #- redis-server --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework netcoreapp1.0
  - redis-server --service-stop
  - redis-server --service-start
