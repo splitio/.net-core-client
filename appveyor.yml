@@ -12,7 +12,7 @@ configuration: Release
 
 before_build:
  - choco install "sonarscanner-msbuild-net46" -y
- - nuget install redis-64
+ - nuget install redis-64 -excludeversion -source http://www.nuget.org/api/v2/
  - redis-server --service-install
  - dotnet restore -s https://www.nuget.org/api/v2/
  - cmd: set BUILD_VERSION=%APPVEYOR_BUILD_NUMBER%
