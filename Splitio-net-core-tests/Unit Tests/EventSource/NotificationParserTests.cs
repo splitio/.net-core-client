@@ -131,7 +131,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_Control_StreamingPaused_ShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}";
+            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_PAUSED\\\"}\"}";
 
             // Act.
             var result = _notificationParser.Parse(text);
@@ -146,7 +146,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_Control_StreamingResumed_ShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}";
+            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_RESUMED\\\"}\"}";
 
             // Act.
             var result = _notificationParser.Parse(text);
@@ -161,7 +161,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         public void Parse_Control_StreamingDisabledShouldReturnParsedEvent()
         {
             // Arrange.
-            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}";
+            var text = "event: message\ndata: {\"id\":\"2222\",\"clientId\":\"3333\",\"timestamp\":1588254699236,\"encoding\":\"json\",\"channel\":\"[?occupancy=metrics.publishers]control_pri\",\"data\":\"{\\\"type\\\":\\\"CONTROL\\\",\\\"controlType\\\":\\\"STREAMING_DISABLED\\\"}\"}";
 
             // Act.
             var result = _notificationParser.Parse(text);
