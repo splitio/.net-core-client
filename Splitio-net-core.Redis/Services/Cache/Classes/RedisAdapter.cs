@@ -102,7 +102,7 @@ namespace Splitio.Redis.Services.Cache.Classes
         {
             try
             {
-                var keys = _server.Keys(pattern: pattern);
+                var keys = _server.Keys(_databaseNumber, pattern);
                 return keys.ToArray();
             }
             catch (Exception e)
