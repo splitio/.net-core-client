@@ -1,5 +1,8 @@
 CHANGES
 
+6.1.4 (Aug 6, 2020)
+- Fixed SplitManager.Splits() when Redis db != 0 is used.
+
 6.1.3 (Jul 6, 2020)
 - Fixed Control notifications parser.
 
