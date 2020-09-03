@@ -37,7 +37,8 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 10, cache, 1);
+            var segmentTaskQueue = new SegmentTaskQueue();
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates, 10, cache, 1, segmentTaskQueue);
             
             //Act
             segmentFetcher.InitializeSegment("payed");
@@ -75,14 +76,15 @@ namespace Splitio_Tests.Unit_Tests.SegmentFetcher
             var apiFetcher = new ApiSegmentChangeFetcher(apiClient.Object);
             var segments = new ConcurrentDictionary<string, Segment>();
             var cache = new InMemorySegmentCache(segments);
-            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates.Object, 10, cache, 1);
+            var segmentTaskQueue = new SegmentTaskQueue();
+            var segmentFetcher = new SelfRefreshingSegmentFetcher(apiFetcher, gates.Object, 10, cache, 1, segmentTaskQueue);
 
             //Act
             segmentFetcher.InitializeSegment("payed");
             segmentFetcher.Start();
 
             //Assert
-            Assert.IsTrue(SegmentTaskQueue.segmentsQueue.TryTake(out SelfRefreshingSegment segment, -1));
+            Assert.IsTrue(segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1));
         }
     }
 }

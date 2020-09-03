@@ -1,5 +1,8 @@
 CHANGES
 
+6.1.5 (Sep 3, 2020)
+- Fixed Destroy client.
+
 6.1.4 (Aug 14, 2020)
 - Fixed SplitManager.Splits() when Redis db != 0 is used.
 

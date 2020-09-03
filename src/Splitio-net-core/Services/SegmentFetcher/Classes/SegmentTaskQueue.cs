@@ -1,10 +1,30 @@
-﻿using System.Collections.Concurrent;
+﻿using Splitio.Services.SegmentFetcher.Interfaces;
+using System.Collections.Concurrent;
 
 namespace Splitio.Services.SegmentFetcher.Classes
 {
-    public static class SegmentTaskQueue
+    public class SegmentTaskQueue : ISegmentTaskQueue
     {
-        //ConcurrentQueue<T> performs best when one dedicated thread is queuing and one dedicated thread is de-queuing
-        public static BlockingCollection<SelfRefreshingSegment> segmentsQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
+        private readonly BlockingCollection<SelfRefreshingSegment> _segmentsQueue;
+
+        public SegmentTaskQueue()
+        {
+            _segmentsQueue = new BlockingCollection<SelfRefreshingSegment>(new ConcurrentQueue<SelfRefreshingSegment>());
+        }
+
+        public void Dispose()
+        {
+            _segmentsQueue.Dispose();
+        }
+
+        public void Add(SelfRefreshingSegment selfRefreshingSegment)
+        {
+            _segmentsQueue.TryAdd(selfRefreshingSegment);
+        }
+
+        public BlockingCollection<SelfRefreshingSegment> GetQueue()
+        {
+            return _segmentsQueue;
+        }
     }
 }
