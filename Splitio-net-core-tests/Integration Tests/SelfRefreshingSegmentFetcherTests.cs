@@ -59,7 +59,8 @@ namespace Splitio_Tests.Integration_Tests
             var apiSegmentChangeFetcher = new ApiSegmentChangeFetcher(sdkApiClient);
             var gates = new InMemoryReadinessGatesCache();
             var segmentCache = new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
-            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4);
+            var segmentTaskQueue = new SegmentTaskQueue();
+            var selfRefreshingSegmentFetcher = new SelfRefreshingSegmentFetcher(apiSegmentChangeFetcher, gates, 30, segmentCache, 4, segmentTaskQueue);
 
             //Act
             var name = "payed";

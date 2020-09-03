@@ -1,4 +1,5 @@
 ﻿using Splitio.Services.Logger;
+using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,27 +10,30 @@ namespace Splitio.Services.SegmentFetcher.Classes
     {
         private static readonly ISplitLogger Log = WrapperAdapter.GetLogger(typeof(SegmentTaskWorker));
 
-        private readonly int numberOfParallelTasks;
-        private int counter;
+        private readonly int _numberOfParallelTasks;
+        private readonly ISegmentTaskQueue _segmentTaskQueue;
+        private int _counter;
 
         //Worker is always one task, so when it is signaled, after the
         //task stops its wait, this variable is auto-reseted
         private AutoResetEvent waitForExecution = new AutoResetEvent(false);
 
-        public SegmentTaskWorker(int numberOfParallelTasks)
+        public SegmentTaskWorker(int numberOfParallelTasks,
+            ISegmentTaskQueue segmentTaskQueue)
         {
-            this.numberOfParallelTasks = numberOfParallelTasks;
-            this.counter = 0;
+            _numberOfParallelTasks = numberOfParallelTasks;
+            _counter = 0;
+            _segmentTaskQueue = segmentTaskQueue;
         }
 
         private void IncrementCounter()
         {
-            Interlocked.Increment(ref counter);
+            Interlocked.Increment(ref _counter);
         }
 
         private void DecrementCounter()
         {
-            Interlocked.Decrement(ref counter);
+            Interlocked.Decrement(ref _counter);
             waitForExecution.Set();
         }
 
@@ -37,10 +41,10 @@ namespace Splitio.Services.SegmentFetcher.Classes
         {
             while (true)
             {
-                if (counter < numberOfParallelTasks)
+                if (_counter < _numberOfParallelTasks)
                 {
                     //Wait indefinitely until a segment is queued
-                    if (SegmentTaskQueue.segmentsQueue.TryTake(out SelfRefreshingSegment segment, -1))
+                    if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1))
                     {
                         if (Log.IsDebugEnabled)
                         {
