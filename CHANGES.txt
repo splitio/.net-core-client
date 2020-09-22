@@ -1,5 +1,8 @@
 CHANGES
 
+6.1.6 (Coming soon)
+- Fixed async operation. 
+
 6.1.5 (Sep 3, 2020)
 - Fixed Destroy client.
 
