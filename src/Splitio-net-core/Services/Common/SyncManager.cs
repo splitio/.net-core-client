@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -37,7 +38,7 @@ namespace Splitio.Services.Common
         {
             if (_streamingEnabled)
             {
-                StartStream();
+                Task.Factory.StartNew(() => StartStream());                
             }
             else
             {
