@@ -38,7 +38,7 @@ namespace Splitio.Services.Common
         {
             if (_streamingEnabled)
             {
-                Task.Factory.StartNew(() => StartStream());                
+                Task.Factory.StartNew(() => StartStream());
             }
             else
             {
