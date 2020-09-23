@@ -74,11 +74,12 @@ namespace Splitio.Services.Common
             _segmentFetcher.Clear();
         }
 
-        public async void SyncAll()
+        public void SyncAll()
         {
-            await _splitFetcher.FetchSplits();
-            await _segmentFetcher.FetchAll();
-            _log.Debug("Spltis and Segments synchronized...");
+            Task.Factory
+                .StartNew(() => _splitFetcher.FetchSplits().Wait())
+                .ContinueWith((x) => _segmentFetcher.FetchAll().Wait())
+                .ContinueWith((x) => _log.Debug("Spltis and Segments synchronized..."));
         }
 
         public async Task SynchronizeSegment(string segmentName)

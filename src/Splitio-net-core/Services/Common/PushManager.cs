@@ -29,11 +29,11 @@ namespace Splitio.Services.Common
         }
 
         #region Public Methods
-        public async void StartSse()
+        public void StartSse()
         {
             try
             {
-                var response = await _authApiClient.AuthenticateAsync();
+                var response = _authApiClient.AuthenticateAsync().Result;
 
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
