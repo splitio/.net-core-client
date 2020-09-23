@@ -7,6 +7,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.Metrics.Interfaces;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.SplitFetcher.Interfaces;
+using System.Threading;
 
 namespace Splitio_Tests.Unit_Tests.Common
 {
@@ -87,6 +88,7 @@ namespace Splitio_Tests.Unit_Tests.Common
 
             // Assert.
             _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);
+            Thread.Sleep(2);
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
         }
 
