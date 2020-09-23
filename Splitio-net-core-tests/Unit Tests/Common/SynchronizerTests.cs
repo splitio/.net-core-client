@@ -87,7 +87,7 @@ namespace Splitio_Tests.Unit_Tests.Common
             _synchronizer.SyncAll();
 
             // Assert.
-            Thread.Sleep(2);
+            Thread.Sleep(500);
             _splitFetcher.Verify(mock => mock.FetchSplits(), Times.Once);            
             _segmentFetcher.Verify(mock => mock.FetchAll(), Times.Once);
         }
