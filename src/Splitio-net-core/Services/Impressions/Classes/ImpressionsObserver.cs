@@ -1,33 +1,39 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Lru;
+using Splitio.Services.Impressions.Interfaces;
 using System;
 
 namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsObserver
     {
-        private readonly LruCache<long, long> _cache;
+        private const int DefaultCacheSize = 500000;
+        
+        private readonly LruCache<ulong, long> _cache;
+        private readonly IImpressionHasher _impressionHasher;
 
-        public ImpressionsObserver()
+        public ImpressionsObserver(IImpressionHasher impressionHasher)
         {
-            _cache = new LruCache<long, long>(5000);
+            _impressionHasher = impressionHasher;
+
+            _cache = new LruCache<ulong, long>(DefaultCacheSize);            
         }
 
         public long? TestAndSet(KeyImpression impression)
         {
-            long? defaultValue = null;
+            long? defaultReturn = null;
 
             if (impression == null)
             {
-                return defaultValue;
+                return defaultReturn;
             }
 
-            long hash = 9827492;
+            ulong hash = _impressionHasher.Process(impression);
             long? previous = _cache.Get(hash);
 
             _cache.AddOrUpdate(hash, impression.time);
 
-            return previous == null ? defaultValue : Math.Min(previous.Value, impression.time);
+            return previous == null ? defaultReturn : Math.Min(previous.Value, impression.time);
         }
     }
 }

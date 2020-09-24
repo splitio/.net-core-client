@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Mark Davis. All rights reserved.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Mark Davis. All rights reserved.
+
+using System;
 
 namespace Splitio.Services.Cache.Lru
 {
