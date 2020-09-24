@@ -109,7 +109,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var contents = fileContent.Split(new string[] { "\n" }, StringSplitOptions.None);
             var csv = contents.Select(x => x.Split(',')).ToArray();
 
-            foreach (string[] item in csv)
+            foreach (var item in csv)
             {
                 if (item.Length != 3)
                     continue;
@@ -118,9 +118,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
                 var seed = uint.Parse(item[1]);
                 var expected = ulong.Parse(item[2]);
 
-                var result = impressionHasher.Hash(key, seed);
-
-                Assert.AreEqual(expected, result);
+                Assert.AreEqual(expected, impressionHasher.Hash(key, seed));
             }
         }
     }

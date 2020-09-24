@@ -2,7 +2,6 @@
 using Splitio.Domain;
 using Splitio.Services.Impressions.Interfaces;
 using System;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Splitio.Services.Impressions.Classes
@@ -18,7 +17,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public ulong Hash(string key, uint seed)
         {
-            HashAlgorithm murmur128 = MurmurHash.Create128(seed);
+            Murmur128 murmur128 = MurmurHash.Create128(seed: seed, preference: AlgorithmPreference.X64);
             byte[] keyToBytes = Encoding.ASCII.GetBytes(key);
             byte[] seedResult = murmur128.ComputeHash(keyToBytes);
 
