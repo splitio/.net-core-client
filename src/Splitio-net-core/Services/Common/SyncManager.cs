@@ -2,6 +2,7 @@
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using System;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -68,7 +69,7 @@ namespace Splitio.Services.Common
 
             _synchronizer.StartPeriodicDataRecording();
             _synchronizer.SyncAll();
-            _pushManager.StartSse();
+            Task.Factory.StartNew(() => _pushManager.StartSse());
         }
 
         private void OnProcessFeedbackSSE(object sender, FeedbackEventArgs e)
