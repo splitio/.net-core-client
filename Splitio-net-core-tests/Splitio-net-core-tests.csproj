@@ -48,6 +48,9 @@
     <None Update="Resources\legacy-sample-data.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\murmur3-64-128.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\murmur3-sample-data-non-alpha-numeric-v2.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
