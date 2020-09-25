@@ -5,7 +5,7 @@ using System;
 
 namespace Splitio.Services.Impressions.Classes
 {
-    public class ImpressionsObserver
+    public class ImpressionsObserver : IImpressionsObserver
     {
         private const int DefaultCacheSize = 500000;
         
@@ -29,11 +29,20 @@ namespace Splitio.Services.Impressions.Classes
             }
 
             ulong hash = _impressionHasher.Process(impression);
-            long? previous = _cache.Get(hash);
 
-            _cache.AddOrUpdate(hash, impression.time);
+            try
+            {
+                long? previous = _cache.Get(hash);
+                _cache.AddOrUpdate(hash, impression.time);
 
-            return previous == null ? defaultReturn : Math.Min(previous.Value, impression.time);
+                return Math.Min(previous.Value, impression.time);
+            }
+            catch (Exception)
+            {
+                _cache.AddOrUpdate(hash, impression.time);
+
+                return defaultReturn;
+            }
         }
     }
 }
