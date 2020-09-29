@@ -37,40 +37,41 @@ namespace Splitio_Tests.Unit_Tests.Shared
                     SdkVersion = "version-test",
                 });
 
-            var config = (SelfRefreshingConfig)_configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.InMemory);
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.InMemory);
 
-            Assert.AreEqual(true, config.LabelsEnabled);
-            Assert.AreEqual("https://sdk.split.io", config.BaseUrl);
-            Assert.AreEqual("https://events.split.io", config.EventsBaseUrl);
-            Assert.AreEqual(5, config.SplitsRefreshRate);
-            Assert.AreEqual(60, config.SegmentRefreshRate);
-            Assert.AreEqual(15000, config.HttpConnectionTimeout);
-            Assert.AreEqual(15000, config.HttpReadTimeout);
-            Assert.AreEqual(false, config.RandomizeRefreshRates);
-            Assert.AreEqual(30, config.TreatmentLogRefreshRate);
-            Assert.AreEqual(30000, config.TreatmentLogSize);
-            Assert.AreEqual(60, config.EventLogRefreshRate);
-            Assert.AreEqual(5000, config.EventLogSize);
-            Assert.AreEqual(10, config.EventsFirstPushWindow);
-            Assert.AreEqual(1000, config.MaxCountCalls);
-            Assert.AreEqual(60, config.MaxTimeBetweenCalls);
-            Assert.AreEqual(5, config.NumberOfParalellSegmentTasks);
-            Assert.AreEqual(true, config.StreamingEnabled);
-            Assert.AreEqual(1, config.AuthRetryBackoffBase);
-            Assert.AreEqual(1, config.StreamingReconnectBackoffBase);
-            Assert.AreEqual("https://auth.split.io/api/auth", config.AuthServiceURL);
-            Assert.AreEqual("https://streaming.split.io/event-stream", config.StreamingServiceURL);
-            Assert.AreEqual(ImpressionModes.Optimized, config.ImpressionMode);
-            Assert.AreEqual("ip-test", config.SdkMachineIP);
-            Assert.AreEqual("name-test", config.SdkMachineName);
-            Assert.AreEqual("version-test", config.SdkSpecVersion);
-            Assert.AreEqual("version-test", config.SdkVersion);
-            Assert.AreEqual(true, config.LabelsEnabled);
+            Assert.AreEqual(true, result.LabelsEnabled);
+            Assert.AreEqual("https://sdk.split.io", result.BaseUrl);
+            Assert.AreEqual("https://events.split.io", result.EventsBaseUrl);
+            Assert.AreEqual(5, result.SplitsRefreshRate);
+            Assert.AreEqual(60, result.SegmentRefreshRate);
+            Assert.AreEqual(15000, result.HttpConnectionTimeout);
+            Assert.AreEqual(15000, result.HttpReadTimeout);
+            Assert.AreEqual(false, result.RandomizeRefreshRates);
+            Assert.AreEqual(30, result.TreatmentLogRefreshRate);
+            Assert.AreEqual(30000, result.TreatmentLogSize);
+            Assert.AreEqual(60, result.EventLogRefreshRate);
+            Assert.AreEqual(5000, result.EventLogSize);
+            Assert.AreEqual(10, result.EventsFirstPushWindow);
+            Assert.AreEqual(1000, result.MaxCountCalls);
+            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
+            Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
+            Assert.AreEqual(true, result.StreamingEnabled);
+            Assert.AreEqual(1, result.AuthRetryBackoffBase);
+            Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
+            Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
+            Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
+            Assert.AreEqual(ImpressionModes.Optimized, result.ImpressionMode);
+            Assert.AreEqual("ip-test", result.SdkMachineIP);
+            Assert.AreEqual("name-test", result.SdkMachineName);
+            Assert.AreEqual("version-test", result.SdkSpecVersion);
+            Assert.AreEqual("version-test", result.SdkVersion);
+            Assert.AreEqual(true, result.LabelsEnabled);
         }
 
         [TestMethod]
-        public void GetRedisDefatulConfig()
+        public void GetInMemoryCustomConfig()
         {
+            // Arrange.
             _wrapperAdapter
                 .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
                 .Returns(new ReadConfigData
@@ -81,13 +82,71 @@ namespace Splitio_Tests.Unit_Tests.Shared
                     SdkVersion = "version-test",
                 });
 
-            var config = _configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.Redis);
+            var config = new ConfigurationOptions
+            {
+                ImpressionMode = ImpressionModes.Debug,
+                FeaturesRefreshRate = 100, 
+                ImpressionsRefreshRate = 150,
+                SegmentsRefreshRate = 80,
+                StreamingEnabled = false
+            };
 
-            Assert.AreEqual("ip-test", config.SdkMachineIP);
-            Assert.AreEqual("name-test", config.SdkMachineName);
-            Assert.AreEqual("version-test", config.SdkSpecVersion);
-            Assert.AreEqual("version-test", config.SdkVersion);
-            Assert.AreEqual(true, config.LabelsEnabled);
+            // Act.
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+
+            // Assert.
+            Assert.AreEqual(true, result.LabelsEnabled);
+            Assert.AreEqual("https://sdk.split.io", result.BaseUrl);
+            Assert.AreEqual("https://events.split.io", result.EventsBaseUrl);
+            Assert.AreEqual(100, result.SplitsRefreshRate);
+            Assert.AreEqual(80, result.SegmentRefreshRate);
+            Assert.AreEqual(15000, result.HttpConnectionTimeout);
+            Assert.AreEqual(15000, result.HttpReadTimeout);
+            Assert.AreEqual(false, result.RandomizeRefreshRates);
+            Assert.AreEqual(150, result.TreatmentLogRefreshRate);
+            Assert.AreEqual(30000, result.TreatmentLogSize);
+            Assert.AreEqual(60, result.EventLogRefreshRate);
+            Assert.AreEqual(5000, result.EventLogSize);
+            Assert.AreEqual(10, result.EventsFirstPushWindow);
+            Assert.AreEqual(1000, result.MaxCountCalls);
+            Assert.AreEqual(60, result.MaxTimeBetweenCalls);
+            Assert.AreEqual(5, result.NumberOfParalellSegmentTasks);
+            Assert.AreEqual(false, result.StreamingEnabled);
+            Assert.AreEqual(1, result.AuthRetryBackoffBase);
+            Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
+            Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
+            Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
+            Assert.AreEqual(ImpressionModes.Debug, result.ImpressionMode);
+            Assert.AreEqual("ip-test", result.SdkMachineIP);
+            Assert.AreEqual("name-test", result.SdkMachineName);
+            Assert.AreEqual("version-test", result.SdkSpecVersion);
+            Assert.AreEqual("version-test", result.SdkVersion);
+            Assert.AreEqual(true, result.LabelsEnabled);
+        }
+
+        [TestMethod]
+        public void GetRedisDefatulConfig()
+        {
+            // Arrange.
+            _wrapperAdapter
+                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new ReadConfigData
+                {
+                    SdkMachineIP = "ip-test",
+                    SdkMachineName = "name-test",
+                    SdkSpecVersion = "version-test",
+                    SdkVersion = "version-test",
+                });
+
+            // Act.
+            var result = _configService.ReadConfig(new ConfigurationOptions(), ConfingTypes.Redis);
+
+            // Assert
+            Assert.AreEqual("ip-test", result.SdkMachineIP);
+            Assert.AreEqual("name-test", result.SdkMachineName);
+            Assert.AreEqual("version-test", result.SdkSpecVersion);
+            Assert.AreEqual("version-test", result.SdkVersion);
+            Assert.AreEqual(true, result.LabelsEnabled);
         }
     }
 }
