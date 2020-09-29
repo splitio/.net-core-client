@@ -29,6 +29,7 @@ namespace Splitio.Services.Client.Classes
         protected readonly IEventTypeValidator _eventTypeValidator;
         protected readonly IEventPropertiesValidator _eventPropertiesValidator;
         protected readonly IWrapperAdapter _wrapperAdapter;
+        protected readonly IConfigService _configService;
 
         protected bool LabelsEnabled;
         protected bool Destroyed;
@@ -57,6 +58,7 @@ namespace Splitio.Services.Client.Classes
             _eventPropertiesValidator = new EventPropertiesValidator();
             _factoryInstantiationsService = FactoryInstantiationsService.Instance();
             _wrapperAdapter = new WrapperAdapter();
+            _configService = new ConfigService(_wrapperAdapter, _log);
         }
 
         #region Public Methods
