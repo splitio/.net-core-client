@@ -48,6 +48,7 @@ namespace Splitio.Services.Client.Classes
         protected ISplitParser _splitParser;
         protected IEvaluator _evaluator;
         protected IImpressionListener _customerImpressionListener;
+        protected IImpressionsManager _impressionsManager;
 
         public SplitClient(ISplitLogger log)
         {
@@ -219,10 +220,7 @@ namespace Splitio.Services.Client.Classes
 
             if (!Labels.SplitNotFound.Equals(result.Label))
             {
-                ImpressionLog(new List<KeyImpression>
-                {
-                    BuildImpression(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null)
-                });
+                _impressionsManager.BuildAndTrack(key.matchingKey, feature, result.Treatment, CurrentTimeHelper.CurrentTimeMillis(), result.ChangeNumber, LabelsEnabled ? result.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null);
             }
 
             return result;
@@ -256,7 +254,7 @@ namespace Splitio.Services.Client.Classes
 
                     if (!Labels.SplitNotFound.Equals(treatmentResult.Value.Label))
                     {
-                        ImpressionsQueue.Add(BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
+                        ImpressionsQueue.Add(_impressionsManager.BuildImpression(key.matchingKey, treatmentResult.Key, treatmentResult.Value.Treatment, CurrentTimeHelper.CurrentTimeMillis(), treatmentResult.Value.ChangeNumber, LabelsEnabled ? treatmentResult.Value.Label : null, key.bucketingKeyHadValue ? key.bucketingKey : null));
                     }
                 }
 
@@ -265,7 +263,7 @@ namespace Splitio.Services.Client.Classes
                     _metricsLog.Time(operation, results.ElapsedMilliseconds);
                 }
 
-                ImpressionLog(ImpressionsQueue);
+                _impressionsManager.Track(ImpressionsQueue);
             }
             else
             {
@@ -276,11 +274,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             return treatmentsForFeatures;
-        }
-        
-        private KeyImpression BuildImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
-        {
-            return new KeyImpression { feature = feature, keyName = matchingKey, treatment = treatment, time = time, changeNumber = changeNumber, label = label, bucketingKey = bucketingKey };
         }
 
         private bool IsClientReady(string methodName)
@@ -298,31 +291,6 @@ namespace Splitio.Services.Client.Classes
             }
 
             return true;
-        }
-
-        private void ImpressionLog(List<KeyImpression> impressionsQueue)
-        {
-            if (impressionsQueue.Any())
-            {
-                if (_impressionsLog != null)
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        _impressionsLog.Log(impressionsQueue);
-                    });
-                }
-
-                if (_customerImpressionListener != null)
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        foreach (var imp in impressionsQueue)
-                        {
-                            _customerImpressionListener.Log(imp);
-                        }
-                    });
-                }
-            }
         }
         #endregion
     }

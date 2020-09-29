@@ -1,5 +1,6 @@
 ﻿using Splitio.Domain;
 using Splitio.Services.Cache.Classes;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -60,6 +61,8 @@ namespace Splitio.Services.Client.Classes
             _trafficTypeValidator = new TrafficTypeValidator(_splitCache);
 
             BuildEvaluator();
+
+            _impressionsManager = new ImpressionsManager(null, null, false, ImpressionModes.Debug);
         }
 
         #region Public Methods
