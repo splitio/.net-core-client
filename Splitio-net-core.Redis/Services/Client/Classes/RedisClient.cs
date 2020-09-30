@@ -39,12 +39,13 @@ namespace Splitio.Redis.Services.Client.Classes
 
         #region Private Methods
         private void ReadConfig(ConfigurationOptions config)
-        {
-            var data = _wrapperAdapter.ReadConfig(config, _log);
-            _config.SdkVersion = data.SdkVersion;
-            _config.SdkSpecVersion = data.SdkSpecVersion;
-            _config.SdkMachineName = data.SdkMachineName;
-            _config.SdkMachineIP = data.SdkMachineIP;
+        {            
+            var baseConfig = _configService.ReadConfig(config, ConfingTypes.Redis);
+            _config.SdkVersion = baseConfig.SdkVersion;
+            _config.SdkSpecVersion = baseConfig.SdkSpecVersion;
+            _config.SdkMachineName = baseConfig.SdkMachineName;
+            _config.SdkMachineIP = baseConfig.SdkMachineIP;
+            LabelsEnabled = baseConfig.LabelsEnabled;
 
             _config.RedisHost = config.CacheAdapterConfig.Host;
             _config.RedisPort = config.CacheAdapterConfig.Port;
@@ -54,7 +55,6 @@ namespace Splitio.Redis.Services.Client.Classes
             _config.RedisSyncTimeout = config.CacheAdapterConfig.SyncTimeout ?? 0;
             _config.RedisConnectRetry = config.CacheAdapterConfig.ConnectRetry ?? 0;
             _config.RedisUserPrefix = config.CacheAdapterConfig.UserPrefix;
-            LabelsEnabled = config.LabelsEnabled ?? true;
         }
 
         private void BuildRedisCache()
