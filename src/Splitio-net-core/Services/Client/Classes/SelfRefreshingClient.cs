@@ -117,7 +117,8 @@ namespace Splitio.Services.Client.Classes
         {
             var impressionsHasher = new ImpressionHasher();
             var impressionsObserver = new ImpressionsObserver(impressionsHasher);
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, true, _config.ImpressionMode, impressionsObserver);
+            var impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, true, _config.ImpressionMode, impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)

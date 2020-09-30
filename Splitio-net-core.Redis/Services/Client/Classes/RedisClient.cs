@@ -83,7 +83,8 @@ namespace Splitio.Redis.Services.Client.Classes
 
         private void BuildImpressionManager()
         {
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, false, ImpressionModes.Debug);
+            var impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionModes.Debug);
         }
 
         private void BuildEventLog(ConfigurationOptions config)

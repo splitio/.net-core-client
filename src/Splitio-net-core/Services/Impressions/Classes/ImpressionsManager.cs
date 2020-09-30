@@ -11,17 +11,20 @@ namespace Splitio.Services.Impressions.Classes
         private readonly IImpressionsObserver _impressionsObserver;
         private readonly IImpressionsLog _impressionsLog;
         private readonly IImpressionListener _customerImpressionListener;
+        private readonly IImpressionsCounter _impressionsCounter;
         private readonly bool _optimized;
         private readonly bool _addPreviousTime;
 
         public ImpressionsManager(IImpressionsLog impressionsLog,
             IImpressionListener customerImpressionListener,
+            IImpressionsCounter impressionsCounter,
             bool addPreviousTime,
             ImpressionModes impressionMode,
             IImpressionsObserver impressionsObserver = null)
         {            
             _impressionsLog = impressionsLog;
             _customerImpressionListener = customerImpressionListener;
+            _impressionsCounter = impressionsCounter;
             _addPreviousTime = addPreviousTime;
             _optimized = impressionMode == ImpressionModes.Optimized && addPreviousTime;
             _impressionsObserver = impressionsObserver;
@@ -36,13 +39,20 @@ namespace Splitio.Services.Impressions.Classes
                 impression.previousTime = _impressionsObserver.TestAndSet(impression);
             }
 
-            // TODO: Uncomment this after implement the ImpressionsCounter
-            //if (_optimized)
-            //{
-            //    impressionsCounter.inc(feature, time);
-            //}
+            if (_optimized)
+            {
+                _impressionsCounter.Inc(feature, time);
+            }
 
             return impression;
+        }
+
+        public void BuildAndTrack(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
+        {
+            Track(new List<KeyImpression>()
+            {
+                BuildImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey)
+            });
         }
 
         public void Track(List<KeyImpression> impressions)
@@ -76,17 +86,9 @@ namespace Splitio.Services.Impressions.Classes
                     });
                 }
             }
-        }
+        }        
 
-        public void BuildAndTrack(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey)
-        {
-            Track(new List<KeyImpression>()
-            {
-                BuildImpression(matchingKey, feature, treatment, time, changeNumber, label, bucketingKey)
-            });
-        }
-
-        private bool ShouldQueueImpression(KeyImpression impression)
+        public bool ShouldQueueImpression(KeyImpression impression)
         {
             return impression.previousTime == null || (ImpressionsHelper.TruncateTimeFrame(impression.previousTime.Value) != ImpressionsHelper.TruncateTimeFrame(impression.time));
         }
