@@ -26,9 +26,9 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = impressionsCounter.PopAll();
 
             // Assert.
-            Assert.AreEqual(3, result.FirstOrDefault(x => x.Key.Equals($"feature1::{SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 0, 0, DateTimeKind.Utc))}")).Value);
-            Assert.AreEqual(2, result.FirstOrDefault(x => x.Key.Equals($"feature2::{SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 0, 0, DateTimeKind.Utc))}")).Value);
-            Assert.AreEqual(1, result.FirstOrDefault(x => x.Key.Equals($"feature1::{SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 0, 0, DateTimeKind.Utc))}")).Value);
+            Assert.AreEqual(3, result.FirstOrDefault(x => x.Key.SplitName.Equals("feature1") && x.Key.TimeFrame.Equals(SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 0, 0, DateTimeKind.Utc)))).Value);
+            Assert.AreEqual(2, result.FirstOrDefault(x => x.Key.SplitName.Equals("feature2") && x.Key.TimeFrame.Equals(SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 09, 0, 0, DateTimeKind.Utc)))).Value);
+            Assert.AreEqual(1, result.FirstOrDefault(x => x.Key.SplitName.Equals("feature1") && x.Key.TimeFrame.Equals(SplitsHelper.MakeTimestamp(new DateTime(2020, 09, 02, 10, 0, 0, DateTimeKind.Utc)))).Value);
         }
     }
 }
