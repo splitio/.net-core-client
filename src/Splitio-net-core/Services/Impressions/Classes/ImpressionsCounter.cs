@@ -17,9 +17,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public void Inc(string splitName, long timeFrame)
         {
-            //var key = new KeyCache(splitName, timeFrame);
             var key = $"{splitName}::{ImpressionsHelper.TruncateTimeFrame(timeFrame)}";
-
 
             _cache.AddOrUpdate(key, DefaultAmount, (keyCache, cacheAmount) => cacheAmount + DefaultAmount);
         }
