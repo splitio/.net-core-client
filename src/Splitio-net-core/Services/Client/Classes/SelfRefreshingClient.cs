@@ -45,6 +45,7 @@ namespace Splitio.Services.Client.Classes
         private IMetricsSdkApiClient _metricsSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
+        private IImpressionsCounter _impressionsCounter;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
@@ -117,8 +118,8 @@ namespace Splitio.Services.Client.Classes
         {
             var impressionsHasher = new ImpressionHasher();
             var impressionsObserver = new ImpressionsObserver(impressionsHasher);
-            var impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, true, _config.ImpressionMode, impressionsObserver);
+            _impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionMode, impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
@@ -172,7 +173,8 @@ namespace Splitio.Services.Client.Classes
         {
             try
             {
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, _wrapperAdapter);
+                var impressionsCountSender = new ImpressionsCountSender(_treatmentSdkApiClient, _impressionsCounter);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, impressionsCountSender, _wrapperAdapter);
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);

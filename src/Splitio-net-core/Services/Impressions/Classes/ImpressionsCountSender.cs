@@ -1,0 +1,56 @@
+﻿using Splitio.CommonLibraries;
+using Splitio.Services.Impressions.Interfaces;
+using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using System;
+using System.Threading;
+
+namespace Splitio.Services.Impressions.Classes
+{
+    public class ImpressionsCountSender : IImpressionsCountSender
+    {
+        private const int CounterRefreshRateSeconds = 1800;
+
+        private readonly ITreatmentSdkApiClient _apiClient;
+        private readonly IImpressionsCounter _impressionsCounter;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
+
+        public ImpressionsCountSender(ITreatmentSdkApiClient apiClient,
+            IImpressionsCounter impressionsCounter)
+        {
+            _apiClient = apiClient;
+            _impressionsCounter = impressionsCounter;            
+            _cancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public void Start()
+        {
+            PeriodicTaskFactory.Start(() => SendImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
+        }
+
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
+            SendImpressionsCount();
+        }
+
+        private void SendImpressionsCount()
+        {
+            var impressions = _impressionsCounter.PopAll();
+
+            if (impressions.Count > 0)
+            {
+                try
+                {
+                    _apiClient.SendImpressionsCount(impressions);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Exception caught sending impressions count.", e);
+                }
+            }
+        }
+    }
+}
