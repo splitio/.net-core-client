@@ -56,11 +56,16 @@ namespace Splitio.Services.Impressions.Classes
             return JsonConvert.SerializeObject(impressionsPerFeature);
         }
 
-        private string ConvertToJson(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        // Added orderByName param for test.
+        public string ConvertToJson(ConcurrentDictionary<KeyCache, int> impressionsCount, bool orderByName = false)
         {
+            IEnumerable<KeyValuePair<KeyCache, int>> query = orderByName 
+                ? impressionsCount.OrderBy(i => i.Key.SplitName).ThenBy(i => i.Key.TimeFrame)
+                : impressionsCount.AsEnumerable();
+
             return JsonConvert.SerializeObject(new
             {
-                pf = impressionsCount.Select(item => new
+                pf = query.Select(item => new
                 {
                     t = item.Key.SplitName,
                     m = item.Key.TimeFrame,

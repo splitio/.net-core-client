@@ -11,27 +11,38 @@ namespace Splitio.Services.Impressions.Classes
     {
         private const int CounterRefreshRateSeconds = 1800;
 
+        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
+
         private readonly ITreatmentSdkApiClient _apiClient;
         private readonly IImpressionsCounter _impressionsCounter;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly int _interval;
 
-        protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
+        private bool _running;
 
         public ImpressionsCountSender(ITreatmentSdkApiClient apiClient,
-            IImpressionsCounter impressionsCounter)
+            IImpressionsCounter impressionsCounter,
+            int? interval = null)
         {
             _apiClient = apiClient;
             _impressionsCounter = impressionsCounter;            
             _cancellationTokenSource = new CancellationTokenSource();
+            _interval = interval ?? CounterRefreshRateSeconds;
+            _running = false;
         }
 
         public void Start()
         {
-            PeriodicTaskFactory.Start(() => SendImpressionsCount(), CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
+            PeriodicTaskFactory.Start(() => { SendImpressionsCount(); _running = true; }, CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
         }
 
         public void Stop()
         {
+            if (!_running)
+            {
+                return;
+            }
+
             _cancellationTokenSource.Cancel();
             SendImpressionsCount();
         }
