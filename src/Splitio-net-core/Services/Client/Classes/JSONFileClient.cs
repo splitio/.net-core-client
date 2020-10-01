@@ -2,6 +2,7 @@
 using Splitio.Services.Cache.Classes;
 using Splitio.Services.Cache.Interfaces;
 using Splitio.Services.Events.Interfaces;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.Impressions.Interfaces;
 using Splitio.Services.InputValidation.Interfaces;
 using Splitio.Services.Logger;
@@ -24,7 +25,8 @@ namespace Splitio.Services.Client.Classes
             IImpressionsLog impressionsLog = null,
             bool isLabelsEnabled = true,
             IEventsLog eventsLog = null,
-            ITrafficTypeValidator trafficTypeValidator = null) : base(GetLogger(log))
+            ITrafficTypeValidator trafficTypeValidator = null,
+            IImpressionsManager impressionsManager = null) : base(GetLogger(log))
         {
             _segmentCache = segmentCacheInstance ?? new InMemorySegmentCache(new ConcurrentDictionary<string, Segment>());
 
@@ -58,6 +60,7 @@ namespace Splitio.Services.Client.Classes
             ApiKey = "localhost";
 
             BuildEvaluator(log);
+            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, null, false, ImpressionModes.Debug);
         }
 
         #region Public Methods

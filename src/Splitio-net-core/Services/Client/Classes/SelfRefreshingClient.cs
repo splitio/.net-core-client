@@ -59,6 +59,7 @@ namespace Splitio.Services.Client.Classes
             BuildSdkApiClients();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
+            BuildImpressionManager();
             BuildEventLog(config);
             BuildEvaluator();
             BuildBlockUntilReadyService();
@@ -110,6 +111,14 @@ namespace Splitio.Services.Client.Classes
             _impressionsLog = new ImpressionsLog(_treatmentSdkApiClient, _config.TreatmentLogRefreshRate, impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
+        }
+
+        private void BuildImpressionManager()
+        {
+            var impressionsHasher = new ImpressionHasher();
+            var impressionsObserver = new ImpressionsObserver(impressionsHasher);
+            var impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, true, _config.ImpressionMode, impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)

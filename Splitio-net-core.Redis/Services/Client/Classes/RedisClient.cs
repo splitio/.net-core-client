@@ -1,4 +1,5 @@
-﻿using Splitio.Redis.Services.Cache.Classes;
+﻿using Splitio.Domain;
+using Splitio.Redis.Services.Cache.Classes;
 using Splitio.Redis.Services.Cache.Interfaces;
 using Splitio.Redis.Services.Domain;
 using Splitio.Redis.Services.Events.Classes;
@@ -7,6 +8,7 @@ using Splitio.Redis.Services.Metrics.Classes;
 using Splitio.Redis.Services.Parsing.Classes;
 using Splitio.Redis.Services.Shared;
 using Splitio.Services.Client.Classes;
+using Splitio.Services.Impressions.Classes;
 using Splitio.Services.InputValidation.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
@@ -30,6 +32,7 @@ namespace Splitio.Redis.Services.Client.Classes
             ReadConfig(config);
             BuildRedisCache();
             BuildTreatmentLog(config);
+            BuildImpressionManager();
             BuildEventLog(config);
             BuildMetricsLog();            
             BuildBlockUntilReadyService();
@@ -76,6 +79,12 @@ namespace Splitio.Redis.Services.Client.Classes
             _impressionsLog = new RedisImpressionLog(impressionsCache);
 
             _customerImpressionListener = config.ImpressionListener;
+        }
+
+        private void BuildImpressionManager()
+        {
+            var impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, impressionsCounter, false, ImpressionModes.Debug);
         }
 
         private void BuildEventLog(ConfigurationOptions config)

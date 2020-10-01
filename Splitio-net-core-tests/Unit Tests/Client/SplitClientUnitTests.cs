@@ -22,6 +22,7 @@ namespace Splitio_Tests.Unit_Tests.Client
         private Mock<CombiningMatcher> _combiningMatcher;
         private Mock<IBlockUntilReadyService> _blockUntilReadyService;
         private Mock<IEvaluator> _evaluatorMock;
+        private Mock<IImpressionsManager> _impressionsManager;
 
         private SplitClientForTesting _splitClientForTesting;
 
@@ -35,8 +36,9 @@ namespace Splitio_Tests.Unit_Tests.Client
             _impressionsLogMock = new Mock<IImpressionsLog>();
             _blockUntilReadyService = new Mock<IBlockUntilReadyService>();
             _evaluatorMock = new Mock<IEvaluator>();
+            _impressionsManager = new Mock<IImpressionsManager>();
 
-            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _eventsLogMock.Object, _impressionsLogMock.Object, _blockUntilReadyService.Object, _evaluatorMock.Object);
+            _splitClientForTesting = new SplitClientForTesting(_logMock.Object, _splitCacheMock.Object, _eventsLogMock.Object, _impressionsLogMock.Object, _blockUntilReadyService.Object, _evaluatorMock.Object, _impressionsManager.Object);
 
             _splitClientForTesting.BlockUntilReady(1000);
         }
