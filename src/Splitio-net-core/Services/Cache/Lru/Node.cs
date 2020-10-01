@@ -16,11 +16,7 @@ namespace Splitio.Services.Cache.Lru
         /// </summary>
         /// <param name="key">Key for the node</param>
         /// <param name="data">Data for the node</param>
-#if DEBUG
         public Node(TKey key, TValue data)
-#else
-        internal Node(TKey key, TValue data)
-#endif
         {
             if (key == null)
             {
