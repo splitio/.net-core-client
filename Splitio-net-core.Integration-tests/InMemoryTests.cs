@@ -258,9 +258,9 @@ namespace Splitio_net_core.Integration_tests
             // Assert.
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
             Assert.AreEqual(3, sentImpressions.Count);
-            Assert.AreEqual(2, sentImpressions.FirstOrDefault(i => i.TestName.Equals("FACUNDO_TEST")).KeyImpressions.Count);
-            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.TestName.Equals("MAURO_TEST")).KeyImpressions.Count);
-            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.TestName.Equals("Test_Save_1")).KeyImpressions.Count);
+            Assert.AreEqual(2, sentImpressions.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).I.Count);
+            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).I.Count);
+            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.F.Equals("Test_Save_1")).I.Count);
 
             var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
             Assert.AreEqual(3, impressionCounts.FirstOrDefault().Pf.Count);
@@ -301,9 +301,9 @@ namespace Splitio_net_core.Integration_tests
             // Assert.
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
             Assert.AreEqual(3, sentImpressions.Count);
-            Assert.AreEqual(5, sentImpressions.FirstOrDefault(i => i.TestName.Equals("FACUNDO_TEST")).KeyImpressions.Count);
-            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.TestName.Equals("MAURO_TEST")).KeyImpressions.Count);
-            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.TestName.Equals("Test_Save_1")).KeyImpressions.Count);
+            Assert.AreEqual(5, sentImpressions.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).I.Count);
+            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).I.Count);
+            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.F.Equals("Test_Save_1")).I.Count);
 
             var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
             Assert.AreEqual(0, impressionCounts.Count);
