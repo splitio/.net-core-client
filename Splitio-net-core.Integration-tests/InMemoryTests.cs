@@ -227,6 +227,90 @@ namespace Splitio_net_core.Integration_tests
             ShutdownServer(httpClientMock);
         }
 
+        [TestMethod]
+        public void GetTreatments_ValidateDedupeImpressions_Optimized()
+        {
+            // Arrange.           
+            var httpClientMock = GetHttpClientMock();
+            var configurations = GetConfigurationOptions(httpClientMock);
+
+            var apikey = "apikey3";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(20000);
+
+            // Act.
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("test", "MAURO_TEST");
+            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+            client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+            client.GetTreatment("admin", "FACUNDO_TEST");
+            client.GetTreatment("admin", "Test_Save_1");
+            client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+
+            client.Destroy();
+            Thread.Sleep(3000);
+
+            // Assert.
+            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            Assert.AreEqual(3, sentImpressions.Count);
+            Assert.AreEqual(2, sentImpressions.FirstOrDefault(i => i.TestName.Equals("FACUNDO_TEST")).KeyImpressions.Count);
+            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.TestName.Equals("MAURO_TEST")).KeyImpressions.Count);
+            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.TestName.Equals("Test_Save_1")).KeyImpressions.Count);
+
+            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+            Assert.AreEqual(3, impressionCounts.FirstOrDefault().Pf.Count);
+            Assert.AreEqual(5, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("FACUNDO_TEST")).Rc);
+            Assert.AreEqual(4, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("MAURO_TEST")).Rc);
+            Assert.AreEqual(2, impressionCounts.FirstOrDefault().Pf.FirstOrDefault(i => i.F.Equals("Test_Save_1")).Rc);
+
+            ShutdownServer(httpClientMock);
+        }
+
+        [TestMethod]
+        public void GetTreatments_ValidateDedupeImpressions_Debug()
+        {
+            // Arrange.           
+            var httpClientMock = GetHttpClientMock();
+            var configurations = GetConfigurationOptions(httpClientMock);
+            configurations.ImpressionMode = ImpressionModes.Debug;
+
+            var apikey = "apikey3";
+
+            var splitFactory = new SplitFactory(apikey, configurations);
+            var client = splitFactory.Client();
+
+            client.BlockUntilReady(20000);
+
+            // Act.
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("nico_test", "FACUNDO_TEST");
+            client.GetTreatmentWithConfig("test", "MAURO_TEST");
+            client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+            client.GetTreatments("admin", new List<string> { "FACUNDO_TEST", "Test_Save_1" });
+            client.GetTreatment("admin", "FACUNDO_TEST");
+            client.GetTreatmentsWithConfig("admin", new List<string> { "FACUNDO_TEST", "MAURO_TEST" });
+
+            client.Destroy();
+            Thread.Sleep(3000);
+
+            // Assert.
+            var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            Assert.AreEqual(3, sentImpressions.Count);
+            Assert.AreEqual(5, sentImpressions.FirstOrDefault(i => i.TestName.Equals("FACUNDO_TEST")).KeyImpressions.Count);
+            Assert.AreEqual(3, sentImpressions.FirstOrDefault(i => i.TestName.Equals("MAURO_TEST")).KeyImpressions.Count);
+            Assert.AreEqual(1, sentImpressions.FirstOrDefault(i => i.TestName.Equals("Test_Save_1")).KeyImpressions.Count);
+
+            var impressionCounts = GetImpressionsCountsSentBackend(httpClientMock);
+            Assert.AreEqual(0, impressionCounts.Count);
+
+            ShutdownServer(httpClientMock);
+        }
+
         #region Protected Methods
         protected override ConfigurationOptions GetConfigurationOptions(HttpClientMock httpClientMock = null, int? eventsPushRate = null, int? eventsQueueSize = null, int? featuresRefreshRate = null, bool? ipAddressesEnabled = null)
         {
@@ -337,6 +421,22 @@ namespace Splitio_net_core.Integration_tests
                 {
                     impressions.Add(_imp);
                 }
+            }
+
+            return impressions;
+        }
+
+        private List<ImpressionCount> GetImpressionsCountsSentBackend(HttpClientMock httpClientMock = null)
+        {
+            var impressions = new List<ImpressionCount>();
+            var logs = httpClientMock.GetImpressionCountsLogs();
+
+            foreach (var log in logs)
+            {
+                var _impression = JsonConvert.DeserializeObject<ImpressionCount>(log.RequestMessage.Body);
+
+                impressions.Add(_impression);
+
             }
 
             return impressions;

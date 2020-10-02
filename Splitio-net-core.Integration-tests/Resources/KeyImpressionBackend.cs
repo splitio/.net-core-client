@@ -41,4 +41,16 @@ namespace Splitio_net_core.Integration_tests.Resources
         public long? C { get; set; }
         public long? M { get; set; }
     }
+
+    public class ImpressionCount
+    {
+        public List<ImpressionCountData> Pf { get; set; }
+    }
+
+    public class ImpressionCountData
+    {
+        public string F { get; set; }
+        public long M { get; set; }
+        public int Rc { get; set; }
+    }
 }
