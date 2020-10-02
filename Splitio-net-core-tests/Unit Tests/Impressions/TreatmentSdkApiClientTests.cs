@@ -29,7 +29,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             var result = treatmentSdkApiClient.ConvertToJson(impressions, true);
 
             // Assert.
-            var expected = $"{{\"pf\":[{{\"t\":\"featur1\",\"m\":{time9am},\"rc\":2}},{{\"t\":\"featur2\",\"m\":{time9am},\"rc\":1}},{{\"t\":\"featur2\",\"m\":{time10am},\"rc\":2}},{{\"t\":\"featur3\",\"m\":{time9am},\"rc\":1}}]}}";
+            var expected = $"{{\"pf\":[{{\"f\":\"featur1\",\"m\":{time9am},\"rc\":2}},{{\"f\":\"featur2\",\"m\":{time9am},\"rc\":1}},{{\"f\":\"featur2\",\"m\":{time10am},\"rc\":2}},{{\"f\":\"featur3\",\"m\":{time9am},\"rc\":1}}]}}";
             Assert.AreEqual(expected, result);
         }
     }

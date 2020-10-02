@@ -67,7 +67,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 pf = query.Select(item => new
                 {
-                    t = item.Key.SplitName,
+                    f = item.Key.SplitName,
                     m = item.Key.TimeFrame,
                     rc = item.Value
                 })
