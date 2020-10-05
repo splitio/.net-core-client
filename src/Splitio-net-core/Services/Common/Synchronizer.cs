@@ -63,14 +63,14 @@ namespace Splitio.Services.Common
             _eventsLog.Stop();
             _metricsLog.Clear();
             _impressionsCountSender.Stop();
-            _log.Debug("Periodic Data Recording stoped...");
+            _log.Debug("Periodic Data Recording stopped...");
         }
 
         public void StopPeriodicFetching()
         {
             _splitFetcher.Stop();
             _segmentFetcher.Stop();
-            _log.Debug("Spltis and Segments fetchers stoped...");
+            _log.Debug("Spltis and Segments fetchers stopped...");
         }
 
         public void ClearFetchersCache()

@@ -8,6 +8,6 @@ namespace Splitio.Services.Impressions.Interfaces
     public interface ITreatmentSdkApiClient
     {
         void SendBulkImpressions(List<KeyImpression> impressions);
-        void SendImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount);
+        void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount);
     }
 }

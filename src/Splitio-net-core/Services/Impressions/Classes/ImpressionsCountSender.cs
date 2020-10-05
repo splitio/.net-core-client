@@ -9,6 +9,7 @@ namespace Splitio.Services.Impressions.Classes
 {
     public class ImpressionsCountSender : IImpressionsCountSender
     {
+        // Send bulk impressions count - Refresh rate: 30 min.
         private const int CounterRefreshRateSeconds = 1800;
 
         protected static readonly ISplitLogger Logger = WrapperAdapter.GetLogger(typeof(ImpressionsCountSender));
@@ -33,7 +34,7 @@ namespace Splitio.Services.Impressions.Classes
 
         public void Start()
         {
-            PeriodicTaskFactory.Start(() => { SendImpressionsCount(); _running = true; }, CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
+            PeriodicTaskFactory.Start(() => { SendBulkImpressionsCount(); _running = true; }, CounterRefreshRateSeconds * 1000, _cancellationTokenSource.Token);
         }
 
         public void Stop()
@@ -44,10 +45,10 @@ namespace Splitio.Services.Impressions.Classes
             }
 
             _cancellationTokenSource.Cancel();
-            SendImpressionsCount();
+            SendBulkImpressionsCount();
         }
 
-        private void SendImpressionsCount()
+        private void SendBulkImpressionsCount()
         {
             var impressions = _impressionsCounter.PopAll();
 
@@ -55,7 +56,7 @@ namespace Splitio.Services.Impressions.Classes
             {
                 try
                 {
-                    _apiClient.SendImpressionsCount(impressions);
+                    _apiClient.SendBulkImpressionsCount(impressions);
                 }
                 catch (Exception e)
                 {

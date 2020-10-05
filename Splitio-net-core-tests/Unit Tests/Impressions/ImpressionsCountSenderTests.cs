@@ -37,7 +37,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _apiClient.Verify(mock => mock.SendImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
+            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
         }
 
         [TestMethod]
@@ -52,7 +52,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             // Assert.
             Thread.Sleep(1500);
-            _apiClient.Verify(mock => mock.SendImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Never);
+            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Never);
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace Splitio_Tests.Unit_Tests.Impressions
             impressionsCountSender.Stop();
 
             // Assert.
-            _apiClient.Verify(mock => mock.SendImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
+            _apiClient.Verify(mock => mock.SendBulkImpressionsCount(It.IsAny<ConcurrentDictionary<KeyCache, int>>()), Times.Once);
         }
     }
 }

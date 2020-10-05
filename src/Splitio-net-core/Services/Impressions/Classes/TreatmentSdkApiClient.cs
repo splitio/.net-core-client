@@ -34,7 +34,7 @@ namespace Splitio.Services.Impressions.Classes
             }
         }
 
-        public async void SendImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
+        public async void SendBulkImpressionsCount(ConcurrentDictionary<KeyCache, int> impressionsCount)
         {
             var json = ConvertToJson(impressionsCount);
 
