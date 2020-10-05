@@ -74,7 +74,7 @@ namespace Splitio.Services.Shared.Classes
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
                 AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split.io/api/auth" : config.AuthServiceURL,
                 StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL,
-                ImpressionMode = config.ImpressionMode ?? ImpressionModes.Optimized
+                ImpressionMode = config.ImpressionMode ?? ImpressionMode.Optimized
             };
 
             selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionMode, config.ImpressionsRefreshRate);
@@ -94,13 +94,13 @@ namespace Splitio.Services.Shared.Classes
             return value;
         }
 
-        private int GetImpressionRefreshRate(ImpressionModes impressionModes, int? impressionsRefreshRate)
+        private int GetImpressionRefreshRate(ImpressionMode impressionMode, int? impressionsRefreshRate)
         {
-            switch (impressionModes)
+            switch (impressionMode)
             {
-                case ImpressionModes.Debug:
+                case ImpressionMode.Debug:
                     return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 60 : impressionsRefreshRate.Value;
-                case ImpressionModes.Optimized:
+                case ImpressionMode.Optimized:
                 default:
                     return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 300 : Math.Max(60, impressionsRefreshRate.Value);
             }

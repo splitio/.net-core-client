@@ -149,7 +149,7 @@ namespace Splitio.Services.Client.Classes
                 splitSDKSpecVersion = _config.SdkSpecVersion,
                 splitSDKMachineName = _config.SdkMachineName,
                 splitSDKMachineIP = _config.SdkMachineIP,
-                SplitSDKImpressionsMode = _config.ImpressionMode.Equals(ImpressionModes.Optimized)
+                SplitSDKImpressionsMode = _config.ImpressionMode.Equals(ImpressionMode.Optimized)
             };
 
             _metricsSdkApiClient = new MetricsSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
