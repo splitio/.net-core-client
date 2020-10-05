@@ -2,6 +2,7 @@
 using Splitio.Services.Client.Classes;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Interfaces;
+using System;
 
 namespace Splitio.Services.Shared.Classes
 {
@@ -47,7 +48,7 @@ namespace Splitio.Services.Shared.Classes
         {
             var baseConfig = ReadBaseConfig(config);
 
-            return new SelfRefreshingConfig
+            var selfRefreshingConfig = new SelfRefreshingConfig
             {
                 SdkVersion = baseConfig.SdkVersion,
                 SdkSpecVersion = baseConfig.SdkSpecVersion,
@@ -61,7 +62,6 @@ namespace Splitio.Services.Shared.Classes
                 HttpConnectionTimeout = config.ConnectionTimeout ?? 15000,
                 HttpReadTimeout = config.ReadTimeout ?? 15000,                
                 RandomizeRefreshRates = config.RandomizeRefreshRates,ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4,
-                TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30,
                 TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000,
                 EventLogRefreshRate = config.EventsPushRate ?? 60,
                 EventLogSize = config.EventsQueueSize ?? 5000,
@@ -74,8 +74,12 @@ namespace Splitio.Services.Shared.Classes
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
                 AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split.io/api/auth" : config.AuthServiceURL,
                 StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL,
-                ImpressionMode = config.ImpressionMode ?? ImpressionModes.Optimized  
+                ImpressionMode = config.ImpressionMode ?? ImpressionModes.Optimized
             };
+
+            selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionMode, config.ImpressionsRefreshRate);
+
+            return selfRefreshingConfig;
         }
 
         private int GetMinimunAllowed(int value, int minAllowed, string configName)
@@ -88,6 +92,18 @@ namespace Splitio.Services.Shared.Classes
             }
 
             return value;
+        }
+
+        private int GetImpressionRefreshRate(ImpressionModes impressionModes, int? impressionsRefreshRate)
+        {
+            switch (impressionModes)
+            {
+                case ImpressionModes.Debug:
+                    return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 60 : impressionsRefreshRate.Value;
+                case ImpressionModes.Optimized:
+                default:
+                    return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 300 : Math.Max(60, impressionsRefreshRate.Value);
+            }
         }
     }
 
