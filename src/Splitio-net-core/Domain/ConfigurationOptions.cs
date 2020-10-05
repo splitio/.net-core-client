@@ -34,6 +34,6 @@ namespace Splitio.Services.Client.Classes
         public int? StreamingReconnectBackoffBase { get; set; }
         public string AuthServiceURL { get; set; }
         public string StreamingServiceURL { get; set; }
-        public ImpressionModes? ImpressionMode { get; set; }
+        public ImpressionMode? ImpressionMode { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(15000, result.HttpConnectionTimeout);
             Assert.AreEqual(15000, result.HttpReadTimeout);
             Assert.AreEqual(false, result.RandomizeRefreshRates);
-            Assert.AreEqual(30, result.TreatmentLogRefreshRate);
+            Assert.AreEqual(300, result.TreatmentLogRefreshRate);
             Assert.AreEqual(30000, result.TreatmentLogSize);
             Assert.AreEqual(60, result.EventLogRefreshRate);
             Assert.AreEqual(5000, result.EventLogSize);
@@ -60,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
             Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
-            Assert.AreEqual(ImpressionModes.Optimized, result.ImpressionMode);
+            Assert.AreEqual(ImpressionMode.Optimized, result.ImpressionMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkSpecVersion);
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             var config = new ConfigurationOptions
             {
-                ImpressionMode = ImpressionModes.Debug,
+                ImpressionMode = ImpressionMode.Debug,
                 FeaturesRefreshRate = 100, 
                 ImpressionsRefreshRate = 150,
                 SegmentsRefreshRate = 80,
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
             Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
-            Assert.AreEqual(ImpressionModes.Debug, result.ImpressionMode);
+            Assert.AreEqual(ImpressionMode.Debug, result.ImpressionMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkSpecVersion);
@@ -147,6 +147,78 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual("version-test", result.SdkSpecVersion);
             Assert.AreEqual("version-test", result.SdkVersion);
             Assert.AreEqual(true, result.LabelsEnabled);
+        }
+
+        [TestMethod]
+        public void GetConfingWithOptimizedImp()
+        {
+            // Arrange.
+            _wrapperAdapter
+                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new ReadConfigData
+                {
+                    SdkMachineIP = "ip-test",
+                    SdkMachineName = "name-test",
+                    SdkSpecVersion = "version-test",
+                    SdkVersion = "version-test",
+                });
+
+            var config = new ConfigurationOptions
+            {
+                ImpressionMode = ImpressionMode.Optimized,
+            };
+
+            // Act.
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+
+            // Assert.
+            Assert.AreEqual(300, result.TreatmentLogRefreshRate);
+
+            // Should return 60 because is the min allowed.
+            config.ImpressionsRefreshRate = 30;
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            Assert.AreEqual(60, result.TreatmentLogRefreshRate);
+
+            // Should return custom value.
+            config.ImpressionsRefreshRate = 120;
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            Assert.AreEqual(120, result.TreatmentLogRefreshRate);
+        }
+
+        [TestMethod]
+        public void GetConfingWithDebugImp()
+        {
+            // Arrange.
+            _wrapperAdapter
+                .Setup(mock => mock.ReadConfig(It.IsAny<ConfigurationOptions>(), It.IsAny<ISplitLogger>()))
+                .Returns(new ReadConfigData
+                {
+                    SdkMachineIP = "ip-test",
+                    SdkMachineName = "name-test",
+                    SdkSpecVersion = "version-test",
+                    SdkVersion = "version-test",
+                });
+
+            var config = new ConfigurationOptions
+            {
+                ImpressionMode = ImpressionMode.Debug,
+            };
+
+            // Act.
+            var result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+
+            // Assert.
+            Assert.AreEqual(60, result.TreatmentLogRefreshRate);
+
+            // Should return 60 because is the min allowed.
+            config.ImpressionsRefreshRate = 30;
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            Assert.AreEqual(30, result.TreatmentLogRefreshRate);
+
+            // Should return custom value.
+            config.ImpressionsRefreshRate = 120;
+            result = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            Assert.AreEqual(120, result.TreatmentLogRefreshRate);
         }
     }
 }
