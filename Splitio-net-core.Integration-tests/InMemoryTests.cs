@@ -278,24 +278,24 @@ namespace Splitio_net_core.Integration_tests
 
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
 
-            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.KeyImpressions.Count));
+            Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
 
             foreach (var expectedImp in expectedImpressions)
             {                
-                var keyImpressions = sentImpressions.First(si => si.TestName.Equals(expectedImp.feature)).KeyImpressions;
+                var keyImpressions = sentImpressions.First(si => si.F.Equals(expectedImp.feature)).I;
 
                 AssertImpression(expectedImp, keyImpressions);
             }
         }
         
-        protected void AssertImpression(KeyImpression impressionExpected, List<KeyImpression> sentImpressions)
+        protected void AssertImpression(KeyImpression impressionExpected, List<ImpressionData> sentImpressions)
         {
             Assert.IsTrue(sentImpressions
-                .Where(si => impressionExpected.bucketingKey == si.bucketingKey)
-                .Where(si => impressionExpected.changeNumber == si.changeNumber)
-                .Where(si => impressionExpected.keyName == si.keyName)
-                .Where(si => impressionExpected.label == si.label)
-                .Where(si => impressionExpected.treatment == si.treatment)
+                .Where(si => impressionExpected.bucketingKey == si.B)
+                .Where(si => impressionExpected.changeNumber == si.C)
+                .Where(si => impressionExpected.keyName == si.K)
+                .Where(si => impressionExpected.label == si.R)
+                .Where(si => impressionExpected.treatment == si.T)
                 .Any());
         }
 
