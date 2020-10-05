@@ -19,17 +19,14 @@ namespace Splitio_Tests.Unit_Tests.Impressions
 
             var impressions = new ConcurrentDictionary<KeyCache, int>();
             impressions.TryAdd(new KeyCache("featur1", time9am), 2);
-            impressions.TryAdd(new KeyCache("featur2", time9am), 1);
-            impressions.TryAdd(new KeyCache("featur3", time9am), 1);
-            impressions.TryAdd(new KeyCache("featur2", time10am), 2);            
 
             var treatmentSdkApiClient = new TreatmentSdkApiClient(new HTTPHeader(), "http://www.fake-test-split.com", 5, 5);
             
             // Act.
-            var result = treatmentSdkApiClient.ConvertToJson(impressions, true);
+            var result = treatmentSdkApiClient.ConvertToJson(impressions);
 
             // Assert.
-            var expected = $"{{\"pf\":[{{\"f\":\"featur1\",\"m\":{time9am},\"rc\":2}},{{\"f\":\"featur2\",\"m\":{time9am},\"rc\":1}},{{\"f\":\"featur2\",\"m\":{time10am},\"rc\":2}},{{\"f\":\"featur3\",\"m\":{time9am},\"rc\":1}}]}}";
+            var expected = $"{{\"pf\":[{{\"f\":\"featur1\",\"m\":{time9am},\"rc\":2}}]}}";
             Assert.AreEqual(expected, result);
         }
     }
