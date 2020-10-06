@@ -686,6 +686,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
 
             // Assert.
+            Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLogMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties != null &&
                                                                              we.Event.key.Equals("key") &&
@@ -708,6 +709,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.Track("key", "user", "event_type", 132, properties);
 
             // Assert.
+            Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLogMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                              we.Event.key.Equals("key") &&
@@ -734,6 +736,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.Track("key", trafficType, "event_type", 132);
 
             // Assert.
+            Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLogMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                              we.Event.key.Equals("key") &&
@@ -762,6 +765,7 @@ namespace Splitio_Tests.Unit_Tests.Client
             var result = _splitClientForTesting.Track("key", trafficType, "event_type", 132);
 
             // Assert.
+            Thread.Sleep(1500);
             Assert.IsTrue(result);
             _eventsLogMock.Verify(mock => mock.Log(It.Is<WrappedEvent>(we => we.Event.properties == null &&
                                                                              we.Event.key.Equals("key") &&

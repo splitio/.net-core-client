@@ -528,9 +528,7 @@ namespace Splitio_net_core.Integration_tests
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
+            var keyImpressions = impressionQueue.FetchAll();            
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -550,6 +548,8 @@ namespace Splitio_net_core.Integration_tests
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            Assert.AreEqual(3, keyImpressions.Count);
 
             //Validate impressions sent to the be.            
             AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
@@ -590,9 +590,7 @@ namespace Splitio_net_core.Integration_tests
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
+            var keyImpressions = impressionQueue.FetchAll();           
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -612,6 +610,8 @@ namespace Splitio_net_core.Integration_tests
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            Assert.AreEqual(3, keyImpressions.Count);
 
             //Validate impressions sent to the be.
             AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
@@ -1044,7 +1044,7 @@ namespace Splitio_net_core.Integration_tests
             }
 
             //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock, sleepTime: 3000, eventsCount: 3, validateEvents: false);
+            AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
         }
         #endregion
 
