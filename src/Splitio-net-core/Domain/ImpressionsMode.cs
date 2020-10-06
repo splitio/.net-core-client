@@ -1,6 +1,6 @@
 ﻿namespace Splitio.Domain
 {
-    public enum ImpressionMode
+    public enum ImpressionsMode
     {
         Optimized,
         Debug

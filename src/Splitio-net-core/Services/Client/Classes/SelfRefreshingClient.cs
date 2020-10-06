@@ -119,7 +119,7 @@ namespace Splitio.Services.Client.Classes
             var impressionsHasher = new ImpressionHasher();
             var impressionsObserver = new ImpressionsObserver(impressionsHasher);
             _impressionsCounter = new ImpressionsCounter();
-            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionMode, impressionsObserver);
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, impressionsObserver);
         }
 
         private void BuildEventLog(ConfigurationOptions config)
@@ -149,7 +149,7 @@ namespace Splitio.Services.Client.Classes
                 splitSDKSpecVersion = _config.SdkSpecVersion,
                 splitSDKMachineName = _config.SdkMachineName,
                 splitSDKMachineIP = _config.SdkMachineIP,
-                SplitSDKImpressionsMode = _config.ImpressionMode.Equals(ImpressionMode.Optimized)
+                SplitSDKImpressionsMode = _config.ImpressionsMode.Equals(ImpressionsMode.Optimized)
             };
 
             _metricsSdkApiClient = new MetricsSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);

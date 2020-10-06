@@ -19,14 +19,14 @@ namespace Splitio.Services.Impressions.Classes
             IImpressionListener customerImpressionListener,
             IImpressionsCounter impressionsCounter,
             bool addPreviousTime,
-            ImpressionMode impressionMode,
+            ImpressionsMode impressionsMode,
             IImpressionsObserver impressionsObserver = null)
         {            
             _impressionsLog = impressionsLog;
             _customerImpressionListener = customerImpressionListener;
             _impressionsCounter = impressionsCounter;
             _addPreviousTime = addPreviousTime;
-            _optimized = impressionMode == ImpressionMode.Optimized && addPreviousTime;
+            _optimized = impressionsMode == ImpressionsMode.Optimized && addPreviousTime;
             _impressionsObserver = impressionsObserver;
         }
 

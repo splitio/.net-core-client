@@ -60,7 +60,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
             Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
-            Assert.AreEqual(ImpressionMode.Optimized, result.ImpressionMode);
+            Assert.AreEqual(ImpressionsMode.Optimized, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkSpecVersion);
@@ -84,7 +84,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             var config = new ConfigurationOptions
             {
-                ImpressionMode = ImpressionMode.Debug,
+                ImpressionsMode = ImpressionsMode.Debug,
                 FeaturesRefreshRate = 100, 
                 ImpressionsRefreshRate = 150,
                 SegmentsRefreshRate = 80,
@@ -116,7 +116,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
             Assert.AreEqual(1, result.StreamingReconnectBackoffBase);
             Assert.AreEqual("https://auth.split.io/api/auth", result.AuthServiceURL);
             Assert.AreEqual("https://streaming.split.io/event-stream", result.StreamingServiceURL);
-            Assert.AreEqual(ImpressionMode.Debug, result.ImpressionMode);
+            Assert.AreEqual(ImpressionsMode.Debug, result.ImpressionsMode);
             Assert.AreEqual("ip-test", result.SdkMachineIP);
             Assert.AreEqual("name-test", result.SdkMachineName);
             Assert.AreEqual("version-test", result.SdkSpecVersion);
@@ -165,7 +165,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             var config = new ConfigurationOptions
             {
-                ImpressionMode = ImpressionMode.Optimized,
+                ImpressionsMode = ImpressionsMode.Optimized,
             };
 
             // Act.
@@ -201,7 +201,7 @@ namespace Splitio_Tests.Unit_Tests.Shared
 
             var config = new ConfigurationOptions
             {
-                ImpressionMode = ImpressionMode.Debug,
+                ImpressionsMode = ImpressionsMode.Debug,
             };
 
             // Act.

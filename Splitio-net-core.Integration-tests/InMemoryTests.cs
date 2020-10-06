@@ -277,7 +277,7 @@ namespace Splitio_net_core.Integration_tests
             // Arrange.           
             var httpClientMock = GetHttpClientMock();
             var configurations = GetConfigurationOptions(httpClientMock);
-            configurations.ImpressionMode = ImpressionMode.Debug;
+            configurations.ImpressionsMode = ImpressionsMode.Debug;
 
             var apikey = "apikey3";
 

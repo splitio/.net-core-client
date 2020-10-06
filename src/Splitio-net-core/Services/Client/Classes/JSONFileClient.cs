@@ -60,7 +60,7 @@ namespace Splitio.Services.Client.Classes
             ApiKey = "localhost";
 
             BuildEvaluator(log);
-            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, null, false, ImpressionMode.Debug);
+            _impressionsManager = impressionsManager ?? new ImpressionsManager(impressionsLog, null, null, false, ImpressionsMode.Debug);
         }
 
         #region Public Methods

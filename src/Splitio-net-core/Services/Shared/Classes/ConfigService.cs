@@ -74,10 +74,10 @@ namespace Splitio.Services.Shared.Classes
                 StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase"),
                 AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split.io/api/auth" : config.AuthServiceURL,
                 StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL,
-                ImpressionMode = config.ImpressionMode ?? ImpressionMode.Optimized
+                ImpressionsMode = config.ImpressionsMode ?? ImpressionsMode.Optimized
             };
 
-            selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionMode, config.ImpressionsRefreshRate);
+            selfRefreshingConfig.TreatmentLogRefreshRate = GetImpressionRefreshRate(selfRefreshingConfig.ImpressionsMode, config.ImpressionsRefreshRate);
 
             return selfRefreshingConfig;
         }
@@ -86,7 +86,7 @@ namespace Splitio.Services.Shared.Classes
         {
             if (value < minAllowed)
             {
-                _log.Warn($"{configName} minumum allowed value: {minAllowed}");
+                _log.Warn($"{configName} minimum allowed value: {minAllowed}");
 
                 return minAllowed;
             }
@@ -94,13 +94,13 @@ namespace Splitio.Services.Shared.Classes
             return value;
         }
 
-        private int GetImpressionRefreshRate(ImpressionMode impressionMode, int? impressionsRefreshRate)
+        private int GetImpressionRefreshRate(ImpressionsMode impressionsMode, int? impressionsRefreshRate)
         {
-            switch (impressionMode)
+            switch (impressionsMode)
             {
-                case ImpressionMode.Debug:
+                case ImpressionsMode.Debug:
                     return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 60 : impressionsRefreshRate.Value;
-                case ImpressionMode.Optimized:
+                case ImpressionsMode.Optimized:
                 default:
                     return impressionsRefreshRate == null || impressionsRefreshRate <= 0 ? 300 : Math.Max(60, impressionsRefreshRate.Value);
             }
