@@ -180,7 +180,7 @@ namespace Splitio.Services.Client.Classes
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
                 var notificationParser = new NotificationParser();
-                var eventSourceClient = new EventSourceClient(_config.StreamingReconnectBackoffBase, notificationParser: notificationParser);
+                var eventSourceClient = new EventSourceClient(notificationParser: notificationParser);
                 var notificationManagerKeeper = new NotificationManagerKeeper();
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);

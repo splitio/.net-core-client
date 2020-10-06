@@ -14,8 +14,8 @@ namespace Splitio.Services.EventSource.Workers
         private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
         private readonly ISynchronizer _synchronizer;
+        private readonly BlockingCollection<long> _queue;
 
-        private BlockingCollection<long> _queue;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _running;
 
@@ -26,6 +26,7 @@ namespace Splitio.Services.EventSource.Workers
             _splitCache = splitCache;
             _synchronizer = synchronizer;
             _log = log ?? WrapperAdapter.GetLogger(typeof(SplitsWorker));
+            _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
         }
 
         #region Public Methods
@@ -33,11 +34,14 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (_queue != null)
+                if (!_running)
                 {
-                    _log.Debug($"Add to queue: {changeNumber}");
-                    _queue.TryAdd(changeNumber);
+                    _log.Debug("Splits Worker not running.");
+                    return;
                 }
+
+                _log.Debug($"Add to queue: {changeNumber}");
+                _queue.TryAdd(changeNumber);                
             }
             catch (Exception ex)
             {
@@ -49,7 +53,13 @@ namespace Splitio.Services.EventSource.Workers
         {
             try
             {
-                if (_queue != null)
+                if (!_running)
+                {
+                    _log.Debug("Splits Worker not running.");
+                    return;
+                }
+
+                if (changeNumber > _splitCache.GetChangeNumber())
                 {
                     _log.Debug($"Kill Split: {splitName}, changeNumber: {changeNumber} and defaultTreatment: {defaultTreatment}");
                     _splitCache.Kill(changeNumber, splitName, defaultTreatment);
@@ -67,12 +77,11 @@ namespace Splitio.Services.EventSource.Workers
             {
                 if (_running)
                 {
-                    _log.Error("Splits Worker already running.");
+                    _log.Debug("Splits Worker already running.");
                     return;
                 }
 
-                _log.Debug("SplitsWorker starting ...");
-                _queue = new BlockingCollection<long>(new ConcurrentQueue<long>());
+                _log.Debug("SplitsWorker starting ...");                
                 _cancellationTokenSource = new CancellationTokenSource();
                 Task.Factory.StartNew(() => ExecuteAsync(), _cancellationTokenSource.Token);
                 _running = true;
@@ -89,16 +98,14 @@ namespace Splitio.Services.EventSource.Workers
             {
                 if (!_running)
                 {
-                    _log.Error("Splits Worker not running.");
+                    _log.Debug("Splits Worker not running.");
                     return;
                 }
 
                 _cancellationTokenSource?.Cancel();
                 _cancellationTokenSource?.Dispose();
-                _queue?.Dispose();
-                _queue = null;
 
-                _log.Debug("SplitsWorker stoped ...");
+                _log.Debug("SplitsWorker stopped ...");
                 _running = false;
             }
             catch (Exception ex)
