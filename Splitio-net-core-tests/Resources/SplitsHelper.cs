@@ -1,4 +1,6 @@
-﻿namespace Splitio_Tests.Resources
+﻿using System;
+
+namespace Splitio_Tests.Resources
 {
     public static class SplitsHelper
     {
@@ -14,5 +16,10 @@
                                             Literature admiration frequently indulgence announcing are who you her.Was least quick after six.So it yourself repeated together cheerful. Neither it cordial so painful picture studied if. Sex him position doubtful resolved boy expenses.Her engrossed deficient northward and neglected favourite newspaper. But use peculiar produced concerns ten. 
                                             Am if number no up period regard sudden better.Decisively surrounded all admiration and not you.Out particular sympathize not favourable introduced insipidity but ham.Rather number can and set praise. Distrusts an it contented perceived attending oh.Thoroughly estimating introduced stimulated why but motionless.
                                             At ourselves direction believing do he departure. Celebrated her had sentiments understood are projection set. Possession ye no mr unaffected remarkably at.Wrote house in never fruit up.Pasture imagine my garrets an he. However distant she request behaved see nothing.Talking settled at pleased an of me brother weather.";
+
+        public static long MakeTimestamp(DateTime time)
+        {
+            return (long)time.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        }
     }
 }

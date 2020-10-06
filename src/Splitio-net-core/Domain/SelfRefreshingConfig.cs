@@ -23,5 +23,6 @@
         public int StreamingReconnectBackoffBase { get; set; }
         public string AuthServiceURL { get; set; }
         public string StreamingServiceURL { get; set; }
+        public ImpressionsMode ImpressionsMode { get; set; }
     }
 }

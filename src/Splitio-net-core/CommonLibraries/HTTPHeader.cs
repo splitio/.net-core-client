@@ -8,5 +8,6 @@ namespace Splitio.CommonLibraries
         public string splitSDKSpecVersion { get; set; }
         public string splitSDKMachineName { get; set; }
         public string splitSDKMachineIP { get; set; }
+        public bool? SplitSDKImpressionsMode { get; set; }
     }
 }

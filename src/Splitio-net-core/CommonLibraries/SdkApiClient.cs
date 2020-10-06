@@ -44,7 +44,7 @@ namespace Splitio.CommonLibraries
             _httpClient.DefaultRequestHeaders.Add("SplitSDKVersion", header.splitSDKVersion);
             _httpClient.DefaultRequestHeaders.Add("SplitSDKSpecVersion", header.splitSDKSpecVersion);
             _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-            _httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");            
+            _httpClient.DefaultRequestHeaders.Add("Keep-Alive", "true");
 
             if (!string.IsNullOrEmpty(header.splitSDKMachineName) && !header.splitSDKMachineName.Equals(Constans.Unknown))
             {
@@ -54,6 +54,11 @@ namespace Splitio.CommonLibraries
             if (!string.IsNullOrEmpty(header.splitSDKMachineIP) && !header.splitSDKMachineIP.Equals(Constans.Unknown))
             {
                 _httpClient.DefaultRequestHeaders.Add("SplitSDKMachineIP", header.splitSDKMachineIP);
+            }
+
+            if (header.SplitSDKImpressionsMode != null)
+            {
+                _httpClient.DefaultRequestHeaders.Add("SplitSDKImpressionsMode", header.SplitSDKImpressionsMode.Value.ToString());
             }
 
             _metricsLog = metricsLog;

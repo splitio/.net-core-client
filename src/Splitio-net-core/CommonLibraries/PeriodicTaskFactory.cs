@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Splitio.Services.Logger;
+using Splitio.Services.Shared.Classes;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,15 +11,17 @@ namespace Splitio.CommonLibraries
     /// </summary>
     public static class PeriodicTaskFactory
     {
+        private static ISplitLogger _log = WrapperAdapter.GetLogger(typeof(PeriodicTaskFactory));
+
         /// <summary>
         /// Starts the periodic task.
         /// </summary>
         public static Task Start(Action action, int intervalInMilliseconds, CancellationToken cancelToken)
         {
-            Action mainAction = () =>
+            void mainAction()
             {
-                MainPeriodicTaskAction(intervalInMilliseconds, cancelToken,  action);
-            };
+                MainPeriodicTaskAction(intervalInMilliseconds, cancelToken, action);
+            }
 
             return Task.Factory.StartNew(mainAction, cancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
@@ -45,6 +49,10 @@ namespace Splitio.CommonLibraries
                     try
                     {
                         periodResetEvent.Wait(intervalInMilliseconds, cancelToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Debug(ex.Message);
                     }
                     finally
                     {

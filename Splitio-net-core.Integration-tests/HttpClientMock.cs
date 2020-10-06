@@ -299,6 +299,14 @@ namespace Splitio_net_core.Integration_tests
                 .ToList();
         }
 
+        public List<LogEntry> GetImpressionCountsLogs()
+        {
+            return _mockServer
+                .LogEntries
+                .Where(l => l.RequestMessage.AbsolutePath.Contains("api/testImpressions/count"))
+                .ToList();
+        }
+
         public List<LogEntry> GetEventsLog()
         {
             return _mockServer

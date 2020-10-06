@@ -19,12 +19,14 @@ namespace Splitio.Services.Common
         private readonly IMetricsLog _metricsLog;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISplitLogger _log;
+        private readonly IImpressionsCountSender _impressionsCountSender;
 
         public Synchronizer(ISplitFetcher splitFetcher,
             ISelfRefreshingSegmentFetcher segmentFetcher,
             IImpressionsLog impressionsLog,
             IEventsLog eventsLog,
             IMetricsLog metricsLog,
+            IImpressionsCountSender impressionsCountSender,
             IWrapperAdapter wrapperAdapter = null,
             ISplitLogger log = null)
         {
@@ -33,6 +35,7 @@ namespace Splitio.Services.Common
             _impressionsLog = impressionsLog;
             _eventsLog = eventsLog;
             _metricsLog = metricsLog;
+            _impressionsCountSender = impressionsCountSender;
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
             _log = log ?? WrapperAdapter.GetLogger(typeof(Synchronizer));
         }
@@ -43,6 +46,7 @@ namespace Splitio.Services.Common
             _impressionsLog.Start();
             _eventsLog.Start();
             _metricsLog.Start();
+            _impressionsCountSender.Start();
             _log.Debug("Periodic Data Recording started...");
         }
 
@@ -58,14 +62,15 @@ namespace Splitio.Services.Common
             _impressionsLog.Stop();
             _eventsLog.Stop();
             _metricsLog.Clear();
-            _log.Debug("Periodic Data Recording stoped...");
+            _impressionsCountSender.Stop();
+            _log.Debug("Periodic Data Recording stopped...");
         }
 
         public void StopPeriodicFetching()
         {
             _splitFetcher.Stop();
             _segmentFetcher.Stop();
-            _log.Debug("Spltis and Segments fetchers stoped...");
+            _log.Debug("Spltis and Segments fetchers stopped...");
         }
 
         public void ClearFetchersCache()

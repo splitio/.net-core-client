@@ -4,6 +4,20 @@ namespace Splitio.Domain
 {
     public class KeyImpression
     {
+        public KeyImpression() { }
+
+        public KeyImpression(string matchingKey, string feature, string treatment, long time, long? changeNumber, string label, string bucketingKey, long? previousTime = null)
+        {
+            this.feature = feature;
+            keyName = matchingKey;
+            this.treatment = treatment;
+            this.time = time;
+            this.changeNumber = changeNumber;
+            this.label = label;
+            this.bucketingKey = bucketingKey;
+            this.previousTime = previousTime;
+        }
+
         [JsonIgnore]
         public string feature { get; set; }
         public string keyName { get; set; }
@@ -12,6 +26,7 @@ namespace Splitio.Domain
         public long? changeNumber { get; set; }
         public string label { get; set; }
         public string bucketingKey { get; set; }
+        public long? previousTime { get; set; }
     }
     
 }
