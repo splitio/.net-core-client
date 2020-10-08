@@ -179,7 +179,7 @@ namespace Splitio_net_core.Integration_tests
                 httpClientMock.SegmentChangesOk("-1", "segment4");
                 httpClientMock.SegmentChangesOk("1470947453878", "segment4", "split_segment4_empty");
 
-                var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_KILL\\\",\\\"changeNumber\\\": 1585948850100, \\\"defaultTreatment\\\" : \\\"off_kill\\\", \\\"splitName\\\" : \\\"push_test\\\"}\",\"name\":\"asdasd\"}\n\n\r\n";
+                var notification = "fb\r\nid: 123\nevent: message\ndata: {\"id\":\"1\",\"clientId\":\"emptyClientId\",\"connectionId\":\"1\",\"timestamp\":1582045421733,\"channel\":\"mauroc\",\"data\":\"{\\\"type\\\" : \\\"SPLIT_KILL\\\",\\\"changeNumber\\\": 1585948850110, \\\"defaultTreatment\\\" : \\\"off_kill\\\", \\\"splitName\\\" : \\\"push_test\\\"}\",\"name\":\"asdasd\"}\n\n\r\n";
                 httpClientMock.SSE_Channels_Response_WithPath(EventSourcePath, notification);
 
                 var authResponse = new AuthenticationResponse

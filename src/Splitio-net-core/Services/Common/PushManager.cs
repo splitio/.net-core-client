@@ -3,6 +3,8 @@ using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
 {
@@ -13,6 +15,9 @@ namespace Splitio.Services.Common
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly ISSEHandler _sseHandler;
         private readonly IBackOff _backOff;
+
+        private CancellationTokenSource _cancellationTokenSourceRefreshToken;
+        private Task _refreshTokenTask;
 
         public PushManager(int authRetryBackOffBase,
             ISSEHandler sseHandler,
@@ -40,6 +45,7 @@ namespace Splitio.Services.Common
                 if (response.PushEnabled.Value)
                 {
                     _sseHandler.Start(response.Token, response.Channels);
+                    _backOff.Reset();
                     ScheduleNextTokenRefresh(response.Expiration.Value);
                 }
                 else
@@ -76,22 +82,32 @@ namespace Splitio.Services.Common
         {
             try
             {
+                CheckTaskStatus();
+
                 var sleepTime = Convert.ToInt32(time) * 1000;
                 _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
 
-                _wrapperAdapter
+                _refreshTokenTask = _wrapperAdapter
                     .TaskDelay(sleepTime)
                     .ContinueWith((t) =>
                     {
                         _log.Debug("Starting ScheduleNextTokenRefresh ...");
                         StopSse();
                         StartSse();
-                    });
+                    }, _cancellationTokenSourceRefreshToken.Token);
             }
             catch (Exception ex)
             {
                 _log.Error($"ScheduleNextTokenRefresh: {ex.Message}");
             }
+        }
+
+        private void CheckTaskStatus()
+        {
+            if (_cancellationTokenSourceRefreshToken != null)
+                _cancellationTokenSourceRefreshToken.Cancel();
+
+            _cancellationTokenSourceRefreshToken = new CancellationTokenSource();
         }
         #endregion
     }

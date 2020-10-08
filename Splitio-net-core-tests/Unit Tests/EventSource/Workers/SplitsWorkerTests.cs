@@ -111,7 +111,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(1000);
 
             // Assert.
-            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Once);
+            _splitCache.Verify(mock => mock.Kill(changeNumber, splitName, defaultTreatment), Times.Never);
         }
     }
 }
