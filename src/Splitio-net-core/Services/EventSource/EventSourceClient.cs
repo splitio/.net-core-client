@@ -178,8 +178,7 @@ namespace Splitio.Services.EventSource
                                 {
                                     Disconnect(reconnect: true);
                                 }
-
-                                if (ex.Notification.StatusCode >= 40000 && ex.Notification.StatusCode <= 49999)
+                                else if (ex.Notification.StatusCode >= 40000 && ex.Notification.StatusCode <= 49999)
                                 {
                                     Disconnect();
                                 }
