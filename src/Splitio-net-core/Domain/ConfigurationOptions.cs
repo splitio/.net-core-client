@@ -1,4 +1,5 @@
-﻿using Splitio.Services.Impressions.Interfaces;
+﻿using Splitio.Domain;
+using Splitio.Services.Impressions.Interfaces;
 
 namespace Splitio.Services.Client.Classes
 {
@@ -33,5 +34,6 @@ namespace Splitio.Services.Client.Classes
         public int? StreamingReconnectBackoffBase { get; set; }
         public string AuthServiceURL { get; set; }
         public string StreamingServiceURL { get; set; }
+        public ImpressionsMode? ImpressionsMode { get; set; }
     }
 }

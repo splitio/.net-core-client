@@ -46,6 +46,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("on", result3);
             Assert.AreEqual("off", result4);
 
+            client.Destroy();
+
             // Validate impressions in listener.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
@@ -109,6 +111,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("control", result2);
             Assert.AreEqual("control", result3);
             Assert.AreEqual("off", result4);
+
+            client.Destroy();
 
             // Validate impressions in listener.
             Thread.Sleep(2000);
@@ -198,6 +202,8 @@ namespace Splitio_net_core.Integration_tests
             var result3 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
             var result4 = client.GetTreatmentWithConfig("test", "MAURO_TEST");
 
+            client.Destroy();
+
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
             Assert.AreEqual("off", result2.Treatment);
@@ -273,6 +279,8 @@ namespace Splitio_net_core.Integration_tests
             var result2 = client.GetTreatmentWithConfig(string.Empty, "FACUNDO_TEST");
             var result3 = client.GetTreatmentWithConfig("test", string.Empty);
             var result4 = client.GetTreatmentWithConfig("mauro", "MAURO_TEST");
+
+            client.Destroy();
 
             // Assert.
             Assert.AreEqual("on", result1.Treatment);
@@ -375,6 +383,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("off", result["MAURO_TEST"]);
             Assert.AreEqual("off", result["Test_Save_1"]);
 
+            client.Destroy();
+
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
@@ -441,6 +451,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("control", result3["FACUNDO_TEST"]);
             Assert.AreEqual("control", result3["MAURO_TEST"]);
             Assert.AreEqual("control", result3["Test_Save_1"]);
+
+            client.Destroy();
 
             // Validate impressions.
             Thread.Sleep(2000);
@@ -511,12 +523,12 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("off", result["Test_Save_1"]);
             Assert.AreEqual("control", result["Random_Treatment_2"]);
 
+            client.Destroy();
+
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
+            var keyImpressions = impressionQueue.FetchAll();            
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -536,6 +548,8 @@ namespace Splitio_net_core.Integration_tests
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            Assert.AreEqual(3, keyImpressions.Count);
 
             //Validate impressions sent to the be.            
             AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
@@ -562,6 +576,8 @@ namespace Splitio_net_core.Integration_tests
             // Act.
             var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
+            client.Destroy();
+
             // Assert.
             Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
             Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
@@ -574,9 +590,7 @@ namespace Splitio_net_core.Integration_tests
             // Validate impressions.
             Thread.Sleep(2000);
             var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
+            var keyImpressions = impressionQueue.FetchAll();           
 
             var impression1 = keyImpressions
                 .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
@@ -596,6 +610,8 @@ namespace Splitio_net_core.Integration_tests
             AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
             AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
             AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+            Assert.AreEqual(3, keyImpressions.Count);
 
             //Validate impressions sent to the be.
             AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
@@ -645,6 +661,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.IsNull(result3["FACUNDO_TEST"].Config);
             Assert.IsNull(result3["MAURO_TEST"].Config);
             Assert.IsNull(result3["Test_Save_1"].Config);
+
+            client.Destroy();
 
             // Validate impressions.
             Thread.Sleep(2000);
@@ -718,6 +736,8 @@ namespace Splitio_net_core.Integration_tests
             Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
             Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
             Assert.IsNull(result["Test_Save_1"].Config);
+
+            client.Destroy();
 
             // Validate impressions.
             Thread.Sleep(2000);
@@ -1024,7 +1044,7 @@ namespace Splitio_net_core.Integration_tests
             }
 
             //Validate Events sent to the be.
-            AssertSentEvents(events, httpClientMock, sleepTime: 3000, eventsCount: 3, validateEvents: false);
+            AssertSentEvents(events, httpClientMock, sleepTime: 1000, eventsCount: 3, validateEvents: false);
         }
         #endregion
 

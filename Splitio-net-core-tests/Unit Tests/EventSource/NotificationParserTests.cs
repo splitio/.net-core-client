@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
 using Splitio.Services.Exceptions;
-using System;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {

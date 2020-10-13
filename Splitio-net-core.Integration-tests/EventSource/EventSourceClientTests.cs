@@ -26,7 +26,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -55,7 +55,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -85,7 +85,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -113,7 +113,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -141,7 +141,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -169,7 +169,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -207,7 +207,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -234,7 +234,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
@@ -257,7 +257,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
                 _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
 
-                var eventSourceClient = new EventSourceClient(backOffBase: 5);
+                var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;

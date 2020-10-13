@@ -1,5 +1,11 @@
 CHANGES
 
+6.2.0 (Oct 13, 2020)
+- Added deduplication logic for impressions data.
+  - Now there are two modes for Impressions when the SDK is in standalone mode, OPTIMIZED (default) that only ships unique impressions and DEBUG for times where you need to send ALL impressions to debug an integration.
+  - Impression listener remains unchanged and will still get all impressions.
+- Fixed async operation.
+
 6.1.5 (Sep 3, 2020)
 - Fixed Destroy client.
 

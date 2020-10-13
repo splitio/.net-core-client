@@ -45,20 +45,22 @@ namespace Splitio.Services.Client.Classes
         private IMetricsSdkApiClient _metricsSdkApiClient;
         private ISelfRefreshingSegmentFetcher _selfRefreshingSegmentFetcher;
         private ISyncManager _syncManager;
+        private IImpressionsCounter _impressionsCounter;
 
         public SelfRefreshingClient(string apiKey, 
             ConfigurationOptions config, 
             ISplitLogger log = null) : base(GetLogger(log))
         {
-            _config = new SelfRefreshingConfig();
+            _config = (SelfRefreshingConfig)_configService.ReadConfig(config, ConfingTypes.InMemory);
+            LabelsEnabled = _config.LabelsEnabled;
             Destroyed = false;
             
             ApiKey = apiKey;
-            ReadConfig(config);
             BuildSdkReadinessGates();
             BuildSdkApiClients();
             BuildSplitFetcher();
             BuildTreatmentLog(config);
+            BuildImpressionManager();
             BuildEventLog(config);
             BuildEvaluator();
             BuildBlockUntilReadyService();
@@ -80,39 +82,6 @@ namespace Splitio.Services.Client.Classes
         #endregion
 
         #region Private Methods
-        private void ReadConfig(ConfigurationOptions config)
-        {
-            _config.BaseUrl = string.IsNullOrEmpty(config.Endpoint) ? "https://sdk.split.io" : config.Endpoint;
-            _config.EventsBaseUrl = string.IsNullOrEmpty(config.EventsEndpoint) ? "https://events.split.io" : config.EventsEndpoint;
-            _config.SplitsRefreshRate = config.FeaturesRefreshRate ?? 5;
-            _config.SegmentRefreshRate = config.SegmentsRefreshRate ?? 60;
-            _config.HttpConnectionTimeout = config.ConnectionTimeout ?? 15000;
-            _config.HttpReadTimeout = config.ReadTimeout ?? 15000;
-
-            var data = _wrapperAdapter.ReadConfig(config, _log);
-            _config.SdkVersion = data.SdkVersion;
-            _config.SdkSpecVersion = data.SdkSpecVersion;
-            _config.SdkMachineName = data.SdkMachineName;
-            _config.SdkMachineIP = data.SdkMachineIP;
-
-            _config.RandomizeRefreshRates = config.RandomizeRefreshRates;
-            _config.ConcurrencyLevel = config.SplitsStorageConcurrencyLevel ?? 4;
-            _config.TreatmentLogRefreshRate = config.ImpressionsRefreshRate ?? 30;
-            _config.TreatmentLogSize = config.MaxImpressionsLogSize ?? 30000;
-            _config.EventLogRefreshRate = config.EventsPushRate ?? 60;
-            _config.EventLogSize = config.EventsQueueSize ?? 5000;
-            _config.EventsFirstPushWindow = config.EventsFirstPushWindow ?? 10;
-            _config.MaxCountCalls = config.MaxMetricsCountCallsBeforeFlush ?? 1000;
-            _config.MaxTimeBetweenCalls = config.MetricsRefreshRate ?? 60;
-            _config.NumberOfParalellSegmentTasks = config.NumberOfParalellSegmentTasks ?? 5;
-            LabelsEnabled = config.LabelsEnabled ?? true;
-            _config.StreamingEnabled = config.StreamingEnabled ?? true;
-            _config.AuthRetryBackoffBase = GetMinimunAllowed(config.AuthRetryBackoffBase ?? 1, 1, "AuthRetryBackoffBase");
-            _config.StreamingReconnectBackoffBase = GetMinimunAllowed(config.StreamingReconnectBackoffBase ?? 1, 1, "StreamingReconnectBackoffBase");
-            _config.AuthServiceURL = string.IsNullOrEmpty(config.AuthServiceURL) ? "https://auth.split.io/api/auth" : config.AuthServiceURL;
-            _config.StreamingServiceURL = string.IsNullOrEmpty(config.StreamingServiceURL) ? "https://streaming.split.io/event-stream" : config.StreamingServiceURL;
-        }
-
         private void BuildSdkReadinessGates()
         {
             _gates = new InMemoryReadinessGatesCache();
@@ -145,6 +114,14 @@ namespace Splitio.Services.Client.Classes
             _customerImpressionListener = config.ImpressionListener;
         }
 
+        private void BuildImpressionManager()
+        {
+            var impressionsHasher = new ImpressionHasher();
+            var impressionsObserver = new ImpressionsObserver(impressionsHasher);
+            _impressionsCounter = new ImpressionsCounter();
+            _impressionsManager = new ImpressionsManager(_impressionsLog, _customerImpressionListener, _impressionsCounter, true, _config.ImpressionsMode, impressionsObserver);
+        }
+
         private void BuildEventLog(ConfigurationOptions config)
         {
             var eventsCache = new InMemorySimpleCache<WrappedEvent>(new BlockingQueue<WrappedEvent>(_config.EventLogSize));
@@ -171,7 +148,8 @@ namespace Splitio.Services.Client.Classes
                 splitSDKVersion = _config.SdkVersion,
                 splitSDKSpecVersion = _config.SdkSpecVersion,
                 splitSDKMachineName = _config.SdkMachineName,
-                splitSDKMachineIP = _config.SdkMachineIP
+                splitSDKMachineIP = _config.SdkMachineIP,
+                SplitSDKImpressionsMode = _config.ImpressionsMode.Equals(ImpressionsMode.Optimized)
             };
 
             _metricsSdkApiClient = new MetricsSdkApiClient(header, _config.EventsBaseUrl, _config.HttpConnectionTimeout, _config.HttpReadTimeout);
@@ -196,12 +174,13 @@ namespace Splitio.Services.Client.Classes
         {
             try
             {
-                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, _wrapperAdapter);
+                var impressionsCountSender = new ImpressionsCountSender(_treatmentSdkApiClient, _impressionsCounter);
+                var synchronizer = new Synchronizer(_splitFetcher, _selfRefreshingSegmentFetcher, _impressionsLog, _eventsLog, _metricsLog, impressionsCountSender, _wrapperAdapter);
                 var splitsWorker = new SplitsWorker(_splitCache, synchronizer);
                 var segmentsWorker = new SegmentsWorker(_segmentCache, synchronizer);
                 var notificationProcessor = new NotificationProcessor(splitsWorker, segmentsWorker);
                 var notificationParser = new NotificationParser();
-                var eventSourceClient = new EventSourceClient(_config.StreamingReconnectBackoffBase, notificationParser: notificationParser);
+                var eventSourceClient = new EventSourceClient(notificationParser: notificationParser);
                 var notificationManagerKeeper = new NotificationManagerKeeper();
                 var sseHandler = new SSEHandler(_config.StreamingServiceURL, splitsWorker, segmentsWorker, notificationProcessor, notificationManagerKeeper, eventSourceClient: eventSourceClient);
                 var authApiClient = new AuthApiClient(_config.AuthServiceURL, ApiKey, _config.HttpReadTimeout);
@@ -223,18 +202,6 @@ namespace Splitio.Services.Client.Classes
         private void Stop()
         {
             _syncManager.Shutdown();
-        }
-
-        private int GetMinimunAllowed(int value, int minAllowed, string configName)
-        {
-            if (value < minAllowed)
-            {
-                _log.Warn($"{configName} minumum allowed value: {minAllowed}");
-
-                return minAllowed;
-            }
-
-            return value;
         }
 
         private static ISplitLogger GetLogger(ISplitLogger splitLogger = null)

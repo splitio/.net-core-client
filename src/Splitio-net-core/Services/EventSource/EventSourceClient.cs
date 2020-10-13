@@ -21,28 +21,21 @@ namespace Splitio.Services.EventSource
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
-        private readonly IBackOff _backOff;
         private readonly IWrapperAdapter _wrapperAdapter;
 
-        private readonly object _connectedLock = new object();
         private bool _connected;
-
-        private readonly object _finishedConnectionLock = new object();
         private bool _finishedConnection;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
         private string _url;
 
-        public EventSourceClient(int backOffBase,
-            ISplitLogger log = null,
+        public EventSourceClient(ISplitLogger log = null,
             INotificationParser notificationParser = null,
-            IBackOff backOff = null,
             IWrapperAdapter wrapperAdapter = null)
         {
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();
-            _backOff = backOff ?? new BackOff(backOffBase);
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
 
             UpdateFinishedConnection(finished: true);
@@ -68,10 +61,7 @@ namespace Splitio.Services.EventSource
 
         public bool IsConnected()
         {
-            lock (_connectedLock)
-            {
-                return _connected;
-            }
+            return _connected;
         }
 
         public void Disconnect(bool reconnect = false)
@@ -81,11 +71,8 @@ namespace Splitio.Services.EventSource
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
-
-            if (_backOff.GetAttempt() == 0)
-            {
-                DispatchDisconnect(reconnect);
-            }
+            
+            DispatchDisconnect(reconnect);            
             UpdateStatus(connected: false);
             _log.Info($"Disconnected from {_url}");
         }
@@ -96,30 +83,34 @@ namespace Splitio.Services.EventSource
         {
             try
             {
-                _wrapperAdapter.TaskDelay(Convert.ToInt32(_backOff.GetInterval()) * 1000).Wait();
+                UpdateFinishedConnection(finished: false);
 
                 _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
                 _cancellationTokenSource = new CancellationTokenSource();
 
                 using (var response = await _splitHttpClient.GetAsync(_url, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token))
                 {
-                    UpdateFinishedConnection(finished: false);
-                    try
-                    {
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        {
-                            _log.Info($"Connected to {_url}");
+                    _log.Debug($"Response from {_url}: {response.StatusCode}");
 
-                            UpdateStatus(connected: true);
-                            _backOff.Reset();
-                            DispatchConnected();
-                            await ReadStreamAsync(stream);
-                        }
-                    }
-                    catch (Exception ex)
+                    if (response.IsSuccessStatusCode)
                     {
-                        _log.Error($"Error reading stream: {ex.Message}");
-                        ReconnectAsync();
+                        try
+                        {
+                            using (var stream = await response.Content.ReadAsStreamAsync())
+                            {
+                                _log.Info($"Connected to {_url}");
+
+                                UpdateStatus(connected: true);
+                                DispatchConnected();
+                                await ReadStreamAsync(stream);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Error($"Error reading stream: {ex.Message}");
+                            Disconnect(reconnect: true);
+                            return;
+                        }
                     }
                 }
             }
@@ -127,10 +118,13 @@ namespace Splitio.Services.EventSource
             {
                 _log.Error($"Error connecting to {_url}: {ex.Message}");
             }
+            finally
+            {
+                UpdateFinishedConnection(finished: true);
+            }
 
             _log.Debug("Finished Event Source client ConnectAsync.");
-            Disconnect();
-            UpdateFinishedConnection(finished: true);
+            Disconnect();            
         }
 
         private async Task ReadStreamAsync(Stream stream)
@@ -178,8 +172,16 @@ namespace Splitio.Services.EventSource
                             }
                             catch (NotificationErrorException ex)
                             {
-                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
-                                Disconnect(reconnect: true);
+                                _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");                                
+
+                                if (ex.Notification.StatusCode >= 40140 && ex.Notification.StatusCode <= 40149)
+                                {
+                                    Disconnect(reconnect: true);
+                                }
+                                else if (ex.Notification.StatusCode >= 40000 && ex.Notification.StatusCode <= 49999)
+                                {
+                                    Disconnect();
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -224,34 +226,19 @@ namespace Splitio.Services.EventSource
             DisconnectEvent?.Invoke(this, e);
         }
 
-        private void ReconnectAsync()
-        {
-            Disconnect();
-            Task.Factory.StartNew(() => ConnectAsync(_url));
-        }
-
         private void UpdateStatus(bool connected)
         {
-            lock (_connectedLock)
-            {
-                _connected = connected;
-            }
+            _connected = connected;
         }
 
         private void UpdateFinishedConnection(bool finished)
         {
-            lock (_finishedConnectionLock)
-            {
-                _finishedConnection = finished;
-            }
+            _finishedConnection = finished;
         }
 
         private bool IsConnectionFinished()
-        {
-            lock (_finishedConnectionLock)
-            {
-                return _finishedConnection;
-            }
+        {            
+            return _finishedConnection;            
         }
         #endregion
     }
