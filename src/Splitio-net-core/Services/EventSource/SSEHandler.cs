@@ -41,19 +41,21 @@ namespace Splitio.Services.EventSource
         }
 
         #region Private Methods
-        public void Start(string token, string channels)
+        public bool Start(string token, string channels)
         {
             try
             {
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                _eventSourceClient.ConnectAsync(url);
+                return _eventSourceClient.ConnectAsync(url);
             }
             catch (Exception ex)
             {
                 _log.Error($"SSE Handler Start: {ex.Message}");
             }
+
+            return false;
         }
 
         public void Stop()

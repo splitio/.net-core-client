@@ -78,15 +78,15 @@ namespace Splitio.Services.Common
             {
                 _synchronizer.StopPeriodicFetching();
                 _synchronizer.SyncAll();
+                return;
             }
-            else if (e.Reconnect)
+
+            _synchronizer.StartPeriodicFetching();
+
+            if (e.Reconnect)
             {
                 _synchronizer.SyncAll();
                 _pushManager.StartSse();
-            }
-            else
-            {
-                _synchronizer.StartPeriodicFetching();
             }
         }
 

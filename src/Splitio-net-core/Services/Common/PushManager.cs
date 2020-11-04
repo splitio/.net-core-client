@@ -42,20 +42,23 @@ namespace Splitio.Services.Common
 
                 _log.Debug($"Auth service response pushEnabled: {response.PushEnabled}.");
 
-                if (response.PushEnabled.Value)
-                {
-                    _sseHandler.Start(response.Token, response.Channels);
+                if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
+                {                    
                     _backOff.Reset();
-                    ScheduleNextTokenRefresh(response.Expiration.Value);
-                }
-                else
-                {
-                    StopSse();
-                }
+                    //ScheduleNextTokenRefresh(response.Expiration.Value);
+                    ScheduleNextTokenRefresh(100);
+                    return;
+                }                
+                
+                StopSse();
 
                 if (response.Retry.Value)
                 {
                     ScheduleNextTokenRefresh(_backOff.GetInterval());
+                }
+                else
+                {
+                    ForceCancellationToken();
                 }
             }
             catch (Exception ex)
@@ -82,7 +85,8 @@ namespace Splitio.Services.Common
         {
             try
             {
-                CheckTaskStatus();
+                ForceCancellationToken();
+                _cancellationTokenSourceRefreshToken = new CancellationTokenSource();
 
                 var sleepTime = Convert.ToInt32(time) * 1000;
                 _log.Debug($"ScheduleNextTokenRefresh sleep time : {sleepTime} miliseconds.");
@@ -102,12 +106,10 @@ namespace Splitio.Services.Common
             }
         }
 
-        private void CheckTaskStatus()
+        private void ForceCancellationToken()
         {
             if (_cancellationTokenSourceRefreshToken != null)
-                _cancellationTokenSourceRefreshToken.Cancel();
-
-            _cancellationTokenSourceRefreshToken = new CancellationTokenSource();
+                _cancellationTokenSourceRefreshToken.Cancel();            
         }
         #endregion
     }
