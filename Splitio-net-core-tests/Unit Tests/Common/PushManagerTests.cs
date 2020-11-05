@@ -54,6 +54,10 @@ namespace Splitio_Tests.Unit_Tests.Common
                 .ReturnsAsync(response)
                 .ReturnsAsync(response2);
 
+            _sseHandler
+                .Setup(mock => mock.Start(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(true);
+
             // Act.
             _pushManager.StartSse();
 

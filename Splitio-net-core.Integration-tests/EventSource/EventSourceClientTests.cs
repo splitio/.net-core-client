@@ -30,9 +30,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.IsTrue(eventSourceClient.IsConnected());
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
@@ -59,9 +60,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SPLIT_KILL, ev.Event.Type);
                 Assert.AreEqual(1585868246622, ((SplitKillNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("off", ((SplitKillNotification)ev.Event).DefaultTreatment);
@@ -89,13 +91,14 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SEGMENT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585868933303, ((SegmentChangeNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
-                _connectedEvent.TryTake(out EventArgs e, -1);
+                _connectedEvent.TryTake(out EventArgs e, 10000);
                 Assert.IsNotNull(e);
             }
         }
@@ -117,9 +120,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_PAUSED, ((ControlNotification)ev.Event).ControlType);
                 Assert.IsTrue(_connectedEvent.Count >= 1);
@@ -145,9 +149,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_RESUMED, ((ControlNotification)ev.Event).ControlType);
                 Assert.IsTrue(_connectedEvent.Count >= 1);
@@ -173,9 +178,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _eventsReceived.TryTake(out EventReceivedEventArgs ev, -1);
+                Assert.IsTrue(result);
+                _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)ev.Event).ControlType);
                 Assert.IsTrue(_connectedEvent.Count >= 1);
@@ -211,9 +217,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _connectedEvent.TryTake(out EventArgs e, -1);
+                Assert.IsTrue(result);
+                _connectedEvent.TryTake(out EventArgs e, 10000);
                 Assert.IsNotNull(e);
                 Assert.AreEqual(0, _eventsReceived.Count);
 
@@ -238,9 +245,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _disconnectEvent.TryTake(out EventArgs e, -1);
+                Assert.IsTrue(result);
+                _disconnectEvent.TryTake(out EventArgs e, 10000);
                 Assert.IsNotNull(e);
             }
         }
@@ -261,9 +269,10 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                eventSourceClient.ConnectAsync(url);
+                var result = eventSourceClient.ConnectAsync(url);
 
-                _connectedEvent.TryTake(out EventArgs e, -1);
+                Assert.IsTrue(result);
+                _connectedEvent.TryTake(out EventArgs e, 10000);
                 Assert.IsNotNull(e);
                 Thread.Sleep(1000);
                 Assert.AreEqual(0, _eventsReceived.Count);

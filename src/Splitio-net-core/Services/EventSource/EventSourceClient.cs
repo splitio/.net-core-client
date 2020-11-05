@@ -19,6 +19,7 @@ namespace Splitio.Services.EventSource
         private const int ReadTimeout = 70;
         private const int BufferSize = 10000;
         private const int ConnectTimeout = 60000;
+        private const int DisconnectTimeout = 1000;
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
@@ -29,7 +30,6 @@ namespace Splitio.Services.EventSource
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationTokenSource _streamReadcancellationTokenSource;
-        private CountdownEvent _disconnectSignal;
         private string _url;
 
         public EventSourceClient(ISplitLogger log = null,
@@ -56,7 +56,7 @@ namespace Splitio.Services.EventSource
             _url = url;
             
             var signal = new CountdownEvent(1);
-            ConnectAsync(signal);
+            Task.Factory.StartNew(() => ConnectAsync(signal));
 
             try
             {
@@ -81,16 +81,12 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect(bool reconnect = false)
         {
-            if (_cancellationTokenSource.IsCancellationRequested) return;
-
-            _disconnectSignal = new CountdownEvent(1);
+            if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested) return;
 
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
-
-            _disconnectSignal.Wait();
 
             DispatchDisconnect(reconnect);
             _log.Info($"Disconnected from {_url}");
@@ -217,7 +213,6 @@ namespace Splitio.Services.EventSource
             }
             finally
             {
-                _disconnectSignal.Signal();
                 _log.Debug($"Stop read stream");
             }            
         }

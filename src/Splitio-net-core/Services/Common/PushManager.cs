@@ -45,8 +45,7 @@ namespace Splitio.Services.Common
                 if (response.PushEnabled.Value && _sseHandler.Start(response.Token, response.Channels))
                 {                    
                     _backOff.Reset();
-                    //ScheduleNextTokenRefresh(response.Expiration.Value);
-                    ScheduleNextTokenRefresh(100);
+                    ScheduleNextTokenRefresh(response.Expiration.Value);
                     return;
                 }                
                 
