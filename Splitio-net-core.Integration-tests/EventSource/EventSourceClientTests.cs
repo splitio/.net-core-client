@@ -269,9 +269,8 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.EventReceived += EventReceived;
                 eventSourceClient.ConnectedEvent += ConnectedEvent;
                 eventSourceClient.DisconnectEvent += DisconnectEvent;
-                var result = eventSourceClient.ConnectAsync(url);
+                eventSourceClient.ConnectAsync(url);
 
-                Assert.IsTrue(result);
                 _connectedEvent.TryTake(out EventArgs e, 10000);
                 Assert.IsNotNull(e);
                 Thread.Sleep(1000);

@@ -69,7 +69,7 @@ namespace Splitio.Services.Common
 
             _synchronizer.StartPeriodicDataRecording();
             _synchronizer.SyncAll();
-            Task.Factory.StartNew(async () => 
+            Task.Factory.StartNew(async () =>
             {
                 if (!await _pushManager.StartSse())
                 {

@@ -58,21 +58,18 @@ namespace Splitio.Services.Impressions.Classes
         public void Track(List<KeyImpression> impressions)
         {
             if (impressions.Any())
-            {
+            {                
                 if (_impressionsLog != null)
                 {
-                    Task.Factory.StartNew(() =>
+                    if (_optimized)
                     {
-                        if (_optimized)
-                        {
-                            var optimizedImpressions = impressions.Where(i => ShouldQueueImpression(i)).ToList();
-                            _impressionsLog.Log(optimizedImpressions);
-                        }
-                        else
-                        {
-                            _impressionsLog.Log(impressions);
-                        }                        
-                    });
+                        var optimizedImpressions = impressions.Where(i => ShouldQueueImpression(i)).ToList();
+                        _impressionsLog.Log(optimizedImpressions);
+                    }
+                    else
+                    {
+                        _impressionsLog.Log(impressions);
+                    }
                 }
 
                 if (_customerImpressionListener != null)
@@ -86,7 +83,7 @@ namespace Splitio.Services.Impressions.Classes
                     });
                 }
             }
-        }        
+        }
 
         public bool ShouldQueueImpression(KeyImpression impression)
         {
