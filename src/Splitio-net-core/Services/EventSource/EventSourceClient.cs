@@ -81,7 +81,7 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect(bool reconnect = false)
         {
-            if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested) return;
+            if (!IsConnected() || _cancellationTokenSource.IsCancellationRequested) return;
 
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
@@ -189,11 +189,11 @@ namespace Splitio.Services.EventSource
                                 {
                                     _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
 
-                                    if (ex.Notification.StatusCode >= 40140 && ex.Notification.StatusCode <= 40149)
+                                    if (ex.Notification.Code >= 40140 && ex.Notification.Code <= 40149)
                                     {
                                         Disconnect(reconnect: true);
                                     }
-                                    else if (ex.Notification.StatusCode >= 40000 && ex.Notification.StatusCode <= 49999)
+                                    else if (ex.Notification.Code >= 40000 && ex.Notification.Code <= 49999)
                                     {
                                         Disconnect();
                                     }

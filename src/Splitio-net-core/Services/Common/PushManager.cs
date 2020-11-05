@@ -34,7 +34,7 @@ namespace Splitio.Services.Common
         }
 
         #region Public Methods
-        public async void StartSse()
+        public async Task<bool> StartSse()
         {
             try
             {
@@ -46,7 +46,7 @@ namespace Splitio.Services.Common
                 {                    
                     _backOff.Reset();
                     ScheduleNextTokenRefresh(response.Expiration.Value);
-                    return;
+                    return true;
                 }                
                 
                 StopSse();
@@ -64,6 +64,8 @@ namespace Splitio.Services.Common
             {
                 _log.Error($"StartSse: {ex.Message}");
             }
+
+            return false;
         }
 
         public void StopSse()
