@@ -18,7 +18,7 @@ namespace Splitio.Services.EventSource
         private const string KeepAliveResponse = ":keepalive\n\n";
         private const int ReadTimeout = 70;
         private const int BufferSize = 10000;
-        private const int ConnectTimeout = 100000;
+        private const int ConnectTimeout = 30000;
         private const int DisconnectTimeout = 1000;
 
         private readonly ISplitLogger _log;
