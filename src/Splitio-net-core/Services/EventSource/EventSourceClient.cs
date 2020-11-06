@@ -50,6 +50,7 @@ namespace Splitio.Services.EventSource
         {
             if (IsConnected())
             {
+                _log.Debug("Event source Client already connected.");
                 return false;
             }
 
