@@ -42,6 +42,7 @@ namespace Splitio.Services.Impressions.Classes
             if (_optimized)
             {
                 _impressionsCounter.Inc(feature, time);
+                impression.Optimized = ShouldQueueImpression(impression);
             }
 
             return impression;
@@ -63,8 +64,9 @@ namespace Splitio.Services.Impressions.Classes
                 {
                     if (_optimized)
                     {
-                        var optimizedImpressions = impressions.Where(i => ShouldQueueImpression(i)).ToList();
-                        _impressionsLog.Log(optimizedImpressions);
+                        var optimizedImpressions = impressions.Where(i => i.Optimized).ToList();
+
+                        if (optimizedImpressions.Any()) _impressionsLog.Log(optimizedImpressions);
                     }
                     else
                     {
