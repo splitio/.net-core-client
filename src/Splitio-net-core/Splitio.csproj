@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
-    <AssemblyName>Splitio-net-core</AssemblyName>
-    <PackageId>Splitio-net-core</PackageId>
+    <AssemblyName>Splitio</AssemblyName>
+    <PackageId>Splitio</PackageId>
     <PackageTargetFallback Condition="'$(TargetFramework)' != 'netstandard2.0'">
       $(PackageTargetFallback);dnxcore50
     </PackageTargetFallback>
