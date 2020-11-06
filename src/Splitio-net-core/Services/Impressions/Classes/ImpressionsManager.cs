@@ -59,7 +59,7 @@ namespace Splitio.Services.Impressions.Classes
         public void Track(List<KeyImpression> impressions)
         {
             if (impressions.Any())
-            {                
+            {
                 if (_impressionsLog != null)
                 {
                     if (_optimized)
