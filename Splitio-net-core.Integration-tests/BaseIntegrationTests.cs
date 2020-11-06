@@ -999,6 +999,7 @@ namespace Splitio_net_core.Integration_tests
         }
 
         [TestMethod]
+        [Ignore]
         public void Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.           
