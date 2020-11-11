@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 6.2.0
+version: 6.2.1-rc{build}
 
 dotnet_csproj:
   patch: true
@@ -37,6 +37,9 @@ after_build:
  - Redis-64\tools\redis-server.exe --service-stop
  - Redis-64\tools\redis-server.exe --service-start
  - dotnet test .\Splitio-net-core-tests\Splitio-net-core-tests.csproj --configuration Release --framework net45
+ - Redis-64\tools\redis-server.exe --service-stop
+ - Redis-64\tools\redis-server.exe --service-start
+ - dotnet test .\Splitio-net-core.Integration-tests\Splitio-net-core.Integration-tests.csproj --configuration Release --framework netcoreapp2.2
  - dotnet test .\Splitio.TestSupport\Splitio-net-core.TestSupport.csproj --configuration Release
  - dotnet pack .\src\Splitio-net-core --configuration Release
  - dotnet pack .\Splitio-net-core.Redis --configuration Release

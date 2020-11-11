@@ -50,19 +50,47 @@ namespace Splitio_Tests.Unit_Tests.Common
         public void Start_WithStreamingEnabled_ShouldStartStream()
         {
             // Arrange.
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(true);
+
             var streamingEnabled = true;
             _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
 
             // Act.
             _syncManager.Start();
 
-            // Assert.
+            // Assert.            
             Thread.Sleep(500);
             _synchronizer.Verify(mock => mock.SyncAll(), Times.Once);
-            _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
+            _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);            
             _pushManager.Verify(mock => mock.StartSse(), Times.Once);
             
             _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Never);
+            _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
+        }
+
+        [TestMethod]
+        public void Start_WithStreamingEnabled_ShouldStartPolling()
+        {
+            // Arrange.
+            _pushManager
+                .Setup(mock => mock.StartSse())
+                .ReturnsAsync(false);
+
+            var streamingEnabled = true;
+            _syncManager = new SyncManager(streamingEnabled, _synchronizer.Object, _pushManager.Object, _sseHandler.Object, _notificationManagerKeeper.Object, _log.Object);
+
+            // Act.
+            _syncManager.Start();
+
+            // Assert.            
+            Thread.Sleep(500);
+            _synchronizer.Verify(mock => mock.SyncAll(), Times.Once);
+            _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);            
+            _pushManager.Verify(mock => mock.StartSse(), Times.Once);
+            _synchronizer.Verify(mock => mock.StartPeriodicFetching(), Times.Once);
+
             _synchronizer.Verify(mock => mock.StartPeriodicDataRecording(), Times.Once);
         }
 

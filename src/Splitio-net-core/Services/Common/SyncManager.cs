@@ -69,24 +69,30 @@ namespace Splitio.Services.Common
 
             _synchronizer.StartPeriodicDataRecording();
             _synchronizer.SyncAll();
-            Task.Factory.StartNew(() => _pushManager.StartSse());
+            Task.Factory.StartNew(async () =>
+            {
+                if (!await _pushManager.StartSse())
+                {
+                    _synchronizer.StartPeriodicFetching();
+                }
+            });
         }
 
         private void OnProcessFeedbackSSE(object sender, FeedbackEventArgs e)
         {
             if (e.IsConnected)
             {
-                _synchronizer.StopPeriodicFetching();
                 _synchronizer.SyncAll();
+                _synchronizer.StopPeriodicFetching();                
+                return;
             }
-            else if (e.Reconnect)
+
+            _synchronizer.StartPeriodicFetching();
+
+            if (e.Reconnect)
             {
                 _synchronizer.SyncAll();
                 _pushManager.StartSse();
-            }
-            else
-            {
-                _synchronizer.StartPeriodicFetching();
             }
         }
 

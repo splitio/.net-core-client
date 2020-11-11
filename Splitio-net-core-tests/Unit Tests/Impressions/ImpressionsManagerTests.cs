@@ -143,10 +143,52 @@ namespace Splitio_Tests.Unit_Tests.Impressions
         }
 
         [TestMethod]
-        public void Track()
+        public void Track_Optimized()
         {
             // Arrange.
             var impressionsManager = new ImpressionsManager(_impressionsLog.Object, _customerImpressionListener.Object, _impressionsCounter.Object, true, ImpressionsMode.Optimized, _impressionsObserver.Object);
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", optimized: true),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", optimized: true)
+            };
+
+            // Act.
+            impressionsManager.Track(impressions);
+
+            // Assert.
+            Thread.Sleep(1000);
+            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Once);
+            _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void Track_Optimized_ShouldnotLog()
+        {
+            // Arrange.
+            var impressionsManager = new ImpressionsManager(_impressionsLog.Object, _customerImpressionListener.Object, _impressionsCounter.Object, true, ImpressionsMode.Optimized, _impressionsObserver.Object);
+            var impTime = CurrentTimeHelper.CurrentTimeMillis();
+            var impressions = new List<KeyImpression>
+            {
+                new KeyImpression("matching-key", "feature", "off", impTime, 432543, "label", "bucketing-key", optimized: false),
+                new KeyImpression("matching-key-2", "feature-2", "off", impTime, 432543, "label-2", "bucketing-key", optimized: false)
+            };
+
+            // Act.
+            impressionsManager.Track(impressions);
+
+            // Assert.
+            Thread.Sleep(1000);
+            _impressionsLog.Verify(mock => mock.Log(impressions), Times.Never);
+            _customerImpressionListener.Verify(mock => mock.Log(It.IsAny<KeyImpression>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void Track_Debug()
+        {
+            // Arrange.
+            var impressionsManager = new ImpressionsManager(_impressionsLog.Object, _customerImpressionListener.Object, _impressionsCounter.Object, true, ImpressionsMode.Debug, _impressionsObserver.Object);
             var impTime = CurrentTimeHelper.CurrentTimeMillis();
             var impressions = new List<KeyImpression>
             {

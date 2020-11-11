@@ -19,7 +19,7 @@ namespace Splitio_net_core.Integration_tests
     {
         protected IImpressionListener _impressionListener;
                 
-        #region GetTreatment        
+        #region GetTreatment
         [TestMethod]
         public void GetTreatment_WithtBUR_WithMultipleCalls_ReturnsTreatments()
         {
@@ -32,7 +32,7 @@ namespace Splitio_net_core.Integration_tests
             var splitFactory = new SplitFactory(apikey, configurations);
             var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+            client.BlockUntilReady(1000000);
 
             // Act.
             var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
@@ -90,54 +90,54 @@ namespace Splitio_net_core.Integration_tests
         public void GetTreatment_WithtInputValidation_ReturnsTreatments()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+                var apikey = "apikey3";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000);
 
-            // Act.
-            var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
-            var result2 = client.GetTreatment(string.Empty, "FACUNDO_TEST");
-            var result3 = client.GetTreatment("1", string.Empty);
-            var result4 = client.GetTreatment("24", "Test_Save_1");
+                // Act.
+                var result1 = client.GetTreatment("nico_test", "FACUNDO_TEST");
+                var result2 = client.GetTreatment(string.Empty, "FACUNDO_TEST");
+                var result3 = client.GetTreatment("1", string.Empty);
+                var result4 = client.GetTreatment("24", "Test_Save_1");
 
-            // Assert.
-            Assert.AreEqual("on", result1);
-            Assert.AreEqual("control", result2);
-            Assert.AreEqual("control", result3);
-            Assert.AreEqual("off", result4);
+                // Assert.
+                Assert.AreEqual("on", result1);
+                Assert.AreEqual("control", result2);
+                Assert.AreEqual("control", result3);
+                Assert.AreEqual("off", result4);
 
-            client.Destroy();
+                client.Destroy();
 
-            // Validate impressions in listener.
-            Thread.Sleep(2000);
-            var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
+                // Validate impressions in listener.
+                Thread.Sleep(2000);
+                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var keyImpressions = impressionQueue.FetchAll();
 
-            Assert.AreEqual(2, keyImpressions.Count);
+                Assert.AreEqual(2, keyImpressions.Count);
 
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                var impression1 = keyImpressions
+                    .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
 
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("24"))
-                .First();
+                var impression2 = keyImpressions
+                    .Where(ki => ki.feature.Equals("Test_Save_1"))
+                    .Where(ki => ki.keyName.Equals("24"))
+                    .First();
 
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
+                AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+                AssertImpression(impression2, 1503956389520, "Test_Save_1", "24", "in segment all", "off");
 
-            //Validate impressions sent to the be.
-            AssertSentImpressions(2, httpClientMock, impression1, impression2);
-
-            ShutdownServer(httpClientMock);
+                //Validate impressions sent to the be.
+                AssertSentImpressions(2, httpClientMock, impression1, impression2);
+            }
         }
 
         [TestMethod]
@@ -357,64 +357,64 @@ namespace Splitio_net_core.Integration_tests
         [TestMethod]
         public void GetTreatments_WithtBUR_ReturnsTreatments()
         {
-            // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var apikey = "apikey3";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            try
+            // Arrange.
+            using (var httpClientMock = GetHttpClientMock())
             {
-                client.BlockUntilReady(10000);
+                var configurations = GetConfigurationOptions(httpClientMock);
+
+                var apikey = "apikey3";
+
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+
+                try
+                {
+                    client.BlockUntilReady(10000);
+                }
+                catch
+                {
+                    client.BlockUntilReady(100000);
+                }
+
+                // Act.
+                var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+
+                // Assert.
+                Assert.AreEqual("on", result["FACUNDO_TEST"]);
+                Assert.AreEqual("off", result["MAURO_TEST"]);
+                Assert.AreEqual("off", result["Test_Save_1"]);
+
+                client.Destroy();
+
+                // Validate impressions.
+                Thread.Sleep(2000);
+                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var keyImpressions = impressionQueue.FetchAll();
+
+                Assert.AreEqual(3, keyImpressions.Count);
+
+                var impression1 = keyImpressions
+                    .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                var impression2 = keyImpressions
+                    .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                var impression3 = keyImpressions
+                    .Where(ki => ki.feature.Equals("Test_Save_1"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+                AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+                AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+                //Validate impressions sent to the be.            
+                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
             }
-            catch
-            {
-                client.BlockUntilReady(100000);
-            }
-
-            // Act.
-            var result = client.GetTreatments("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
-
-            // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"]);
-            Assert.AreEqual("off", result["MAURO_TEST"]);
-            Assert.AreEqual("off", result["Test_Save_1"]);
-
-            client.Destroy();
-
-            // Validate impressions.
-            Thread.Sleep(2000);
-            var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            //Validate impressions sent to the be.            
-            AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
-
-            ShutdownServer(httpClientMock);
         }
 
         [TestMethod]
@@ -563,60 +563,60 @@ namespace Splitio_net_core.Integration_tests
         public void GetTreatmentsWithConfig_WithtBUR_ReturnsTreatments()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
+            using (var httpClientMock = GetHttpClientMock())
+            {
+                var configurations = GetConfigurationOptions(httpClientMock);
 
-            var apikey = "apikey3";
+                var apikey = "apikey3";
 
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
 
-            client.BlockUntilReady(10000);
+                client.BlockUntilReady(10000);
 
-            // Act.
-            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
+                // Act.
+                var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "MAURO_TEST", "Test_Save_1" });
 
-            client.Destroy();
+                client.Destroy();
 
-            // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
-            Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
-            Assert.AreEqual("off", result["Test_Save_1"].Treatment);
+                // Assert.
+                Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
+                Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
+                Assert.AreEqual("off", result["Test_Save_1"].Treatment);
 
-            Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
-            Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
-            Assert.IsNull(result["Test_Save_1"].Config);
+                Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
+                Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
+                Assert.IsNull(result["Test_Save_1"].Config);
 
-            // Validate impressions.
-            Thread.Sleep(2000);
-            var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();           
+                // Validate impressions.
+                Thread.Sleep(2000);
+                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var keyImpressions = impressionQueue.FetchAll();
 
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                var impression1 = keyImpressions
+                    .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
 
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                var impression2 = keyImpressions
+                    .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
 
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
+                var impression3 = keyImpressions
+                    .Where(ki => ki.feature.Equals("Test_Save_1"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
 
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+                AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+                AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+                AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
 
-            Assert.AreEqual(3, keyImpressions.Count);
+                Assert.AreEqual(3, keyImpressions.Count);
 
-            //Validate impressions sent to the be.
-            AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
-
-            ShutdownServer(httpClientMock);
+                //Validate impressions sent to the be.
+                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
+            }
         }
 
         [TestMethod]
@@ -706,69 +706,62 @@ namespace Splitio_net_core.Integration_tests
         public void GetTreatmentsWithConfig_WithtBUR_WhenTreatmentsDoesntExist_ReturnsTreatments()
         {
             // Arrange.           
-            var httpClientMock = GetHttpClientMock();
-            var configurations = GetConfigurationOptions(httpClientMock);
-
-            var apikey = "apikey3";
-
-            var splitFactory = new SplitFactory(apikey, configurations);
-            var client = splitFactory.Client();
-
-            try
+            using (var httpClientMock = GetHttpClientMock())
             {
-                client.BlockUntilReady(10000);
-            }
-            catch
-            {
+                var configurations = GetConfigurationOptions(httpClientMock);
+
+                var apikey = "apikey3";
+
+                var splitFactory = new SplitFactory(apikey, configurations);
+                var client = splitFactory.Client();
+
                 client.BlockUntilReady(100000);
+
+                // Act.
+                var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
+
+                // Assert.
+                Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
+                Assert.AreEqual("control", result["Random_Treatment"].Treatment);
+                Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
+                Assert.AreEqual("off", result["Test_Save_1"].Treatment);
+                Assert.AreEqual("control", result["Random_Treatment_1"].Treatment);
+
+                Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
+                Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
+                Assert.IsNull(result["Test_Save_1"].Config);
+
+                client.Destroy();
+
+                // Validate impressions.
+                Thread.Sleep(2000);
+                var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
+                var keyImpressions = impressionQueue.FetchAll();
+
+                Assert.AreEqual(3, keyImpressions.Count);
+
+                var impression1 = keyImpressions
+                    .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                var impression2 = keyImpressions
+                    .Where(ki => ki.feature.Equals("MAURO_TEST"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                var impression3 = keyImpressions
+                    .Where(ki => ki.feature.Equals("Test_Save_1"))
+                    .Where(ki => ki.keyName.Equals("nico_test"))
+                    .First();
+
+                AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
+                AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
+                AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
+
+                //Validate impressions sent to the be.
+                AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
             }
-
-            // Act.
-            var result = client.GetTreatmentsWithConfig("nico_test", new List<string> { "FACUNDO_TEST", "Random_Treatment", "MAURO_TEST", "Test_Save_1", "Random_Treatment_1" });
-
-            // Assert.
-            Assert.AreEqual("on", result["FACUNDO_TEST"].Treatment);
-            Assert.AreEqual("control", result["Random_Treatment"].Treatment);
-            Assert.AreEqual("off", result["MAURO_TEST"].Treatment);
-            Assert.AreEqual("off", result["Test_Save_1"].Treatment);
-            Assert.AreEqual("control", result["Random_Treatment_1"].Treatment);
-
-            Assert.AreEqual("{\"color\":\"green\"}", result["FACUNDO_TEST"].Config);
-            Assert.AreEqual("{\"version\":\"v1\"}", result["MAURO_TEST"].Config);
-            Assert.IsNull(result["Test_Save_1"].Config);
-
-            client.Destroy();
-
-            // Validate impressions.
-            Thread.Sleep(2000);
-            var impressionQueue = ((IntegrationTestsImpressionListener)_impressionListener).GetQueue();
-            var keyImpressions = impressionQueue.FetchAll();
-
-            Assert.AreEqual(3, keyImpressions.Count);
-
-            var impression1 = keyImpressions
-                .Where(ki => ki.feature.Equals("FACUNDO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            var impression2 = keyImpressions
-                .Where(ki => ki.feature.Equals("MAURO_TEST"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            var impression3 = keyImpressions
-                .Where(ki => ki.feature.Equals("Test_Save_1"))
-                .Where(ki => ki.keyName.Equals("nico_test"))
-                .First();
-
-            AssertImpression(impression1, 1506703262916, "FACUNDO_TEST", "nico_test", "whitelisted", "on");
-            AssertImpression(impression2, 1506703262966, "MAURO_TEST", "nico_test", "not in split", "off");
-            AssertImpression(impression3, 1503956389520, "Test_Save_1", "nico_test", "in segment all", "off");
-
-            //Validate impressions sent to the be.
-            AssertSentImpressions(3, httpClientMock, impression1, impression2, impression3);
-
-            ShutdownServer(httpClientMock);
         }
         #endregion
 
@@ -1006,6 +999,7 @@ namespace Splitio_net_core.Integration_tests
         }
 
         [TestMethod]
+        [Ignore]
         public void Track_WithLowQueue_ReturnsTrue()
         {
             // Arrange.           

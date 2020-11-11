@@ -1,8 +1,10 @@
-﻿namespace Splitio.Services.Common
+﻿using System.Threading.Tasks;
+
+namespace Splitio.Services.Common
 {
     public interface IPushManager
     {
-        void StartSse();
+        Task<bool> StartSse();
         void StopSse();
     }
 }
