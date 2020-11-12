@@ -16,20 +16,20 @@ namespace Splitio.Services.EventSource
     public class EventSourceClient : IEventSourceClient
     {
         private const string KeepAliveResponse = ":keepalive\n\n";
-        private const int ReadTimeout = 70;
+        private const int ReadTimeoutMs = 70000;
+        private const int ConnectTimeoutMs = 30000;
         private const int BufferSize = 10000;
-        private const int ConnectTimeout = 30000;
-        private const int DisconnectTimeout = 1000;
 
         private readonly ISplitLogger _log;
         private readonly INotificationParser _notificationParser;
         private readonly IWrapperAdapter _wrapperAdapter;
+        private readonly CountdownEvent _disconnectSignal;
 
         private bool _connected;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
-        private CancellationTokenSource _streamReadcancellationTokenSource;
+        private CancellationTokenSource _streamReadcancellationTokenSource;        
         private string _url;
 
         public EventSourceClient(ISplitLogger log = null,
@@ -39,6 +39,8 @@ namespace Splitio.Services.EventSource
             _log = log ?? WrapperAdapter.GetLogger(typeof(EventSourceClient));
             _notificationParser = notificationParser ?? new NotificationParser();
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
+
+            _disconnectSignal = new CountdownEvent(1);
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -55,13 +57,14 @@ namespace Splitio.Services.EventSource
             }
 
             _url = url;
-            
+            _disconnectSignal.Reset();
             var signal = new CountdownEvent(1);
+
             Task.Factory.StartNew(() => ConnectAsync(signal));
 
             try
             {
-                if (!signal.Wait(ConnectTimeout))
+                if (!signal.Wait(ConnectTimeoutMs))
                 {
                     return false;
                 }
@@ -90,7 +93,11 @@ namespace Splitio.Services.EventSource
             _splitHttpClient.Dispose();
 
             DispatchDisconnect(reconnect);
+
+            _disconnectSignal.Wait(ReadTimeoutMs);
+
             _log.Info($"Disconnected from {_url}");
+            
         }
         #endregion
 
@@ -135,6 +142,7 @@ namespace Splitio.Services.EventSource
             }
             finally
             {
+                _disconnectSignal.Signal();
                 _connected = false;
             }
 
@@ -156,13 +164,13 @@ namespace Splitio.Services.EventSource
                     {
                         var buffer = new byte[BufferSize];
 
-                        var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeout * 1000);
+                        var timeoutTask = _wrapperAdapter.TaskDelay(ReadTimeoutMs);
                         var streamReadTask = stream.ReadAsync(buffer, 0, BufferSize, _streamReadcancellationTokenSource.Token);
                         // Creates a task that will complete when any of the supplied tasks have completed.
                         // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                         var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                        if (finishedTask == timeoutTask) throw new Exception($"Streaming read time out after {ReadTimeout} seconds.");
+                        if (finishedTask == timeoutTask) throw new Exception($"Streaming read time out after {ReadTimeoutMs} seconds.");
 
                         int len = streamReadTask.Result;
 

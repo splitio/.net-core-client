@@ -80,9 +80,10 @@ namespace Splitio.Services.Common
 
         private void OnProcessFeedbackSSE(object sender, FeedbackEventArgs e)
         {
+            _synchronizer.SyncAll();
+
             if (e.IsConnected)
-            {
-                _synchronizer.SyncAll();
+            {                
                 _synchronizer.StopPeriodicFetching();                
                 return;
             }
@@ -91,7 +92,6 @@ namespace Splitio.Services.Common
 
             if (e.Reconnect)
             {
-                _synchronizer.SyncAll();
                 _pushManager.StartSse();
             }
         }
