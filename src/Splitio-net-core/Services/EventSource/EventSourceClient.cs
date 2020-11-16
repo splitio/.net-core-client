@@ -143,11 +143,11 @@ namespace Splitio.Services.EventSource
             finally
             {
                 _disconnectSignal.Signal();
+                Disconnect();
                 _connected = false;
             }
 
-            _log.Debug("Finished Event Source client ConnectAsync.");
-            Disconnect();
+            _log.Debug("Finished Event Source client ConnectAsync.");            
         }
 
         private async Task ReadStreamAsync(Stream stream)
