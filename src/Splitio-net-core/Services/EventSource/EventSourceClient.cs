@@ -156,6 +156,7 @@ namespace Splitio.Services.EventSource
             _streamReadcancellationTokenSource = new CancellationTokenSource();
 
             _log.Debug($"Reading stream ....");
+
             try
             {
                 while (!_streamReadcancellationTokenSource.IsCancellationRequested && IsConnected())
@@ -170,11 +171,11 @@ namespace Splitio.Services.EventSource
                         // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                         var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                        if (finishedTask == timeoutTask) throw new Exception($"Streaming read time out after {ReadTimeoutMs} seconds.");
+                        if (finishedTask == timeoutTask) throw new ReadStreamException(true, $"Streaming read time out after {ReadTimeoutMs} seconds.");
 
                         int len = streamReadTask.Result;
 
-                        if (len == 0) throw new Exception($"Streaming end of the file.");
+                        if (len == 0) throw new ReadStreamException(true, "Streaming end of the file.");
 
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
@@ -216,6 +217,11 @@ namespace Splitio.Services.EventSource
                     }
                 }
             }
+            catch (ReadStreamException ex)
+            {
+                _log.Debug($"ReadStreamException: {ex.Message}");
+                Disconnect(ex.ReconnectEventSourveClient);
+            }
             catch (Exception ex)
             {
                 _log.Debug($"Stream Token canceled. {ex.Message}");
@@ -223,7 +229,7 @@ namespace Splitio.Services.EventSource
             finally
             {
                 _log.Debug($"Stop read stream");
-            }            
+            }
         }
 
         private void DispatchEvent(IncomingNotification incomingNotification)
