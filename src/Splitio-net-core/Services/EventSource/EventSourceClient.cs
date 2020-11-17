@@ -85,25 +85,31 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect(bool reconnect = false)
         {
-            if (!IsConnected() || _cancellationTokenSource.IsCancellationRequested) return;
+            if (_cancellationTokenSource.IsCancellationRequested) return;
 
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
 
-            DispatchDisconnect(reconnect);
+            DispatchDisconnect();
 
             _disconnectSignal.Wait(ReadTimeoutMs);
+            _log.Debug($"Disconnected from {_url}");
 
-            _log.Info($"Disconnected from {_url}");
-            
+            if (reconnect)
+            {
+                DispatchDisconnect(reconnect);
+                _log.Debug("Reconnecting Event Source Client...");
+            }            
         }
         #endregion
 
         #region Private Methods
         private async Task ConnectAsync(CountdownEvent signal)
         {
+            bool reconnect = false;
+
             try
             {
                 _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
@@ -127,27 +133,31 @@ namespace Splitio.Services.EventSource
                                 await ReadStreamAsync(stream);
                             }
                         }
+                        catch (ReadStreamException ex)
+                        {
+                            _log.Debug($"Error reading stream: {ex.Message}");
+                            reconnect = ex.ReconnectEventSourveClient;
+                        }
                         catch (Exception ex)
                         {
-                            _log.Error($"Error reading stream: {ex.Message}");
-                            Disconnect(reconnect: true);
-                            return;
+                            _log.Debug($"Error reading stream: {ex.Message}");
+                            reconnect = true;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"Error connecting to {_url}: {ex.Message}");
+                _log.Debug($"Error connecting to {_url}: {ex.Message}");
             }
             finally
             {
                 _disconnectSignal.Signal();
-                Disconnect();
+                Disconnect(reconnect);
                 _connected = false;
-            }
 
-            _log.Debug("Finished Event Source client ConnectAsync.");            
+                _log.Debug("Finished Event Source client ConnectAsync.");
+            }            
         }
 
         private async Task ReadStreamAsync(Stream stream)
@@ -201,11 +211,11 @@ namespace Splitio.Services.EventSource
 
                                     if (ex.Notification.Code >= 40140 && ex.Notification.Code <= 40149)
                                     {
-                                        Disconnect(reconnect: true);
+                                        throw new ReadStreamException(true, $"Ably Notification code: {ex.Notification.Code}");
                                     }
                                     else if (ex.Notification.Code >= 40000 && ex.Notification.Code <= 49999)
                                     {
-                                        Disconnect();
+                                        throw new ReadStreamException(false, $"Ably Notification code: {ex.Notification.Code}");
                                     }
                                 }
                                 catch (Exception ex)
@@ -220,7 +230,7 @@ namespace Splitio.Services.EventSource
             catch (ReadStreamException ex)
             {
                 _log.Debug($"ReadStreamException: {ex.Message}");
-                Disconnect(ex.ReconnectEventSourveClient);
+                throw ex;
             }
             catch (Exception ex)
             {
