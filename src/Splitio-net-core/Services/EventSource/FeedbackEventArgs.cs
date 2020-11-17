@@ -5,12 +5,10 @@ namespace Splitio.Services.EventSource
     public class FeedbackEventArgs : EventArgs
     {
         public bool IsConnected { get; }
-        public bool Reconnect { get; } 
 
-        public FeedbackEventArgs(bool isConnected, bool reconnect = false)
+        public FeedbackEventArgs(bool isConnected)
         {
             IsConnected = isConnected;
-            Reconnect = reconnect;
         }
     }
 }

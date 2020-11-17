@@ -29,6 +29,7 @@ namespace Splitio.Services.Common
 
             _sseHandler.ConnectedEvent += OnProcessFeedbackSSE;
             _sseHandler.DisconnectEvent += OnProcessFeedbackSSE;
+            _sseHandler.ReconnectEvent += OnReconnect;
             notificationManagerKeeper.OccupancyEvent += OnOccupancyEvent;
             notificationManagerKeeper.PushShutdownEvent += OnPushShutdownEvent;
         }
@@ -89,11 +90,11 @@ namespace Splitio.Services.Common
             }
 
             _synchronizer.StartPeriodicFetching();
+        }
 
-            if (e.Reconnect)
-            {
-                _pushManager.StartSse();
-            }
+        private void OnReconnect(object sender, EventArgs e)
+        {
+            _pushManager.StartSse();
         }
 
         private void OnOccupancyEvent(object sender, OccupancyEventArgs e)

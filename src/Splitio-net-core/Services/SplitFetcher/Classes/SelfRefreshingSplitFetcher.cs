@@ -24,8 +24,6 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly CancellationTokenSource _cancelTokenSource;
         private readonly int _interval;
 
-        private bool _running;
-
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser, 
             IReadinessGatesCache gates, 
@@ -39,19 +37,11 @@ namespace Splitio.Services.SplitFetcher.Classes
             _gates = gates;
             _interval = interval;
             _splitCache = splitCache;
-            _running = false;
         }
 
         #region Public Methods
         public void Start()
         {
-            if (_running)
-            {
-                _log.Debug("SelfRefreshingSplitFetcher already running.");
-                return;
-            }
-
-            _running = true;
             var periodicTask = PeriodicTaskFactory.Start(async() =>
             {
                 await FetchSplits();
@@ -62,13 +52,6 @@ namespace Splitio.Services.SplitFetcher.Classes
 
         public void Stop()
         {
-            if (!_running)
-            {
-                _log.Debug("SelfRefreshingSplitFetcher already stopped.");
-                return;
-            }
-
-            _running = false;
             _cancelTokenSource.Cancel();
         }
 
