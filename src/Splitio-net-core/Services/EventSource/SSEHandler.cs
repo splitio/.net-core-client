@@ -18,6 +18,7 @@ namespace Splitio.Services.EventSource
 
         public event EventHandler<FeedbackEventArgs> ConnectedEvent;
         public event EventHandler<FeedbackEventArgs> DisconnectEvent;
+        public event EventHandler<EventArgs> ReconnectEvent;
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
@@ -38,6 +39,7 @@ namespace Splitio.Services.EventSource
             _eventSourceClient.EventReceived += EventReceived;
             _eventSourceClient.ConnectedEvent += OnConnected;
             _eventSourceClient.DisconnectEvent += OnDisconnect;
+            _eventSourceClient.ReconnectEvent += OnReconnect;
         }
 
         #region Private Methods
@@ -112,6 +114,11 @@ namespace Splitio.Services.EventSource
         {
             StopWorkers();
             DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void OnReconnect(object sender, EventArgs e)
+        {
+            ReconnectEvent?.Invoke(this, e);
         }
         #endregion
     }

@@ -11,5 +11,6 @@ namespace Splitio.Services.EventSource
         event EventHandler<EventReceivedEventArgs> EventReceived;
         event EventHandler<FeedbackEventArgs> ConnectedEvent;
         event EventHandler<FeedbackEventArgs> DisconnectEvent;
+        event EventHandler<EventArgs> ReconnectEvent;
     }
 }

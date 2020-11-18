@@ -46,6 +46,7 @@ namespace Splitio.Services.EventSource
         public event EventHandler<EventReceivedEventArgs> EventReceived;
         public event EventHandler<FeedbackEventArgs> ConnectedEvent;
         public event EventHandler<FeedbackEventArgs> DisconnectEvent;
+        public event EventHandler<EventArgs> ReconnectEvent;
 
         #region Public Methods
         public bool ConnectAsync(string url)
@@ -85,25 +86,31 @@ namespace Splitio.Services.EventSource
 
         public void Disconnect(bool reconnect = false)
         {
-            if (!IsConnected() || _cancellationTokenSource.IsCancellationRequested) return;
+            if (_cancellationTokenSource.IsCancellationRequested) return;
 
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
 
-            DispatchDisconnect(reconnect);
+            DispatchDisconnect();
 
             _disconnectSignal.Wait(ReadTimeoutMs);
+            _log.Debug($"Disconnected from {_url}");
 
-            _log.Info($"Disconnected from {_url}");
-            
+            if (reconnect)
+            {
+                DispatchReconnect();
+                _log.Debug("Reconnecting Event Source Client...");
+            }            
         }
         #endregion
 
         #region Private Methods
         private async Task ConnectAsync(CountdownEvent signal)
         {
+            bool reconnect = false;
+
             try
             {
                 _splitHttpClient = new SplitioHttpClient(new Dictionary<string, string> { { "Accept", "text/event-stream" } });
@@ -127,27 +134,31 @@ namespace Splitio.Services.EventSource
                                 await ReadStreamAsync(stream);
                             }
                         }
+                        catch (ReadStreamException ex)
+                        {
+                            _log.Debug(ex.Message);
+                            reconnect = ex.ReconnectEventSourveClient;
+                        }
                         catch (Exception ex)
                         {
-                            _log.Error($"Error reading stream: {ex.Message}");
-                            Disconnect(reconnect: true);
-                            return;
+                            _log.Debug($"Error reading stream: {ex.Message}");
+                            reconnect = true;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _log.Error($"Error connecting to {_url}: {ex.Message}");
+                _log.Debug($"Error connecting to {_url}: {ex.Message}");
             }
             finally
             {
                 _disconnectSignal.Signal();
-                Disconnect();
+                Disconnect(reconnect);
                 _connected = false;
-            }
 
-            _log.Debug("Finished Event Source client ConnectAsync.");            
+                _log.Debug("Finished Event Source client ConnectAsync.");
+            }            
         }
 
         private async Task ReadStreamAsync(Stream stream)
@@ -175,7 +186,10 @@ namespace Splitio.Services.EventSource
 
                         int len = streamReadTask.Result;
 
-                        if (len == 0) throw new ReadStreamException(true, "Streaming end of the file.");
+                        if (len == 0)
+                        {
+                            throw new ReadStreamException(true, "Streaming end of the file.");
+                        }
 
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
@@ -201,11 +215,11 @@ namespace Splitio.Services.EventSource
 
                                     if (ex.Notification.Code >= 40140 && ex.Notification.Code <= 40149)
                                     {
-                                        Disconnect(reconnect: true);
+                                        throw new ReadStreamException(true, $"Ably Notification code: {ex.Notification.Code}");
                                     }
                                     else if (ex.Notification.Code >= 40000 && ex.Notification.Code <= 49999)
                                     {
-                                        Disconnect();
+                                        throw new ReadStreamException(false, $"Ably Notification code: {ex.Notification.Code}");
                                     }
                                 }
                                 catch (Exception ex)
@@ -220,7 +234,7 @@ namespace Splitio.Services.EventSource
             catch (ReadStreamException ex)
             {
                 _log.Debug($"ReadStreamException: {ex.Message}");
-                Disconnect(ex.ReconnectEventSourveClient);
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -235,32 +249,22 @@ namespace Splitio.Services.EventSource
         private void DispatchEvent(IncomingNotification incomingNotification)
         {
             _log.Debug($"DispatchEvent: {incomingNotification}");
-            OnEvent(new EventReceivedEventArgs(incomingNotification));
+            EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchDisconnect(bool reconnect = false)
+        private void DispatchDisconnect()
         {
-            OnDisconnect(new FeedbackEventArgs(isConnected: false, reconnect: reconnect));
+            DisconnectEvent?.Invoke(this, new FeedbackEventArgs(isConnected: false));
         }
 
         private void DispatchConnected()
         {
-            OnConnected(new FeedbackEventArgs(isConnected: true));
+            ConnectedEvent?.Invoke(this, new FeedbackEventArgs(isConnected: true));
         }
 
-        private void OnEvent(EventReceivedEventArgs e)
+        private void DispatchReconnect()
         {
-            EventReceived?.Invoke(this, e);
-        }
-
-        private void OnConnected(FeedbackEventArgs e)
-        {
-            ConnectedEvent?.Invoke(this, e);
-        }
-
-        private void OnDisconnect(FeedbackEventArgs e)
-        {
-            DisconnectEvent?.Invoke(this, e);
+            ReconnectEvent?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }
