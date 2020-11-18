@@ -329,7 +329,8 @@ namespace Splitio_net_core.Integration_tests
                 MetricsRefreshRate = 1,
                 EventsPushRate = eventsPushRate ?? 1,
                 EventsQueueSize = eventsQueueSize,
-                IPAddressesEnabled = ipAddressesEnabled
+                IPAddressesEnabled = ipAddressesEnabled,
+                StreamingEnabled = false
             };
         }
 
@@ -358,9 +359,23 @@ namespace Splitio_net_core.Integration_tests
 
         protected override void AssertSentImpressions(int sentImpressionsCount, HttpClientMock httpClientMock = null, params KeyImpression[] expectedImpressions)
         {
-            Thread.Sleep(1500);
+            if (sentImpressionsCount <= 0) return;
 
             var sentImpressions = GetImpressionsSentBackend(httpClientMock);
+
+            var time = 1000;
+            while (sentImpressionsCount != sentImpressions.Sum(si => si.I.Count))
+            {
+                if (time >= 10000)
+                {
+                    break;
+                }
+
+                Thread.Sleep(time);
+
+                time = time + 1000;
+                sentImpressions = GetImpressionsSentBackend(httpClientMock);
+            }
 
             Assert.AreEqual(sentImpressionsCount, sentImpressions.Sum(si => si.I.Count));
 

@@ -1,6 +1,7 @@
 ﻿using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,18 +44,25 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 if (_counter < _numberOfParallelTasks)
                 {
-                    //Wait indefinitely until a segment is queued
-                    if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1))
+                    try
                     {
-                        if (Log.IsDebugEnabled)
+                        //Wait indefinitely until a segment is queued
+                        if (_segmentTaskQueue.GetQueue().TryTake(out SelfRefreshingSegment segment, -1))
                         {
-                            Log.Debug(string.Format("Segment dequeued: {0}", segment.Name));
-                        }
+                            if (Log.IsDebugEnabled)
+                            {
+                                Log.Debug(string.Format("Segment dequeued: {0}", segment.Name));
+                            }
 
-                        IncrementCounter();
-                        Task task = new Task(async() => await segment.FetchSegment(), token);
-                        task.ContinueWith((x) => { DecrementCounter(); });
-                        task.Start();
+                            IncrementCounter();
+                            Task task = new Task(async () => await segment.FetchSegment(), token);
+                            task.ContinueWith((x) => { DecrementCounter(); });
+                            task.Start();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Debug(ex.Message);
                     }
                 }
                 else

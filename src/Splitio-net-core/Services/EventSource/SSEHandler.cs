@@ -18,6 +18,7 @@ namespace Splitio.Services.EventSource
 
         public event EventHandler<FeedbackEventArgs> ConnectedEvent;
         public event EventHandler<FeedbackEventArgs> DisconnectEvent;
+        public event EventHandler<EventArgs> ReconnectEvent;
 
         public SSEHandler(string streaminServiceUrl,
             ISplitsWorker splitsWorker,
@@ -38,22 +39,25 @@ namespace Splitio.Services.EventSource
             _eventSourceClient.EventReceived += EventReceived;
             _eventSourceClient.ConnectedEvent += OnConnected;
             _eventSourceClient.DisconnectEvent += OnDisconnect;
+            _eventSourceClient.ReconnectEvent += OnReconnect;
         }
 
         #region Private Methods
-        public void Start(string token, string channels)
+        public bool Start(string token, string channels)
         {
             try
             {
                 _log.Debug($"SSE Handler starting...");
                 var url = $"{_streaminServiceUrl}?channels={channels}&v=1.1&accessToken={token}";
 
-                _eventSourceClient.ConnectAsync(url);
+                return _eventSourceClient.ConnectAsync(url);
             }
             catch (Exception ex)
             {
                 _log.Error($"SSE Handler Start: {ex.Message}");
             }
+
+            return false;
         }
 
         public void Stop()
@@ -69,7 +73,6 @@ namespace Splitio.Services.EventSource
             catch (Exception ex)
             {
                 _log.Debug($"SSE Handler Stop: {ex.Message}");
-                DisconnectEvent?.Invoke(this, new FeedbackEventArgs(false));
             }
         }
 
@@ -111,6 +114,11 @@ namespace Splitio.Services.EventSource
         {
             StopWorkers();
             DisconnectEvent?.Invoke(this, e);
+        }
+
+        private void OnReconnect(object sender, EventArgs e)
+        {
+            ReconnectEvent?.Invoke(this, e);
         }
         #endregion
     }

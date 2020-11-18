@@ -22,7 +22,7 @@ namespace Splitio.Services.SplitFetcher.Classes
         private readonly IReadinessGatesCache _gates;
         private readonly ISplitCache _splitCache;
         private readonly CancellationTokenSource _cancelTokenSource;
-        private readonly int _interval;        
+        private readonly int _interval;
 
         public SelfRefreshingSplitFetcher(ISplitChangeFetcher splitChangeFetcher,
             ISplitParser splitParser, 
