@@ -1,6 +1,6 @@
 CHANGES
 
-6.2.1 (Nov 17, 2020)
+6.2.1 (Nov 18, 2020)
 - Fixed the first schedule for the SSE refresh token.
 
 6.2.0 (Oct 13, 2020)
