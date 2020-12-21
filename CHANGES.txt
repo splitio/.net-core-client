@@ -1,6 +1,6 @@
 CHANGES
 
-6.2.2 (Dec 21, 2020)
+6.2.2 (Dec 22, 2020)
 - Signed packages.
 
 6.2.1 (Nov 18, 2020)
