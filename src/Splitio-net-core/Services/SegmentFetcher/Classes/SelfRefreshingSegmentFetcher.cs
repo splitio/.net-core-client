@@ -4,6 +4,7 @@ using Splitio.Services.Logger;
 using Splitio.Services.SegmentFetcher.Interfaces;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -85,14 +86,15 @@ namespace Splitio.Services.SegmentFetcher.Classes
             {
                 segment = new SelfRefreshingSegment(name, _segmentChangeFetcher, _gates, _segmentCache);
 
-                _segments.TryAdd(name, segment);
-
-                _segmentTaskQueue.Add(segment);
-
-                if (_log.IsDebugEnabled)
+                if (_segments.TryAdd(name, segment))
                 {
-                    _log.Debug($"Segment queued: {segment.Name}");
-                }
+                    _segmentTaskQueue.Add(segment);
+
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.Debug($"Segment queued: {segment.Name}");
+                    }
+                }                
             }
         }
 
@@ -108,8 +110,16 @@ namespace Splitio.Services.SegmentFetcher.Classes
 
         public async Task Fetch(string segmentName)
         {
-            var refreshingSegment = new SelfRefreshingSegment(segmentName, _segmentChangeFetcher, _gates, _segmentCache);
-            await refreshingSegment.FetchSegment();
+            try
+            {
+                InitializeSegment(segmentName);
+                _segments.TryGetValue(segmentName, out SelfRefreshingSegment fetcher);
+                await fetcher.FetchSegment();
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Segment {segmentName} is not initialized. {ex.Message}");
+            }
         }
         #endregion
 
