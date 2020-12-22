@@ -1,7 +1,7 @@
 CHANGES
 
 6.2.3 (Dec 22, 2020)
-- Fixed package strong name.
+- Fixed package strong name
 
 6.2.1 (Nov 18, 2020)
 - Fixed the first schedule for the SSE refresh token.
