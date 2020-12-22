@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.6;net40;net45</TargetFrameworks>
@@ -10,8 +10,13 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>6.2.1</Version>
-    <RootNamespace>Splitio</RootNamespace>
+    <Version>6.2.2</Version>
+    <RootNamespace>Splitio</RootNamespace>    
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Splitio.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40'">

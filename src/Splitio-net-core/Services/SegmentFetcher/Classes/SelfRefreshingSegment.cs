@@ -27,13 +27,6 @@ namespace Splitio.Services.SegmentFetcher.Classes
             _gates.RegisterSegment(name);
         }
 
-        public async Task FetchSegment(string segmentName)
-        {
-            Name = segmentName;
-            _gates.RegisterSegment(Name);
-            await FetchSegment();
-        }
-
         public async Task FetchSegment()
         {
             while (true)
