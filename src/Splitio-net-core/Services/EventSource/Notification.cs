@@ -12,14 +12,7 @@
         public string Id { get; set; }
         public string Channel { get; set; }
         public string Data { get; set; }
-    }
-    
-    public class NotificationError
-    {
-        public string Message { get; set; }
-        public int StatusCode { get; set; }
-        public int Code { get; set; }
-    }
+    }       
 
     public enum NotificationType
     {
@@ -27,7 +20,8 @@
         SPLIT_KILL,
         SEGMENT_UPDATE,
         CONTROL,
-        OCCUPANCY
+        OCCUPANCY,
+        ERROR
     }
 
     public enum ControlType
@@ -41,6 +35,13 @@
     {
         public NotificationType Type { get; set; }
         public string Channel { get; set; }
+    }
+
+    public class NotificationError : IncomingNotification
+    {
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+        public int Code { get; set; }
     }
 
     public class SplitChangeNotifiaction : IncomingNotification

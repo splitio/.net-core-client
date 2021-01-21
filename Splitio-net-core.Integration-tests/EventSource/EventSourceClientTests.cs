@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
-using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
@@ -10,8 +9,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
     public class EventSourceClientTests
     {
         private BlockingCollection<EventReceivedEventArgs> _eventsReceived;
-        private BlockingCollection<EventArgs> _connectedEvent;
-        private BlockingCollection<EventArgs> _disconnectEvent;
+        private BlockingCollection<SSEActionsEventArgs> _actionEvent;
 
         [TestMethod]
         public void EventSourceClient_SplitUpdateEvent_ShouldReceiveEvent()
@@ -23,25 +21,22 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.IsTrue(eventSourceClient.IsConnected());
                 Assert.AreEqual(NotificationType.SPLIT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585867723838, ((SplitChangeNotifiaction)ev.Event).ChangeNumber);
-                Assert.IsTrue(_connectedEvent.Count >= 1);
-
-                eventSourceClient.Disconnect();
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
-
+        
         [TestMethod]
         public void EventSourceClient_SplitKillEvent_ShouldReceiveEvent()
         {
@@ -52,13 +47,11 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
@@ -66,9 +59,8 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 Assert.AreEqual(1585868246622, ((SplitKillNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("off", ((SplitKillNotification)ev.Event).DefaultTreatment);
                 Assert.AreEqual("test-split", ((SplitKillNotification)ev.Event).SplitName);
-                Assert.IsTrue(_connectedEvent.Count >= 1);
-
-                eventSourceClient.Disconnect();
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
 
@@ -82,21 +74,19 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.SEGMENT_UPDATE, ev.Event.Type);
                 Assert.AreEqual(1585868933303, ((SegmentChangeNotification)ev.Event).ChangeNumber);
                 Assert.AreEqual("test-segment", ((SegmentChangeNotification)ev.Event).SegmentName);
-                _connectedEvent.TryTake(out EventArgs e, 10000);
-                Assert.IsNotNull(e);
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
 
@@ -110,24 +100,22 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_PAUSED, ((ControlNotification)ev.Event).ControlType);
-                Assert.IsTrue(_connectedEvent.Count >= 1);
-
-                eventSourceClient.Disconnect();
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
-
+        
+        
         [TestMethod]
         public void EventSourceClient_ControlEvent_StreamingResumed_ShouldReceiveEvent()
         {
@@ -138,24 +126,21 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_RESUMED, ((ControlNotification)ev.Event).ControlType);
-                Assert.IsTrue(_connectedEvent.Count >= 1);
-
-                eventSourceClient.Disconnect();
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
-
+        
         [TestMethod]
         public void EventSourceClient_ControlEvent_StreamingDisabled_ShouldReceiveEvent()
         {
@@ -166,21 +151,18 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
                 _eventsReceived.TryTake(out EventReceivedEventArgs ev, 10000);
                 Assert.AreEqual(NotificationType.CONTROL, ev.Event.Type);
                 Assert.AreEqual(ControlType.STREAMING_DISABLED, ((ControlNotification)ev.Event).ControlType);
-                Assert.IsTrue(_connectedEvent.Count >= 1);
-
-                eventSourceClient.Disconnect();
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
             }
         }
 
@@ -204,20 +186,16 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
-                _connectedEvent.TryTake(out EventArgs e, 10000);
-                Assert.IsNotNull(e);
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
                 Assert.AreEqual(0, _eventsReceived.Count);
-
-                eventSourceClient.Disconnect();
             }
         }
 
@@ -231,17 +209,18 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
-                _disconnectEvent.TryTake(out EventArgs e, 10000);
-                Assert.IsNotNull(e);
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
+
+                _actionEvent.TryTake(out SSEActionsEventArgs action2, 10000);
+                Assert.AreEqual(SSEClientActions.RETRYABLE_ERROR, action2.Action);
             }
         }
 
@@ -254,38 +233,29 @@ namespace Splitio_net_core.Integration_tests.EventSource
 
                 var url = httpClientMock.GetUrl();
                 _eventsReceived = new BlockingCollection<EventReceivedEventArgs>(new ConcurrentQueue<EventReceivedEventArgs>());
-                _connectedEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
-                _disconnectEvent = new BlockingCollection<EventArgs>(new ConcurrentQueue<EventArgs>());
+                _actionEvent = new BlockingCollection<SSEActionsEventArgs>(new ConcurrentQueue<SSEActionsEventArgs>());
 
                 var eventSourceClient = new EventSourceClient();
                 eventSourceClient.EventReceived += EventReceived;
-                eventSourceClient.ConnectedEvent += ConnectedEvent;
-                eventSourceClient.DisconnectEvent += DisconnectEvent;
+                eventSourceClient.ActionEvent += ActionEvent;
                 eventSourceClient.ConnectAsync(url);
 
-                _connectedEvent.TryTake(out EventArgs e, 10000);
-                Assert.IsNotNull(e);
+                _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
+                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
                 Thread.Sleep(1000);
                 Assert.AreEqual(0, _eventsReceived.Count);
-
-                eventSourceClient.Disconnect();
             }
         }
-
+        
         #region Private Method
         private void EventReceived(object sender, EventReceivedEventArgs e)
         {
             _eventsReceived.TryAdd(e);
         }
 
-        private void ConnectedEvent(object sender, EventArgs e)
+        private void ActionEvent(object sender, SSEActionsEventArgs e)
         {
-            _connectedEvent.TryAdd(e);
-        }
-
-        private void DisconnectEvent(object sender, EventArgs e)
-        {
-            _disconnectEvent.TryAdd(e);
+            _actionEvent.TryAdd(e);
         }
         #endregion
     }

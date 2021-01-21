@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Splitio.Services.EventSource;
-using Splitio.Services.Exceptions;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {
@@ -86,7 +85,6 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NotificationErrorException))]
         public void Parse_NotificationError_ShouldReturnException()
         {
             // Arrange.
@@ -94,6 +92,11 @@ namespace Splitio_Tests.Unit_Tests.EventSource
 
             // Act.
             var result = _notificationParser.Parse(text);
+
+            // Assert.
+            Assert.AreEqual(NotificationType.ERROR, result.Type);
+            Assert.AreEqual(40142, ((NotificationError)result).Code);
+            Assert.AreEqual(401, ((NotificationError)result).StatusCode);
         }
 
         [TestMethod]

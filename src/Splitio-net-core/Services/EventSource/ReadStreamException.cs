@@ -4,12 +4,12 @@ namespace Splitio.Services.EventSource
 {
     public class ReadStreamException : Exception
     {
-        public bool ReconnectEventSourveClient { get; set; }
+        public SSEClientActions Action { get; set; }
 
-        public ReadStreamException(bool reconnect, string message)
+        public ReadStreamException(SSEClientActions action, string message)
             : base(message)
         {
-            ReconnectEventSourveClient = reconnect;
+            Action = action;
         }
     }
 }

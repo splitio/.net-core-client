@@ -10,8 +10,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
     public class NotificationManagerKeeperTests
     {
         private readonly Mock<ISplitLogger> _log;
-        private bool? _pushEnabled;
-        private EventArgs _event;
+        private SSEActionsEventArgs _event;
 
         private readonly INotificationManagerKeeper _notificationManagerKeeper;
 
@@ -20,15 +19,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _log = new Mock<ISplitLogger>();
 
             _notificationManagerKeeper = new NotificationManagerKeeper(_log.Object);
-            _notificationManagerKeeper.OccupancyEvent += OnOccupancyEvent;
-            _notificationManagerKeeper.PushShutdownEvent += OnPushShutdownEvent;
+            _notificationManagerKeeper.ActionEvent += OnActionEvent;
         }
 
         [TestMethod]
         public void HandleIncominEvent_ControlStreamingPaused_ShouldDispatchEvent()
         {
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
 
             var notification = new ControlNotification
             {
@@ -41,14 +39,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            Assert.IsFalse(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_DOWN, _event.Action);
         }
 
         [TestMethod]
         public void HandleIncominEvent_ControlStreamingResumed_ShouldDispatchEvent()
         {
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
 
             var notification = new ControlNotification
             {
@@ -61,14 +59,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            Assert.IsTrue(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_READY, _event.Action);
         }
 
         [TestMethod]
         public void HandleIncominEvent_ControlStreamingResumed_ShouldNotDispatchEvent()
         {
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
 
             var occupancyNoti = new OccupancyNotification
             {
@@ -84,12 +82,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource
                 Type = NotificationType.CONTROL
             };
 
-            // Act.
+            // Act & Assert.
             _notificationManagerKeeper.HandleIncomingEvent(occupancyNoti);
-            _notificationManagerKeeper.HandleIncomingEvent(notification);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_DOWN, _event.Action);
 
-            // Assert.
-            Assert.IsFalse(_pushEnabled.Value);
+            _event = null;
+            _notificationManagerKeeper.HandleIncomingEvent(notification);
+            Assert.IsNull(_event);
         }
 
         [TestMethod]
@@ -109,14 +108,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            Assert.IsNotNull(_event);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_OFF, _event.Action);
         }
 
         [TestMethod]
         public void HandleIncominEvent_OccupancyWithPublishers_FirstTime_ShouldNotDispatchEvent()
         {
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
 
             var notification = new OccupancyNotification
             {
@@ -129,14 +128,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notification);
 
             // Assert.
-            Assert.IsNull(_pushEnabled);
+            Assert.IsNull(_event);
         }
-
+        
         [TestMethod]
         public void HandleIncominEvent_OccupancyWithPublishers_ManyEvents_MultiReg()
         {
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
 
             var notificationPri = new OccupancyNotification
             {
@@ -149,7 +148,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.IsNull(_pushEnabled);
+            Assert.IsNull(_event);
 
             // Event control_pri with 0 publishers - should return false
             // Arrange.
@@ -159,7 +158,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.IsFalse(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_DOWN, _event.Action);
 
             // Event control_sec with 2 publishers - should return true
             // Arrange.
@@ -174,18 +173,18 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            Assert.IsTrue(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_READY, _event.Action);
 
             // Event control_pri with 2 publishers - should return null
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
             notificationPri.Metrics.Publishers = 2;
 
             // Act.
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.IsNull(_pushEnabled);
+            Assert.IsNull(_event);
 
             // Event control_pri with 0 publishers - should return null
             // Arrange.
@@ -195,7 +194,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationPri);
 
             // Assert.
-            Assert.IsNull(_pushEnabled);
+            Assert.IsNull(_event);
 
             // Event control_sec with 0 publishers - should return false
             // Arrange.
@@ -205,18 +204,18 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            Assert.IsFalse(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_DOWN, _event.Action);
 
             // Event control_sec with 0 publishers - should return null
             // Arrange.
-            _pushEnabled = null;
+            _event = null;
             notificationSec.Metrics.Publishers = 0;
 
             // Act.
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            Assert.IsNull(_pushEnabled);
+            Assert.IsNull(_event);
 
             // Event control_sec with 1 publishers - should return true
             // Arrange.
@@ -226,15 +225,10 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             _notificationManagerKeeper.HandleIncomingEvent(notificationSec);
 
             // Assert.
-            Assert.IsTrue(_pushEnabled.Value);
+            Assert.AreEqual(SSEClientActions.SUBSYSTEM_READY, _event.Action);
         }
-
-        private void OnOccupancyEvent(object sender, OccupancyEventArgs e)
-        {
-            _pushEnabled = e.PublisherAvailable;
-        }
-
-        private void OnPushShutdownEvent(object sender, EventArgs e)
+        
+        private void OnActionEvent(object sender, SSEActionsEventArgs e)
         {
             _event = e;
         }

@@ -37,15 +37,13 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Raise(mock => mock.ConnectedEvent += null, new FeedbackEventArgs(true));
+                .Raise(mock => mock.ActionEvent += null, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
 
             // Act.
             _sseHandler.Start(token, channels);
 
             // Assert.
             _eventSourceClient.Verify(mock => mock.ConnectAsync(It.IsAny<string>()), Times.Once);
-            _splitsWorker.Verify(mock => mock.Start(), Times.Once);
-            _segmentsWorker.Verify(mock => mock.Start(), Times.Once);
         }
 
         [TestMethod]
@@ -56,17 +54,15 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.Disconnect(It.IsAny<bool>()))
-                .Raises(mock => mock.DisconnectEvent += null, new FeedbackEventArgs(false));
+                .Setup(mock => mock.Disconnect(It.IsAny<SSEClientActions>()))
+                .Raises(mock => mock.ActionEvent += null, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
 
             // Act.
             _sseHandler.Start(token, channels);
             _sseHandler.Stop();
 
             // Assert.
-            _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<bool>()), Times.Once);
-            _splitsWorker.Verify(mock => mock.Stop(), Times.Once);
-            _segmentsWorker.Verify(mock => mock.Stop(), Times.Once);
+            _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<SSEClientActions>()), Times.Once);
         }
     }
 }

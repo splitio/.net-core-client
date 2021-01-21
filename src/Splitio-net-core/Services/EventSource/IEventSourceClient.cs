@@ -5,12 +5,10 @@ namespace Splitio.Services.EventSource
     public interface IEventSourceClient
     {
         bool ConnectAsync(string url);
-        void Disconnect(bool reconnect = false);
+        void Disconnect(SSEClientActions action = SSEClientActions.DISCONNECT);
         bool IsConnected();
         
         event EventHandler<EventReceivedEventArgs> EventReceived;
-        event EventHandler<FeedbackEventArgs> ConnectedEvent;
-        event EventHandler<FeedbackEventArgs> DisconnectEvent;
-        event EventHandler<EventArgs> ReconnectEvent;
+        event EventHandler<SSEActionsEventArgs> ActionEvent;
     }
 }

@@ -14,8 +14,7 @@ namespace Splitio.Services.EventSource
         private int _publishersPri;
         private int _publishersSec;
 
-        public event EventHandler<OccupancyEventArgs> OccupancyEvent;
-        public event EventHandler<EventArgs> PushShutdownEvent;
+        public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
         public NotificationManagerKeeper(ISplitLogger log = null)
         {
@@ -50,16 +49,16 @@ namespace Splitio.Services.EventSource
             switch (controlEvent.ControlType)
             {
                 case ControlType.STREAMING_PAUSED:
-                    DispatchOccupancyEvent(publisherAvailable: false);
+                    DispatchActionEvent(SSEClientActions.SUBSYSTEM_DOWN);
                     break;
-                case ControlType.STREAMING_RESUMED:
+                case ControlType.STREAMING_RESUMED:                    
                     lock (_eventOccupancyLock)
                     {
-                        if (_publisherAvailable) DispatchOccupancyEvent(publisherAvailable: true);
+                        if (_publisherAvailable) DispatchActionEvent(SSEClientActions.SUBSYSTEM_READY);
                     }
                     break;
                 case ControlType.STREAMING_DISABLED:
-                    DispatchPushShutdown();
+                    DispatchActionEvent(SSEClientActions.SUBSYSTEM_OFF);
                     break;
                 default:
                     _log.Error($"Incorrect control type. {controlEvent.ControlType}");
@@ -78,12 +77,12 @@ namespace Splitio.Services.EventSource
                 if (!ArePublishersAvailable() && _publisherAvailable)
                 {
                     _publisherAvailable = false;
-                    DispatchOccupancyEvent(false);
+                    DispatchActionEvent(SSEClientActions.SUBSYSTEM_DOWN);
                 }
                 else if (ArePublishersAvailable() && !_publisherAvailable)
                 {
                     _publisherAvailable = true;
-                    DispatchOccupancyEvent(true);
+                    DispatchActionEvent(SSEClientActions.SUBSYSTEM_READY);
                 }
             }
         }
@@ -108,14 +107,9 @@ namespace Splitio.Services.EventSource
             return _publishersPri >= 1 || _publishersSec >= 1;
         }
 
-        private void DispatchOccupancyEvent(bool publisherAvailable)
+        private void DispatchActionEvent(SSEClientActions action)
         {
-            OccupancyEvent?.Invoke(this, new OccupancyEventArgs(publisherAvailable));
-        }
-
-        private void DispatchPushShutdown()
-        {
-            PushShutdownEvent?.Invoke(this, EventArgs.Empty);
+            ActionEvent?.Invoke(this, new SSEActionsEventArgs(action));
         }
         #endregion
     }
