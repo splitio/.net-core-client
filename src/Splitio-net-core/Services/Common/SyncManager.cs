@@ -56,6 +56,8 @@ namespace Splitio.Services.Common
         // public for tests
         public void OnProcessFeedbackSSE(object sender, SSEActionsEventArgs e)
         {
+            _log.Debug($"OnProcessFeedbackSSE Actio: {e.Action}");
+
             switch (e.Action)
             {
                 case SSEClientActions.CONNECTED:
