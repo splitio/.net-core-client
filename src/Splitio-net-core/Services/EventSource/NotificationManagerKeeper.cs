@@ -8,6 +8,7 @@ namespace Splitio.Services.EventSource
     public class NotificationManagerKeeper : INotificationManagerKeeper
     {
         private readonly ISplitLogger _log;
+        private readonly object _eventOccupancyLock = new object();
 
         private bool _publisherAvailable;
         private int _publishersPri;
@@ -43,7 +44,7 @@ namespace Splitio.Services.EventSource
 
         #region Private Methods
         private void ProcessEventControl(IncomingNotification notification)
-        {
+        {            
             var controlEvent = (ControlNotification)notification;
 
             switch (controlEvent.ControlType)
@@ -52,7 +53,10 @@ namespace Splitio.Services.EventSource
                     DispatchOccupancyEvent(publisherAvailable: false);
                     break;
                 case ControlType.STREAMING_RESUMED:
-                    if (_publisherAvailable) DispatchOccupancyEvent(publisherAvailable: true);
+                    lock (_eventOccupancyLock)
+                    {
+                        if (_publisherAvailable) DispatchOccupancyEvent(publisherAvailable: true);
+                    }
                     break;
                 case ControlType.STREAMING_DISABLED:
                     DispatchPushShutdown();
@@ -65,19 +69,22 @@ namespace Splitio.Services.EventSource
 
         private void ProcessEventOccupancy(IncomingNotification notification)
         {
-            var occupancyEvent = (OccupancyNotification)notification;
-
-            UpdatePublishers(occupancyEvent.Channel, occupancyEvent.Metrics.Publishers);
-
-            if (!ArePublishersAvailable() && _publisherAvailable)
+            lock (_eventOccupancyLock)
             {
-                _publisherAvailable = false;
-                DispatchOccupancyEvent(false);
-            }
-            else if (ArePublishersAvailable() && !_publisherAvailable)
-            {
-                _publisherAvailable = true;
-                DispatchOccupancyEvent(true);
+                var occupancyEvent = (OccupancyNotification)notification;
+
+                UpdatePublishers(occupancyEvent.Channel, occupancyEvent.Metrics.Publishers);
+
+                if (!ArePublishersAvailable() && _publisherAvailable)
+                {
+                    _publisherAvailable = false;
+                    DispatchOccupancyEvent(false);
+                }
+                else if (ArePublishersAvailable() && !_publisherAvailable)
+                {
+                    _publisherAvailable = true;
+                    DispatchOccupancyEvent(true);
+                }
             }
         }
 
