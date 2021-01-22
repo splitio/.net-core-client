@@ -2,7 +2,6 @@
 using Moq;
 using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
-using System;
 
 namespace Splitio_Tests.Unit_Tests.EventSource
 {

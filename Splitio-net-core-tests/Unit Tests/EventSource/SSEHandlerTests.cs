@@ -37,12 +37,14 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Raise(mock => mock.ActionEvent += null, new SSEActionsEventArgs(SSEClientActions.CONNECTED));
+                .Setup(mock => mock.ConnectAsync(It.IsAny<string>()))
+                .Returns(true);
 
             // Act.
-            _sseHandler.Start(token, channels);
+            var result = _sseHandler.Start(token, channels);
 
             // Assert.
+            Assert.IsTrue(result);
             _eventSourceClient.Verify(mock => mock.ConnectAsync(It.IsAny<string>()), Times.Once);
         }
 
@@ -54,14 +56,15 @@ namespace Splitio_Tests.Unit_Tests.EventSource
             var channels = "channel-test";
 
             _eventSourceClient
-                .Setup(mock => mock.Disconnect(It.IsAny<SSEClientActions>()))
-                .Raises(mock => mock.ActionEvent += null, new SSEActionsEventArgs(SSEClientActions.NONRETRYABLE_ERROR));
+                .Setup(mock => mock.ConnectAsync(It.IsAny<string>()))
+                .Returns(true);
 
             // Act.
-            _sseHandler.Start(token, channels);
+            var result = _sseHandler.Start(token, channels);
             _sseHandler.Stop();
 
             // Assert.
+            Assert.IsTrue(result);
             _eventSourceClient.Verify(mock => mock.Disconnect(It.IsAny<SSEClientActions>()), Times.Once);
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Splitio.Services.EventSource;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
-using System;
 using System.Threading.Tasks;
 
 namespace Splitio.Services.Common
@@ -53,6 +52,33 @@ namespace Splitio.Services.Common
             _synchronizer.StopPeriodicDataRecording();
             _pushManager.StopSse();
         }
+
+        // public for tests
+        public void OnProcessFeedbackSSE(object sender, SSEActionsEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case SSEClientActions.CONNECTED:
+                    ProcessConnected();
+                    break;                
+                case SSEClientActions.RETRYABLE_ERROR:
+                    ProcessDisconnect(retry: true);
+                    break;
+                case SSEClientActions.DISCONNECT:
+                case SSEClientActions.NONRETRYABLE_ERROR:
+                    ProcessDisconnect(retry: false);
+                    break;
+                case SSEClientActions.SUBSYSTEM_DOWN:
+                    ProcessSubsystemDown();
+                    break;
+                case SSEClientActions.SUBSYSTEM_READY:
+                    ProcessSubsystemReady();
+                    break;
+                case SSEClientActions.SUBSYSTEM_OFF:
+                    ProcessSubsystemOff();
+                    break;
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -76,33 +102,7 @@ namespace Splitio.Services.Common
                     _synchronizer.StartPeriodicFetching();
                 }
             });
-        }
-
-        private void OnProcessFeedbackSSE(object sender, SSEActionsEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case SSEClientActions.CONNECTED:
-                    ProcessConnected();
-                    break;
-                case SSEClientActions.DISCONNECT:
-                case SSEClientActions.RETRYABLE_ERROR:
-                    ProcessDisconnect(retry: true);
-                    break;
-                case SSEClientActions.NONRETRYABLE_ERROR:
-                    ProcessDisconnect(retry: false);
-                    break;
-                case SSEClientActions.SUBSYSTEM_DOWN:
-                    ProcessSubsystemDown();
-                    break;
-                case SSEClientActions.SUBSYSTEM_READY:
-                    ProcessSubsystemReady();
-                    break;
-                case SSEClientActions.SUBSYSTEM_OFF:
-                    ProcessSubsystemOff();
-                    break;
-            }
-        }
+        }        
 
         private void ProcessConnected()
         {

@@ -85,7 +85,7 @@ namespace Splitio_Tests.Unit_Tests.EventSource
         }
 
         [TestMethod]
-        public void Parse_NotificationError_ShouldReturnException()
+        public void Parse_NotificationError_ShouldReturnError()
         {
             // Arrange.
             var text = "event: error\ndata: {\"message\":\"Token expired\",\"code\":40142,\"statusCode\":401,\"href\":\"https://help.ably.io/error/40142\"}\n\n";
