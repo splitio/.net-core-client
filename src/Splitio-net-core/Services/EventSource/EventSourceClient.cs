@@ -194,30 +194,23 @@ namespace Splitio.Services.EventSource
 
                             foreach (var line in lines)
                             {
-                                try
+                                if (!string.IsNullOrEmpty(line))
                                 {
-                                    if (!string.IsNullOrEmpty(line))
+                                    var eventData = _notificationParser.Parse(line);
+
+                                    if (eventData != null)
                                     {
-                                        var eventData = _notificationParser.Parse(line);
-
-                                        if (eventData != null)
+                                        if (eventData.Type == NotificationType.ERROR)
                                         {
-                                            if (eventData.Type == NotificationType.ERROR)
-                                            {
-                                                var notificationError = (NotificationError)eventData;
+                                            var notificationError = (NotificationError)eventData;
 
-                                                ProcessErrorNotification(notificationError);
-                                            }
-                                            else
-                                            {
-                                                DispatchEvent(eventData);
-                                            }
+                                            ProcessErrorNotification(notificationError);
+                                        }
+                                        else
+                                        {
+                                            DispatchEvent(eventData);
                                         }
                                     }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _log.Debug($"Error during event parse: {ex.Message}");
                                 }
                             }
                         }
@@ -247,7 +240,8 @@ namespace Splitio.Services.EventSource
             {
                 throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
             }
-            else if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
+
+            if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
             {
                 throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
             }
