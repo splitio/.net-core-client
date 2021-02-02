@@ -1,5 +1,4 @@
 ﻿using Splitio.Services.Common;
-using Splitio.Services.Exceptions;
 using Splitio.Services.Logger;
 using Splitio.Services.Shared.Classes;
 using Splitio.Services.Shared.Interfaces;
@@ -44,9 +43,7 @@ namespace Splitio.Services.EventSource
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
-        public event EventHandler<FeedbackEventArgs> ConnectedEvent;
-        public event EventHandler<FeedbackEventArgs> DisconnectEvent;
-        public event EventHandler<EventArgs> ReconnectEvent;
+        public event EventHandler<SSEActionsEventArgs> ActionEvent;
 
         #region Public Methods
         public bool ConnectAsync(string url)
@@ -84,7 +81,7 @@ namespace Splitio.Services.EventSource
             return _connected;
         }
 
-        public void Disconnect(bool reconnect = false)
+        public void Disconnect(SSEClientActions action = SSEClientActions.DISCONNECT)
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
 
@@ -93,23 +90,17 @@ namespace Splitio.Services.EventSource
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
 
-            DispatchDisconnect();
+            DispatchActionEvent(action);
 
             _disconnectSignal.Wait(ReadTimeoutMs);
             _log.Debug($"Disconnected from {_url}");
-
-            if (reconnect)
-            {
-                DispatchReconnect();
-                _log.Debug("Reconnecting Event Source Client...");
-            }            
         }
         #endregion
 
         #region Private Methods
         private async Task ConnectAsync(CountdownEvent signal)
         {
-            bool reconnect = false;
+            var action = SSEClientActions.DISCONNECT;
 
             try
             {
@@ -129,7 +120,7 @@ namespace Splitio.Services.EventSource
                                 _log.Info($"Connected to {_url}");
 
                                 _connected = true;
-                                DispatchConnected();
+                                DispatchActionEvent(SSEClientActions.CONNECTED);
                                 signal.Signal();
                                 await ReadStreamAsync(stream);
                             }
@@ -137,12 +128,12 @@ namespace Splitio.Services.EventSource
                         catch (ReadStreamException ex)
                         {
                             _log.Debug(ex.Message);
-                            reconnect = ex.ReconnectEventSourveClient;
+                            action = ex.Action;
                         }
                         catch (Exception ex)
                         {
                             _log.Debug($"Error reading stream: {ex.Message}");
-                            reconnect = true;
+                            action = SSEClientActions.RETRYABLE_ERROR;
                         }
                     }
                 }
@@ -154,7 +145,7 @@ namespace Splitio.Services.EventSource
             finally
             {
                 _disconnectSignal.Signal();
-                Disconnect(reconnect);
+                Disconnect(action);
                 _connected = false;
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
@@ -182,13 +173,16 @@ namespace Splitio.Services.EventSource
                         // Returns: A task that represents the completion of one of the supplied tasks. The return task's Result is the task that completed.
                         var finishedTask = await _wrapperAdapter.WhenAny(streamReadTask, timeoutTask);
 
-                        if (finishedTask == timeoutTask) throw new ReadStreamException(true, $"Streaming read time out after {ReadTimeoutMs} seconds.");
-
+                        if (finishedTask == timeoutTask)
+                        {
+                            throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Streaming read time out after {ReadTimeoutMs} seconds.");
+                        }
+                        
                         int len = streamReadTask.Result;
 
                         if (len == 0)
                         {
-                            throw new ReadStreamException(true, "Streaming end of the file.");
+                            throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, "Streaming end of the file.");
                         }
 
                         var notificationString = encoder.GetString(buffer, 0, len);
@@ -200,31 +194,23 @@ namespace Splitio.Services.EventSource
 
                             foreach (var line in lines)
                             {
-                                try
+                                if (!string.IsNullOrEmpty(line))
                                 {
-                                    if (!string.IsNullOrEmpty(line))
-                                    {
-                                        var eventData = _notificationParser.Parse(line);
+                                    var eventData = _notificationParser.Parse(line);
 
-                                        if (eventData != null) DispatchEvent(eventData);
-                                    }
-                                }
-                                catch (NotificationErrorException ex)
-                                {
-                                    _log.Debug($"Notification error: {ex.Message}. Status Server: {ex.Notification.StatusCode}.");
+                                    if (eventData != null)
+                                    {
+                                        if (eventData.Type == NotificationType.ERROR)
+                                        {
+                                            var notificationError = (NotificationError)eventData;
 
-                                    if (ex.Notification.Code >= 40140 && ex.Notification.Code <= 40149)
-                                    {
-                                        throw new ReadStreamException(true, $"Ably Notification code: {ex.Notification.Code}");
+                                            ProcessErrorNotification(notificationError);
+                                        }
+                                        else
+                                        {
+                                            DispatchEvent(eventData);
+                                        }
                                     }
-                                    else if (ex.Notification.Code >= 40000 && ex.Notification.Code <= 49999)
-                                    {
-                                        throw new ReadStreamException(false, $"Ably Notification code: {ex.Notification.Code}");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _log.Debug($"Error during event parse: {ex.Message}");
                                 }
                             }
                         }
@@ -246,25 +232,30 @@ namespace Splitio.Services.EventSource
             }
         }
 
+        private void ProcessErrorNotification(NotificationError notificationError)
+        {
+            _log.Debug($"Notification error: {notificationError.Message}. Status Server: {notificationError.StatusCode}.");
+
+            if (notificationError.Code >= 40140 && notificationError.Code <= 40149)
+            {
+                throw new ReadStreamException(SSEClientActions.RETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
+            }
+
+            if (notificationError.Code >= 40000 && notificationError.Code <= 49999)
+            {
+                throw new ReadStreamException(SSEClientActions.NONRETRYABLE_ERROR, $"Ably Notification code: {notificationError.Code}");
+            }
+        }
+
         private void DispatchEvent(IncomingNotification incomingNotification)
         {
             _log.Debug($"DispatchEvent: {incomingNotification}");
             EventReceived?.Invoke(this, new EventReceivedEventArgs(incomingNotification));
         }
 
-        private void DispatchDisconnect()
+        private void DispatchActionEvent(SSEClientActions action)
         {
-            DisconnectEvent?.Invoke(this, new FeedbackEventArgs(isConnected: false));
-        }
-
-        private void DispatchConnected()
-        {
-            ConnectedEvent?.Invoke(this, new FeedbackEventArgs(isConnected: true));
-        }
-
-        private void DispatchReconnect()
-        {
-            ReconnectEvent?.Invoke(this, EventArgs.Empty);
+            ActionEvent?.Invoke(this, new SSEActionsEventArgs(action));
         }
         #endregion
     }
