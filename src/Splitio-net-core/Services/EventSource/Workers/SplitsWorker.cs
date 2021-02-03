@@ -11,6 +11,8 @@ namespace Splitio.Services.EventSource.Workers
 {
     public class SplitsWorker : ISplitsWorker
     {
+        private readonly static int MaxRetriesAllowed = 10;
+
         private readonly ISplitLogger _log;
         private readonly ISplitCache _splitCache;
         private readonly ISynchronizer _synchronizer;
@@ -122,14 +124,17 @@ namespace Splitio.Services.EventSource.Workers
             {
                 while (!_cancellationTokenSource.IsCancellationRequested && _running)
                 {
-                    //Wait indefinitely until a segment is queued
+                    // Wait indefinitely until a segment is queued
                     if (_queue.TryTake(out long changeNumber, -1))
                     {
                         _log.Debug($"ChangeNumber dequeue: {changeNumber}");
 
-                        if (changeNumber > _splitCache.GetChangeNumber())
+                        var attempt = 0;
+
+                        while (changeNumber >= _splitCache.GetChangeNumber() && (attempt < MaxRetriesAllowed))
                         {
                             await _synchronizer.SynchronizeSplits();
+                            attempt++;
                         }
                     }
                 }
