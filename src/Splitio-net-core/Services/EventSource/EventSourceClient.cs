@@ -24,12 +24,13 @@ namespace Splitio.Services.EventSource
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly CountdownEvent _disconnectSignal;
 
+        private string _url;
         private bool _connected;
+        private bool _firstEvent;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationTokenSource _streamReadcancellationTokenSource;        
-        private string _url;
 
         public EventSourceClient(ISplitLogger log = null,
             INotificationParser notificationParser = null,
@@ -40,6 +41,7 @@ namespace Splitio.Services.EventSource
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
 
             _disconnectSignal = new CountdownEvent(1);
+            _firstEvent = true;
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -85,6 +87,7 @@ namespace Splitio.Services.EventSource
         {
             if (_cancellationTokenSource.IsCancellationRequested) return;
 
+            _firstEvent = true;
             _streamReadcancellationTokenSource.Cancel();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
@@ -119,10 +122,7 @@ namespace Splitio.Services.EventSource
                             {
                                 _log.Info($"Connected to {_url}");
 
-                                _connected = true;
-                                DispatchActionEvent(SSEClientActions.CONNECTED);
-                                signal.Signal();
-                                await ReadStreamAsync(stream);
+                                await ReadStreamAsync(stream, signal);
                             }
                         }
                         catch (ReadStreamException ex)
@@ -152,7 +152,7 @@ namespace Splitio.Services.EventSource
             }            
         }
 
-        private async Task ReadStreamAsync(Stream stream)
+        private async Task ReadStreamAsync(Stream stream, CountdownEvent signal)
         {
             var encoder = new UTF8Encoding();
             _streamReadcancellationTokenSource = new CancellationTokenSource();
@@ -161,9 +161,9 @@ namespace Splitio.Services.EventSource
 
             try
             {
-                while (!_streamReadcancellationTokenSource.IsCancellationRequested && IsConnected())
+                while (!_streamReadcancellationTokenSource.IsCancellationRequested && (IsConnected() || _firstEvent))
                 {
-                    if (stream.CanRead && IsConnected())
+                    if (stream.CanRead && (IsConnected() || _firstEvent))
                     {
                         var buffer = new byte[BufferSize];
 
@@ -187,6 +187,11 @@ namespace Splitio.Services.EventSource
 
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                        if (_firstEvent)
+                        {
+                            ProcessFirtsEvent(notificationString, signal);
+                        }
 
                         if (notificationString != KeepAliveResponse && IsConnected())
                         {
@@ -256,6 +261,19 @@ namespace Splitio.Services.EventSource
         private void DispatchActionEvent(SSEClientActions action)
         {
             ActionEvent?.Invoke(this, new SSEActionsEventArgs(action));
+        }
+
+        private void ProcessFirtsEvent(string notification, CountdownEvent signal)
+        {
+            _firstEvent = false;
+            var eventData = _notificationParser.Parse(notification);
+
+            // This case is when in the first event received an error notification, mustn't dispatch connected.
+            if (eventData != null && eventData.Type == NotificationType.ERROR) return;
+
+            _connected = true;
+            DispatchActionEvent(SSEClientActions.CONNECTED);
+            signal.Signal();
         }
         #endregion
     }

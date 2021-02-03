@@ -217,10 +217,7 @@ namespace Splitio_net_core.Integration_tests.EventSource
                 eventSourceClient.ConnectAsync(url);
 
                 _actionEvent.TryTake(out SSEActionsEventArgs action, 10000);
-                Assert.AreEqual(SSEClientActions.CONNECTED, action.Action);
-
-                _actionEvent.TryTake(out SSEActionsEventArgs action2, 10000);
-                Assert.AreEqual(SSEClientActions.RETRYABLE_ERROR, action2.Action);
+                Assert.AreEqual(SSEClientActions.DISCONNECT, action.Action);
             }
         }
 
