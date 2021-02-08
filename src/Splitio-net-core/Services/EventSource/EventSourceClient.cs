@@ -94,13 +94,12 @@ namespace Splitio.Services.EventSource
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
-
-            _disconnectSignal.Signal();
-            _connected = false;            
-
-            DispatchActionEvent(action);
+            
+            _connected = false;
 
             _disconnectSignal.Wait(ReadTimeoutMs);
+
+            DispatchActionEvent(action);
             _log.Debug($"Disconnected from {_url}");
         }
         #endregion
@@ -148,7 +147,8 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"Error connecting to {_url}: {ex.Message}");
             }
             finally
-            {                
+            {
+                _disconnectSignal.Signal();
                 Disconnect(action);                
 
                 _log.Debug("Finished Event Source client ConnectAsync.");

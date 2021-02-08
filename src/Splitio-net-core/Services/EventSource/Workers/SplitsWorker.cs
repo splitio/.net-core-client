@@ -131,7 +131,7 @@ namespace Splitio.Services.EventSource.Workers
 
                         var attempt = 0;
 
-                        while (changeNumber >= _splitCache.GetChangeNumber() && (attempt < MaxRetriesAllowed))
+                        while (changeNumber > _splitCache.GetChangeNumber() && (attempt < MaxRetriesAllowed))
                         {
                             await _synchronizer.SynchronizeSplits();
                             attempt++;

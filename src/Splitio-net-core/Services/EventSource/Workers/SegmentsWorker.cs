@@ -109,7 +109,7 @@ namespace Splitio.Services.EventSource.Workers
 
                         var attempt = 0;
 
-                        while (segment.ChangeNumber >= _segmentCache.GetChangeNumber(segment.SegmentName) && (attempt < MaxRetriesAllowed))
+                        while (segment.ChangeNumber > _segmentCache.GetChangeNumber(segment.SegmentName) && (attempt < MaxRetriesAllowed))
                         {
                             await _synchronizer.SynchronizeSegment(segment.SegmentName);
                             attempt++;
