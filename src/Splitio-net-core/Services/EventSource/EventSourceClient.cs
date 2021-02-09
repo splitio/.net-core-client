@@ -23,13 +23,15 @@ namespace Splitio.Services.EventSource
         private readonly INotificationParser _notificationParser;
         private readonly IWrapperAdapter _wrapperAdapter;
         private readonly CountdownEvent _disconnectSignal;
+        private readonly CountdownEvent _connectedSignal;
 
+        private string _url;
         private bool _connected;
+        private bool _firstEvent;
 
         private ISplitioHttpClient _splitHttpClient;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationTokenSource _streamReadcancellationTokenSource;        
-        private string _url;
 
         public EventSourceClient(ISplitLogger log = null,
             INotificationParser notificationParser = null,
@@ -40,6 +42,8 @@ namespace Splitio.Services.EventSource
             _wrapperAdapter = wrapperAdapter ?? new WrapperAdapter();
 
             _disconnectSignal = new CountdownEvent(1);
+            _connectedSignal = new CountdownEvent(1);
+            _firstEvent = true;
         }
 
         public event EventHandler<EventReceivedEventArgs> EventReceived;
@@ -54,15 +58,16 @@ namespace Splitio.Services.EventSource
                 return false;
             }
 
+            _firstEvent = true;
             _url = url;
             _disconnectSignal.Reset();
-            var signal = new CountdownEvent(1);
+            _connectedSignal.Reset();
 
-            Task.Factory.StartNew(() => ConnectAsync(signal));
+            Task.Factory.StartNew(() => ConnectAsync());
 
             try
             {
-                if (!signal.Wait(ConnectTimeoutMs))
+                if (!_connectedSignal.Wait(ConnectTimeoutMs))
                 {
                     return false;
                 }
@@ -90,6 +95,9 @@ namespace Splitio.Services.EventSource
             _cancellationTokenSource.Dispose();
             _splitHttpClient.Dispose();
 
+            _disconnectSignal.Signal();
+            _connected = false;            
+
             DispatchActionEvent(action);
 
             _disconnectSignal.Wait(ReadTimeoutMs);
@@ -98,7 +106,7 @@ namespace Splitio.Services.EventSource
         #endregion
 
         #region Private Methods
-        private async Task ConnectAsync(CountdownEvent signal)
+        private async Task ConnectAsync()
         {
             var action = SSEClientActions.DISCONNECT;
 
@@ -119,9 +127,6 @@ namespace Splitio.Services.EventSource
                             {
                                 _log.Info($"Connected to {_url}");
 
-                                _connected = true;
-                                DispatchActionEvent(SSEClientActions.CONNECTED);
-                                signal.Signal();
                                 await ReadStreamAsync(stream);
                             }
                         }
@@ -143,10 +148,8 @@ namespace Splitio.Services.EventSource
                 _log.Debug($"Error connecting to {_url}: {ex.Message}");
             }
             finally
-            {
-                _disconnectSignal.Signal();
-                Disconnect(action);
-                _connected = false;
+            {                
+                Disconnect(action);                
 
                 _log.Debug("Finished Event Source client ConnectAsync.");
             }            
@@ -161,9 +164,9 @@ namespace Splitio.Services.EventSource
 
             try
             {
-                while (!_streamReadcancellationTokenSource.IsCancellationRequested && IsConnected())
+                while (!_streamReadcancellationTokenSource.IsCancellationRequested && (IsConnected() || _firstEvent))
                 {
-                    if (stream.CanRead && IsConnected())
+                    if (stream.CanRead && (IsConnected() || _firstEvent))
                     {
                         var buffer = new byte[BufferSize];
 
@@ -187,6 +190,11 @@ namespace Splitio.Services.EventSource
 
                         var notificationString = encoder.GetString(buffer, 0, len);
                         _log.Debug($"Read stream encoder buffer: {notificationString}");
+
+                        if (_firstEvent)
+                        {
+                            ProcessFirtsEvent(notificationString);
+                        }
 
                         if (notificationString != KeepAliveResponse && IsConnected())
                         {
@@ -256,6 +264,19 @@ namespace Splitio.Services.EventSource
         private void DispatchActionEvent(SSEClientActions action)
         {
             ActionEvent?.Invoke(this, new SSEActionsEventArgs(action));
+        }
+
+        private void ProcessFirtsEvent(string notification)
+        {
+            _firstEvent = false;
+            var eventData = _notificationParser.Parse(notification);
+
+            // This case is when in the first event received an error notification, mustn't dispatch connected.
+            if (eventData != null && eventData.Type == NotificationType.ERROR) return;
+
+            _connected = true;
+            _connectedSignal.Signal();
+            DispatchActionEvent(SSEClientActions.CONNECTED);            
         }
         #endregion
     }

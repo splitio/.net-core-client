@@ -38,7 +38,7 @@ namespace Splitio.Services.EventSource
             _eventSourceClient.ActionEvent += OnAction;
         }
 
-        #region Private Methods
+        #region Public Methods
         public bool Start(string token, string channels)
         {
             try
