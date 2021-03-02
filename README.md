@@ -1,3 +1,6 @@
+> :warning: This repository has been archived since we unified the source code for both .NET and .NET-Core clients a while back. The last release done here was 6.2.3 and this repo won't receive any further maintenance as the source code for the client current versions is not kept here anymore.
+For current and future releases, reporting issues or submitting any PRs, please see our unified and final [dotnet-client repository](https://github.com/splitio/dotnet-client).
+
 # Split SDK for .NET
 
 ![CI Status](https://ci.appveyor.com/api/projects/status/github/splitio/.net-core-client?branch=master&svg=true&passingText=master%20-%20ok&pendingText=master%20-%20running&failingText=master%20-%20failing)
@@ -66,7 +69,7 @@ Split has built and maintains SDKs for:
 * Java [Github](https://github.com/splitio/java-client) [Docs](https://help.split.io/hc/en-us/articles/360020405151-Java-SDK)
 * Javascript [Github](https://github.com/splitio/javascript-client) [Docs](https://help.split.io/hc/en-us/articles/360020448791-JavaScript-SDK)
 * Node [Github](https://github.com/splitio/javascript-client) [Docs](https://help.split.io/hc/en-us/articles/360020564931-Node-js-SDK)
-* .NET [Github](https://github.com/splitio/.net-core-client) [Docs](https://help.split.io/hc/en-us/articles/360020240172--NET-SDK)
+* .NET [Github](https://github.com/splitio/dotnet-client) [Docs](https://help.split.io/hc/en-us/articles/360020240172--NET-SDK)
 * Ruby [Github](https://github.com/splitio/ruby-client) [Docs](https://help.split.io/hc/en-us/articles/360020673251-Ruby-SDK)
 * PHP [Github](https://github.com/splitio/php-client) [Docs](https://help.split.io/hc/en-us/articles/360020350372-PHP-SDK)
 * Python [Github](https://github.com/splitio/python-client) [Docs](https://help.split.io/hc/en-us/articles/360020359652-Python-SDK)
