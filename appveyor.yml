@@ -1,7 +1,7 @@
 nuget:
   account_feed: true
 
-version: 6.2.3
+version: 6.2.4-rc{build}
 
 dotnet_csproj:
   patch: true

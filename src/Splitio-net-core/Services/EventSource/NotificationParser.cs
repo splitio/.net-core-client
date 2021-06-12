@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Splitio.Domain;
-using Splitio.Services.Exceptions;
 using System;
 
 namespace Splitio.Services.EventSource
@@ -89,10 +88,12 @@ namespace Splitio.Services.EventSource
         {
             var notificatinError = GetNotificationData<NotificationError>(notificationString);
 
-            if (notificatinError.Message != null)
-                throw new NotificationErrorException(notificatinError);
+            if (notificatinError.Message == null)
+                return null;
 
-            return null;
+            notificatinError.Type = NotificationType.ERROR;
+
+            return notificatinError;
         }
 
         private T GetNotificationData<T>(string notificationString)

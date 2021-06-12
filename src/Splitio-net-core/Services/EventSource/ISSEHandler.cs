@@ -9,8 +9,6 @@ namespace Splitio.Services.EventSource
         void StartWorkers();
         void StopWorkers();
 
-        event EventHandler<FeedbackEventArgs> ConnectedEvent;
-        event EventHandler<FeedbackEventArgs> DisconnectEvent;
-        event EventHandler<EventArgs> ReconnectEvent;
+        event EventHandler<SSEActionsEventArgs> ActionEvent;
     }
 }

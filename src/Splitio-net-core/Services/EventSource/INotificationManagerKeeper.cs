@@ -6,7 +6,6 @@ namespace Splitio.Services.EventSource
     {
         void HandleIncomingEvent(IncomingNotification notification);
 
-        event EventHandler<OccupancyEventArgs> OccupancyEvent;
-        event EventHandler<EventArgs> PushShutdownEvent;
+        event EventHandler<SSEActionsEventArgs> ActionEvent;
     }
 }
