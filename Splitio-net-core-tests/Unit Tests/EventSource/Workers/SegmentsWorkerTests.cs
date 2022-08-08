@@ -34,22 +34,25 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             var segmentName = "segment-test";
 
             _segmentCache
-                .Setup(mock => mock.GetChangeNumber(segmentName))
-                .Returns(1585956698447);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName))
+                .Returns(1585956698447)
+                .Returns(1585956698458);
 
             var changeNumber2 = 1585956698467;
             var segmentName2 = "segment-test-2";
 
             _segmentCache
-                .Setup(mock => mock.GetChangeNumber(segmentName2))
-                .Returns(changeNumber);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName2))
+                .Returns(changeNumber)
+                .Returns(1585956698478);
 
             var changeNumber3 = 1585956698477;
             var segmentName3 = "segment-test-3";
 
             _segmentCache
-                .Setup(mock => mock.GetChangeNumber(segmentName3))
-                .Returns(changeNumber3 + 1);
+                .SetupSequence(mock => mock.GetChangeNumber(segmentName3))
+                .Returns(changeNumber3 + 1)
+                .Returns(1585956698488);
 
             _segmentsWorker.Start();
 
@@ -64,8 +67,30 @@ namespace Splitio_Tests.Unit_Tests.EventSource.Workers
             Thread.Sleep(10);
 
             // Assert.
-            _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Exactly(3));
+            _segmentCache.Verify(mock => mock.GetChangeNumber(It.IsAny<string>()), Times.Exactly(5));
             _synchronizer.Verify(mock => mock.SynchronizeSegment(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void AddToQueue_MaxAttemptsAllowed()
+        {
+            // Arrange.
+            var changeNumber = 1585956698457;
+            var segmentName = "segment-test";
+
+            _segmentCache
+                .Setup(mock => mock.GetChangeNumber(segmentName))
+                .Returns(1585956698447);
+
+            _segmentsWorker.Start();
+
+            // Act.
+            _segmentsWorker.AddToQueue(changeNumber, segmentName);
+            Thread.Sleep(1000);
+
+            // Assert.
+            _segmentCache.Verify(mock => mock.GetChangeNumber(segmentName), Times.Exactly(11));
+            _synchronizer.Verify(mock => mock.SynchronizeSegment(segmentName), Times.Exactly(10));
         }
 
         [TestMethod]
